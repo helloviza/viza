@@ -3,20 +3,20 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/helloviza-logo.png";
 import flightIcon from "../assets/flight-icon.png";
 
-const HERO_HEIGHT = window.innerHeight;
+const HERO_HEIGHT = window.innerHeight; // Hero section height (100vh)
 
 const Header = ({ onFlightClick }) => {
   const [visible, setVisible] = useState(true);
   const [inHero, setInHero] = useState(true);
-  const [user, setUser] = useState(null);
-
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     let timeout;
+
     const handleUserActivity = () => {
       const scrollY = window.scrollY;
+      // Check if in Hero section
       if (scrollY < HERO_HEIGHT - 60) {
         setInHero(true);
         setVisible(true);
@@ -24,8 +24,11 @@ const Header = ({ onFlightClick }) => {
       } else {
         setInHero(false);
       }
+
       setVisible(false);
+
       if (timeout) clearTimeout(timeout);
+
       timeout = setTimeout(() => {
         setVisible(true);
       }, 1500);
@@ -34,6 +37,7 @@ const Header = ({ onFlightClick }) => {
     window.addEventListener("scroll", handleUserActivity);
     window.addEventListener("mousemove", handleUserActivity);
 
+    // Also check on mount (refresh at top)
     handleUserActivity();
 
     return () => {
@@ -43,14 +47,10 @@ const Header = ({ onFlightClick }) => {
     };
   }, []);
 
-  useEffect(() => {
-    // On mount or login state change
-    const userStr = localStorage.getItem("helloviza_user");
-    setUser(userStr ? JSON.parse(userStr) : null);
-  }, [localStorage.getItem("helloviza_user")]); // Update on user login/logout
-
+  // Choose color: blue in Hero, black otherwise
   const linkColor = inHero ? "#d06549" : "#000000";
 
+  // Handler for Visa Services scroll
   const handleVisaServicesClick = (e) => {
     e.preventDefault();
     if (location.pathname !== "/") {
@@ -58,7 +58,7 @@ const Header = ({ onFlightClick }) => {
       setTimeout(() => {
         const section = document.getElementById("visa-services");
         if (section) section.scrollIntoView({ behavior: "smooth" });
-      }, 400);
+      }, 400); // Wait for home to mount
     } else {
       const section = document.getElementById("visa-services");
       if (section) section.scrollIntoView({ behavior: "smooth" });
@@ -67,6 +67,7 @@ const Header = ({ onFlightClick }) => {
 
   return (
     <>
+      {/* Flight icon at very top center */}
       <div style={styles.flightIconWrapper}>
         <img
           src={flightIcon}
@@ -75,6 +76,8 @@ const Header = ({ onFlightClick }) => {
           onClick={onFlightClick}
         />
       </div>
+
+      {/* Main Header Navigation */}
       <header
         style={{
           ...styles.header,
@@ -86,7 +89,9 @@ const Header = ({ onFlightClick }) => {
         <Link to="/" style={{ ...styles.logoLink }}>
           <img src={logo} alt="helloviza logo" style={styles.logo} />
         </Link>
+
         <nav style={styles.nav}>
+          {/* Only change for Visa Services link */}
           <a
             href="#visa-services"
             style={{ ...styles.link, color: linkColor }}
@@ -108,33 +113,68 @@ const Header = ({ onFlightClick }) => {
           <Link to="/contact" style={{ ...styles.link, color: linkColor }}>
             Support / Contact
           </Link>
-          {user ? (
-            <>
-              <span style={{ ...styles.link, color: "#16a34a" }}>
-                Hi, {user.firstName || user.email.split("@")[0]}
-              </span>
-              <span
-                style={{ ...styles.link, color: "#b83030", marginLeft: "1.2rem", cursor: "pointer" }}
-                onClick={() => {
-                  localStorage.removeItem("helloviza_user");
-                  localStorage.removeItem("helloviza_token");
-                  window.location.reload();
-                }}
-              >
-                Logout
-              </span>
-            </>
-          ) : (
-            <Link to="/login" style={{ ...styles.link, color: linkColor }}>
-              Login / Sign Up
-            </Link>
-          )}
+          <Link to="/login" style={{ ...styles.link, color: linkColor }}>
+            Login / Sign Up
+          </Link>
         </nav>
       </header>
     </>
   );
 };
 
-const styles = { /* ...your same styles... */ };
+const styles = {
+  flightIconWrapper: {
+    position: "fixed",
+    top: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 1001,
+    background: "#00477f",
+    borderBottomLeftRadius: "12px",
+    borderBottomRightRadius: "12px",
+    padding: "0.5rem 1rem",
+  },
+  flightIcon: {
+    height: "24px",
+    width: "24px",
+    cursor: "pointer",
+  },
+  header: {
+    position: "fixed",
+    top: "1rem",
+    left: 0,
+    right: 0,
+    padding: "1.2rem 3rem",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: "transparent",
+    color: "#000",
+    zIndex: 1000,
+    width: "100%",
+  },
+  logoLink: {
+    display: "flex",
+    alignItems: "center",
+    textDecoration: "none",
+    marginRight: "1rem",
+  },
+  logo: {
+    height: "56px",
+    objectFit: "contain",
+  },
+  nav: {
+    display: "flex",
+    gap: "2rem",
+  },
+  link: {
+    textDecoration: "none",
+    fontWeight: 500,
+    fontSize: "1rem",
+    cursor: "pointer",
+    transition: "color 0.3s",
+    fontFamily: "'Barlow Condensed', Arial, sans-serif",
+  },
+};
 
 export default Header;

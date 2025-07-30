@@ -26,9 +26,11 @@ function ProtectedRoute({ isLoggedIn, children, redirectTo = "/login" }) {
 }
 
 function App() {
+  // Use lazy initializer to check localStorage once on mount
   const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("helloviza_user")
+    () => !!localStorage.getItem("helloviza_user")
   );
+
   const bookingPanelRef = useRef();
 
   function handleLogin() {
@@ -60,6 +62,7 @@ function App() {
             </>
           }
         />
+
         <Route
           path="/go-for-visa"
           element={
@@ -68,21 +71,28 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/login"
           element={
             <Login
               onLogin={() => {
                 handleLogin();
+                // Get ?from param to redirect after login
                 const params = new URLSearchParams(window.location.search);
                 const from = params.get("from");
-                if (from) window.location.replace(from);
-                else window.location.replace("/");
+                if (from) {
+                  window.location.replace(from);
+                } else {
+                  window.location.replace("/");
+                }
               }}
             />
           }
         />
+
         <Route path="/reset-password" element={<ResetPassword />} />
+
         <Route
           path="/contact"
           element={
@@ -92,6 +102,7 @@ function App() {
             </>
           }
         />
+
         {/* Add more routes here */}
       </Routes>
 
