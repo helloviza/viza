@@ -41,8 +41,8 @@
 .text-block button {
   padding: 0.75rem 2rem;
   font-size: 1rem;
-  background: white;
-  color: black;
+  background: #d06549;
+  color: #ffffff;
   border: none;
   border-radius: 0px;
   cursor: pointer;
