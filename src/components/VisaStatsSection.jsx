@@ -4,21 +4,21 @@ const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
 const stats = [
   {
-    bg: "#fff",
+    bg: "#ffffff",
     color: "#1b1b1b",
     big: "99.2%",
     heading: "Visas On Time",
     sub: "Visa delivered before\ntravel date",
   },
   {
-    bg: "#131a2b",
+    bg: "#d06549",
     color: "#fff",
     big: "5L+",
     heading: "Processed",
     sub: "Processed for travelers worldwide",
   },
   {
-    bg: "#4868f7",
+    bg: "#00477f",
     color: "#fff",
     big: "4.81★",
     heading: "Rating",

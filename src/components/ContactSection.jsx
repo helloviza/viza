@@ -23,7 +23,7 @@ const labelStyle = {
   fontWeight: 700,
   fontSize: "1.13rem",
   marginBottom: ".32rem",
-  color: "#222",
+  color: "#00477f",
   letterSpacing: ".02em"
 };
 
@@ -80,26 +80,26 @@ export default function ContactSection() {
             fontWeight: 700,
             margin: "0 0 1.2rem 0",
             lineHeight: 0.98,
-            color: "#1b1b1b",
+            color: "#00477f",
             letterSpacing: "-1px"
           }}>Contact</h1>
           <div style={{marginBottom: "1.3rem"}}>
             <div style={{
-              fontSize: "1rem", fontWeight: 700, color: "#888", marginBottom: ".11rem",
+              fontSize: "1rem", fontWeight: 700, color: "#00477f", marginBottom: ".11rem",
               letterSpacing: ".02em", textTransform: "uppercase"
             }}>E–MAIL ADDRESS</div>
             <div style={{
-              fontSize: "1.2rem", color: "#191919", fontWeight: 700,
+              fontSize: "1.2rem", color: "#d06549", fontWeight: 700,
               letterSpacing: "-.02em", marginTop: ".1rem"
             }}>hello@helloviza.com</div>
           </div>
           <div>
             <div style={{
-              fontSize: "1rem", fontWeight: 700, color: "#888", marginBottom: ".11rem",
+              fontSize: "1rem", fontWeight: 700, color: "#00477f", marginBottom: ".11rem",
               letterSpacing: ".02em", textTransform: "uppercase"
             }}>WORKING HOURS</div>
             <div style={{
-              fontSize: "1.2rem", color: "#191919", fontWeight: 700,
+              fontSize: "1.2rem", color: "#d06549", fontWeight: 700,
               letterSpacing: "-.02em", marginTop: ".1rem"
             }}>Monday – Sunday, 9 AM – 8 PM, IST</div>
           </div>

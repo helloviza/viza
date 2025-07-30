@@ -122,6 +122,7 @@ const styles = {
     textAlign: "center",
     marginBottom: "2rem",
     letterSpacing: ".01em",
+    color: "#00477f", // example: dark text color
   },
   grid: {
     display: "grid",
@@ -165,7 +166,7 @@ const styles = {
   },
   price: {
     fontSize: "1.1rem",
-    color: "#2462ff",
+    color: "#d06549",
     fontWeight: 600,
     marginBottom: "1.1rem",
   },

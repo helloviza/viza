@@ -112,6 +112,7 @@ const styles = {
     fontWeight: "600",
     marginBottom: "1.5rem",
     fontFamily: "inherit",
+    color: "#00477f", // example: dark text color
   },
   grid: {
     display: "grid",
@@ -121,6 +122,7 @@ const styles = {
   inputGroup: {
     display: "flex",
     flexDirection: "column",
+    color: "#00477f", // example: dark text color
   },
   buttonWrapper: {
     gridColumn: "span 2",

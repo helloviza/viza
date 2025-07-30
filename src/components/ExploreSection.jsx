@@ -30,11 +30,11 @@ const ExploreSection = () => (
       <div style={{
         fontSize: "1rem",
         fontWeight: 400,
-        color: "#232323",
+        color: "#d06549",
         lineHeight: 1.14,
         letterSpacing: "0.01em"
       }}>
-        Step into a realm where the extraordinary becomes reality. From hidden valleys to untouched coastlines, these are places that defy imagination and stir the soul. Discover the world’s most remarkable wonders, carefully curated to inspire your next unforgettable journey.
+        Embark on a seamless journey to the world’s most exclusive destinations. From hidden valleys to pristine coastlines, our bespoke visa services unlock extraordinary escapes, crafted with elegance to inspire your next adventure.
       </div>
     </div>
 
@@ -50,11 +50,11 @@ const ExploreSection = () => (
       position: "relative"
     }}>
       <h1 style={{
-        fontSize: "5vw",
+        fontSize: "4vw",
         fontWeight: 700,
         margin: 0,
         lineHeight: 0.98,
-        color: "#181818",
+        color: "#00477f",
         letterSpacing: "-1px",
         textAlign: "left",
         wordBreak: "break-word"

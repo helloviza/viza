@@ -317,7 +317,7 @@ const styles = {
   },
   formArea: {
     flex: "1 1 60%",
-    padding: "6rem 3rem",
+    padding: "10rem 4rem 15rem",
     maxWidth: 600,
     boxSizing: "border-box",
   },

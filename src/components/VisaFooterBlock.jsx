@@ -21,9 +21,9 @@ const VisaFooterBlock = () => (
       </div>
       {/* Right Column */}
       <div style={styles.rightCol}>
-        <h1 style={styles.newsHeading}>
-          <span style={{ fontStyle: "italic", fontWeight: 700 }}>Helloviza.com</span>
-        </h1>
+       <h1 style={styles.newsHeading}>
+  <span style={{ fontWeight: 700 }}>Helloviza.com</span>
+</h1>
         <div style={styles.subtext}>
           If you are using a mobile device, simply click on the QR code.
         </div>
@@ -33,7 +33,7 @@ const VisaFooterBlock = () => (
           style={styles.qrImg}
         />
         <div style={styles.rightTextBlock}>
-          Exclusive PlumTrips & Events is a premium B2B2E platform that streamlines corporate travel, curated experiences, and event management — blending business travel, leisure, and large-scale experiential execution under one roof.
+          Every destination is a new chapter; chase the story that sets your heart free.
         </div>
         <form style={styles.form}>
           <input
@@ -60,14 +60,14 @@ const VisaFooterBlock = () => (
           <a href="/contact" style={styles.link}>Contact</a>
         </div>
         <div style={styles.col}>
-          <div style={styles.headingFooter}>VISA</div>
-          <a href="/visa-destinations" style={styles.link}>Visa Destinations</a>
-          <a href="/hotels" style={styles.link}>Flight</a>
+          <div style={styles.headingFooter}>MANAGEMENT</div>
+          <a href="/visa-destinations" style={styles.link}>About Us</a>
+          <a href="/hotels" style={styles.link}>Career</a>
         </div>
         <div style={styles.col}>
-          <div style={styles.headingFooter}>OTHER SERVICE</div>
-          <a href="#" style={styles.link}>The Saat Phere</a>
-          <a href="#" style={styles.link}>Peachmint</a>
+          <div style={styles.headingFooter}>OUR SERVICE</div>
+          <a href="#" style={styles.link}>Book my Visa</a>
+          <a href="#" style={styles.link}>Hot Visa Destination</a>
         </div>
         <div style={styles.col}>
           <div style={styles.headingFooter}>SOCIAL MEDIA</div>
@@ -78,14 +78,14 @@ const VisaFooterBlock = () => (
       </div>
       {/* Bottom bar */}
       <div style={styles.bottomBar}>
-        <div style={styles.left}>&copy; {new Date().getFullYear()} Helloviza</div>
+        <div style={styles.left}>&copy; {new Date().getFullYear()} Helloviza, All rights reserved</div>
         <div style={styles.center}>
           <a href="/privacy-policy" style={styles.bottomLink}>Privacy Policy</a>
           <a href="/terms-of-use" style={styles.bottomLink}>Terms of Use</a>
-          <a href="/imprint" style={styles.bottomLink}>Imprint</a>
+          <a href="/Newsroom" style={styles.bottomLink}>Newsroom</a>
         </div>
         <div style={styles.right}>
-          <a href="#" style={styles.bottomCredit}>Imran Ali’s website</a>
+          <a href="#" style={styles.bottomCredit}>Helloviza’s website</a>
         </div>
       </div>
     </footer>
@@ -97,7 +97,7 @@ const styles = {
   section: {
     display: "flex",
     flexDirection: "row",
-    background: "#000",
+    background: "#d06549",
     color: "#fff",
     padding: "2.4rem 3vw 1.6rem 3vw",
     minHeight: "352px",
@@ -141,7 +141,7 @@ const styles = {
     fontSize: "0.94rem",
     fontWeight: 500,
     background: "#f3f3f3",
-    color: "#111",
+    color: "#00477f",
     border: "none",
     borderRadius: "8px",
     padding: "0.6rem 1.2rem",
@@ -173,7 +173,7 @@ const styles = {
     fontFamily: baseFont,
   },
   subtext: {
-    color: "#888",
+    color: "#ffffff",
     fontSize: "0.8rem",
     fontWeight: 400,
     marginBottom: "0.48rem",
@@ -212,15 +212,15 @@ const styles = {
     borderRadius: "6px",
     border: "none",
     outline: "none",
-    background: "#222",
-    color: "#fff",
+    background: "#ffffff",
+    color: "#00477f",
     fontFamily: baseFont,
   },
   subscribeBtn: {
     padding: "0.56rem 0.96rem",
     fontSize: "0.8rem",
     background: "#f3f3f3",
-    color: "#111",
+    color: "#00477f",
     borderRadius: "6px",
     border: "none",
     fontWeight: 500,
@@ -241,7 +241,7 @@ const styles = {
 
   // --- FOOTER SECTION ---
   footer: {
-    background: "#000",
+    background: "#d06549",
     color: "#fff",
     width: "100vw",
     padding: "0 0 0.32rem 0",
@@ -270,7 +270,7 @@ const styles = {
     fontFamily: baseFont,
   },
   headingFooter: {
-    color: "#888",
+    color: "#ffffff",
     fontWeight: 700,
     fontSize: "1.2rem",
     marginBottom: "0.8rem",
@@ -294,11 +294,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: "#000",
+    background: "#d06549",
     fontFamily: baseFont,
   },
   left: {
-    color: "#888",
+    color: "#ffffff",
     fontWeight: 600,
     fontSize: "0.96rem",
     fontFamily: baseFont,
@@ -321,7 +321,7 @@ const styles = {
     fontFamily: baseFont,
   },
   right: {
-    color: "#888",
+    color: "#ffffff",
     fontWeight: 400,
     fontSize: "0.88rem",
     minWidth: 112,
@@ -329,7 +329,7 @@ const styles = {
     fontFamily: baseFont,
   },
   bottomCredit: {
-    color: "#888",
+    color: "#ffffff",
     textDecoration: "none",
     fontWeight: 400,
     fontSize: "0.88rem",

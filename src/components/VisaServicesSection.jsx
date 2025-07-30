@@ -44,7 +44,7 @@ export default function VisaServicesSection() {
           <p>
             Your trusted partner for global visas. Fast, reliable, and always by your side.
             <br />
-            <span style={{ color: "#aaa", fontSize: "1rem" }}>— Your custom text goes here</span>
+            <span style={{ color: "#aaa", fontSize: "1rem" }}>— Team Helloviza</span>
           </p>
         </div>
       </div>
@@ -118,14 +118,14 @@ const styles = {
     fontSize: "1.55rem",
     fontWeight: 700,
     marginBottom: "1.1rem",
-    color: "#111",
+    color: "#00477f",
   },
   textArea: {
     minHeight: "120px",
     width: "100%",
     fontFamily: baseFont,
     fontSize: "1.13rem",
-    color: "#222",
+    color: "#d06549",
     background: "transparent",
     padding: 0,
     border: "none",
