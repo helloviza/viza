@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import loginBg from "../assets/login-bg.jpg";
+import loginBg from "../assets/login-bg.jpg"; // Adjust path as needed
+import { GoogleLogin } from "@react-oauth/google";
+import {jwtDecode} from "jwt-decode";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
-const scale = 0.64;
-
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
@@ -30,13 +30,15 @@ export default function Login({ onLogin }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    // Demo submit logic — replace with actual API calls
-    console.log("Submitted", mode, form);
-    if (onLogin) onLogin();
-    if (mode === "signup") setMode("login"); // After signup switch to login mode
+    // TODO: Replace with actual API login/signup calls
+    const userData = {
+      name: form.firstName ? `${form.firstName} ${form.lastName}` : "User",
+      email: form.email,
+    };
+    if (onLogin) onLogin(userData);
+    if (mode === "signup") setMode("login");
   }
 
-  // Keyboard accessibility for tabs (Enter or Space toggles mode)
   const handleKeyDown = (e, newMode) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -44,11 +46,36 @@ export default function Login({ onLogin }) {
     }
   };
 
+  // Google login success callback with token decoding
+  const handleGoogleSuccess = (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const userData = {
+        name: decoded.name || "Google User",
+        email: decoded.email || "",
+        picture: decoded.picture || "",
+        token: credentialResponse.credential,
+      };
+      if (onLogin) {
+        onLogin(userData);
+      }
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to decode token", error);
+      setError("Failed to process Google login. Please try again.");
+    }
+  };
+
+  // Google login failure callback
+  const handleGoogleFailure = () => {
+    setError("Google login failed, please try again.");
+  };
+
   return (
     <div style={styles.outer}>
       <div style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }} />
       <div style={styles.formArea}>
-        {/* Tabs for Login and Signup */}
+        {/* Tabs */}
         <div role="tablist" aria-label="Login and Signup Tabs" style={styles.tabs}>
           <div
             role="tab"
@@ -56,52 +83,33 @@ export default function Login({ onLogin }) {
             aria-selected={mode === "login"}
             onClick={() => setMode("login")}
             onKeyDown={(e) => handleKeyDown(e, "login")}
-            style={{
-              ...styles.tabWrap,
-              ...(mode === "login" ? styles.activeTabWrap : {}),
-              cursor: "pointer",
-            }}
+            style={{ ...styles.tabWrap, ...(mode === "login" ? styles.activeTabWrap : {}), cursor: "pointer" }}
           >
-            <span style={{ ...styles.tab, ...(mode === "login" ? styles.activeTab : {}) }}>
-              • Log in
-            </span>
-            <div
-              style={{
-                ...styles.underline,
-                ...(mode === "login" ? styles.activeUnderline : {}),
-              }}
-            />
+            <span style={{ ...styles.tab, ...(mode === "login" ? styles.activeTab : {}) }}>• Log in</span>
+            <div style={{ ...styles.underline, ...(mode === "login" ? styles.activeUnderline : {}) }} />
           </div>
-
           <div
             role="tab"
             tabIndex={0}
             aria-selected={mode === "signup"}
             onClick={() => setMode("signup")}
             onKeyDown={(e) => handleKeyDown(e, "signup")}
-            style={{
-              ...styles.tabWrap,
-              ...(mode === "signup" ? styles.activeTabWrap : {}),
-              cursor: "pointer",
-            }}
+            style={{ ...styles.tabWrap, ...(mode === "signup" ? styles.activeTabWrap : {}), cursor: "pointer" }}
           >
-            <span style={{ ...styles.tab, ...(mode === "signup" ? styles.activeTab : {}) }}>
-              • Sign Up
-            </span>
-            <div
-              style={{
-                ...styles.underline,
-                ...(mode === "signup" ? styles.activeUnderline : {}),
-              }}
-            />
+            <span style={{ ...styles.tab, ...(mode === "signup" ? styles.activeTab : {}) }}>• Sign Up</span>
+            <div style={{ ...styles.underline, ...(mode === "signup" ? styles.activeUnderline : {}) }} />
           </div>
+        </div>
+
+        {/* Google Login Button */}
+        <div style={{ marginBottom: 20, textAlign: "center" }}>
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={styles.form}>
-          {error && (
-            <div style={{ color: "#c00", fontWeight: "bold", marginBottom: 8 }}>{error}</div>
-          )}
+          {error && <div style={{ color: "#c00", fontWeight: "bold", marginBottom: 8 }}>{error}</div>}
+
           <div style={{ display: "flex", gap: "2vw" }}>
             {mode === "signup" && (
               <>
@@ -223,71 +231,72 @@ export default function Login({ onLogin }) {
           <button type="submit" style={styles.submitBtn}>
             {mode === "login" ? "Log In" : "Sign Up"}
           </button>
-
-          <div style={styles.belowLinks}>
-            {mode === "login" ? (
-              <>
-                <span>
-                  Forgot your password?{" "}
-                  <a
-                    href="#"
-                    style={styles.link}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/reset-password");
-                    }}
-                  >
-                    Reset here
-                  </a>
-                </span>
-                <br />
-                <span>
-                  Trouble logging in?{" "}
-                  <a
-                    href="#"
-                    style={styles.link}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/contact");
-                    }}
-                  >
-                    Contact us
-                  </a>
-                </span>
-              </>
-            ) : (
-              <>
-                <span>
-                  Already have an account?{" "}
-                  <a
-                    href="#"
-                    style={styles.link}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setMode("login");
-                    }}
-                  >
-                    Log in here
-                  </a>
-                </span>
-                <br />
-                <span>
-                  Trouble signing up?{" "}
-                  <a
-                    href="#"
-                    style={styles.link}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/contact");
-                    }}
-                  >
-                    Contact us
-                  </a>
-                </span>
-              </>
-            )}
-          </div>
         </form>
+
+        {/* Below links */}
+        <div style={styles.belowLinks}>
+          {mode === "login" ? (
+            <>
+              <span>
+                Forgot your password?{" "}
+                <a
+                  href="#"
+                  style={styles.link}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/reset-password");
+                  }}
+                >
+                  Reset here
+                </a>
+              </span>
+              <br />
+              <span>
+                Trouble logging in?{" "}
+                <a
+                  href="#"
+                  style={styles.link}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/contact");
+                  }}
+                >
+                  Contact us
+                </a>
+              </span>
+            </>
+          ) : (
+            <>
+              <span>
+                Already have an account?{" "}
+                <a
+                  href="#"
+                  style={styles.link}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMode("login");
+                  }}
+                >
+                  Log in here
+                </a>
+              </span>
+              <br />
+              <span>
+                Trouble signing up?{" "}
+                <a
+                  href="#"
+                  style={styles.link}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/contact");
+                  }}
+                >
+                  Contact us
+                </a>
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -357,8 +366,8 @@ const styles = {
     padding: "0.6rem 1rem",
     borderRadius: 6,
     border: "1px solid #444",
-    backgroundColor: "#ffffff",
-    color: "#fff",
+    backgroundColor: "#a7c8fc",
+    color: "#111111",
     fontSize: "1rem",
   },
   checkboxWrap: {
@@ -378,7 +387,7 @@ const styles = {
     padding: "1rem",
     fontSize: "1.2rem",
     fontWeight: "bold",
-    backgroundColor: "#111111",
+    backgroundColor: "#ffffff",
     color: "#d06549",
     border: "none",
     borderRadius: 8,
@@ -390,7 +399,7 @@ const styles = {
     color: "rgba(255, 255, 255, 0.7)",
   },
   link: {
-    color: "#d06549",
+    color: "#ffffff",
     textDecoration: "underline",
     cursor: "pointer",
   },

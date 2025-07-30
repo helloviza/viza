@@ -22,7 +22,7 @@ const VisaFooterBlock = () => (
       {/* Right Column */}
       <div style={styles.rightCol}>
         <h1 style={styles.newsHeading}>
-          <span style={{ fontStyle: "italic", fontWeight: 700 }}>Plumtrips.com</span>
+          <span style={{ fontStyle: "italic", fontWeight: 700 }}>Helloviza.com</span>
         </h1>
         <div style={styles.subtext}>
           If you are using a mobile device, simply click on the QR code.

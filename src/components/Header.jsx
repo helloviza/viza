@@ -3,9 +3,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/helloviza-logo.png";
 import flightIcon from "../assets/flight-icon.png";
 
-const HERO_HEIGHT = window.innerHeight; // Hero section height (100vh)
+const HERO_HEIGHT = window.innerHeight;
 
-const Header = ({ onFlightClick }) => {
+export default function Header({ onFlightClick, user, onLogout }) {
   const [visible, setVisible] = useState(true);
   const [inHero, setInHero] = useState(true);
   const location = useLocation();
@@ -16,7 +16,6 @@ const Header = ({ onFlightClick }) => {
 
     const handleUserActivity = () => {
       const scrollY = window.scrollY;
-      // Check if in Hero section
       if (scrollY < HERO_HEIGHT - 60) {
         setInHero(true);
         setVisible(true);
@@ -37,7 +36,6 @@ const Header = ({ onFlightClick }) => {
     window.addEventListener("scroll", handleUserActivity);
     window.addEventListener("mousemove", handleUserActivity);
 
-    // Also check on mount (refresh at top)
     handleUserActivity();
 
     return () => {
@@ -47,27 +45,29 @@ const Header = ({ onFlightClick }) => {
     };
   }, []);
 
-  // Choose color: blue in Hero, black otherwise
   const linkColor = inHero ? "#d06549" : "#000000";
 
-  // Handler for Visa Services scroll
-  const handleVisaServicesClick = (e) => {
+  const handleVisaServicesClick = e => {
     e.preventDefault();
     if (location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
         const section = document.getElementById("visa-services");
         if (section) section.scrollIntoView({ behavior: "smooth" });
-      }, 400); // Wait for home to mount
+      }, 400);
     } else {
       const section = document.getElementById("visa-services");
       if (section) section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
+  const handleLogoutClick = () => {
+    if (onLogout) onLogout();
+    navigate("/");
+  };
+
   return (
     <>
-      {/* Flight icon at very top center */}
       <div style={styles.flightIconWrapper}>
         <img
           src={flightIcon}
@@ -77,7 +77,6 @@ const Header = ({ onFlightClick }) => {
         />
       </div>
 
-      {/* Main Header Navigation */}
       <header
         style={{
           ...styles.header,
@@ -86,12 +85,11 @@ const Header = ({ onFlightClick }) => {
           transition: "opacity 0.4s, transform 0.4s",
         }}
       >
-        <Link to="/" style={{ ...styles.logoLink }}>
+        <Link to="/" style={styles.logoLink}>
           <img src={logo} alt="helloviza logo" style={styles.logo} />
         </Link>
 
         <nav style={styles.nav}>
-          {/* Only change for Visa Services link */}
           <a
             href="#visa-services"
             style={{ ...styles.link, color: linkColor }}
@@ -113,14 +111,30 @@ const Header = ({ onFlightClick }) => {
           <Link to="/contact" style={{ ...styles.link, color: linkColor }}>
             Support / Contact
           </Link>
-          <Link to="/login" style={{ ...styles.link, color: linkColor }}>
-            Login / Sign Up
-          </Link>
+
+          {user ? (
+            <>
+              <span style={{ ...styles.link, color: linkColor }}>
+                Hello, {user.name || user.email}
+              </span>
+              <button
+                onClick={handleLogoutClick}
+                style={styles.logoutBtn}
+                aria-label="Logout"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/login" style={{ ...styles.link, color: linkColor }}>
+              Login / Sign Up
+            </Link>
+          )}
         </nav>
       </header>
     </>
   );
-};
+}
 
 const styles = {
   flightIconWrapper: {
@@ -166,6 +180,7 @@ const styles = {
   nav: {
     display: "flex",
     gap: "2rem",
+    alignItems: "center",
   },
   link: {
     textDecoration: "none",
@@ -175,6 +190,13 @@ const styles = {
     transition: "color 0.3s",
     fontFamily: "'Barlow Condensed', Arial, sans-serif",
   },
+  logoutBtn: {
+    backgroundColor: "transparent",
+    border: "none",
+    color: "#d06549",
+    fontWeight: "bold",
+    fontSize: "1rem",
+    cursor: "pointer",
+    marginLeft: "1rem",
+  },
 };
-
-export default Header;

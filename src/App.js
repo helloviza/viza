@@ -1,20 +1,21 @@
 import React, { useState, useRef } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+
 import Header from "./components/Header";
 import Home from "./pages/Home";
-import ScrollTextSections from "./components/ScrollTextSections";
-import BookingPanelScheduler from "./components/BookingPanelScheduler";
-import VisaFooterBlock from "./components/VisaFooterBlock";
-import ExploreSection from "./components/ExploreSection";
-import VisaCountryGrid from "./components/VisaCountryGrid";
-import VisaStatsSection from "./components/VisaStatsSection";
-import ScrollToHeroButton from "./components/ScrollToHeroButton";
-import GoForVisa from "./pages/GoForVisa";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import ContactSection from "./components/ContactSection";
 import BackgroundBreakSection from "./components/BackgroundBreakSection";
+import BookingPanelScheduler from "./components/BookingPanelScheduler";
+import VisaFooterBlock from "./components/VisaFooterBlock";
+import ScrollTextSections from "./components/ScrollTextSections";
+import ExploreSection from "./components/ExploreSection";
 import VisaServicesSection from "./components/VisaServicesSection";
+import VisaCountryGrid from "./components/VisaCountryGrid";
+import VisaStatsSection from "./components/VisaStatsSection";
+import ScrollToHeroButton from "./components/ScrollToHeroButton";
+import GoForVisa from "./pages/GoForVisa";
 
 function ProtectedRoute({ isLoggedIn, children, redirectTo = "/login" }) {
   const location = useLocation();
@@ -25,27 +26,41 @@ function ProtectedRoute({ isLoggedIn, children, redirectTo = "/login" }) {
   );
 }
 
-function App() {
-  // Use lazy initializer to check localStorage once on mount
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    () => !!localStorage.getItem("helloviza_user")
-  );
+export default function App() {
+  // Initialize user state from localStorage
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem("helloviza_user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null; // fallback if localStorage data is corrupted
+    }
+  });
 
   const bookingPanelRef = useRef();
 
-  function handleLogin() {
-    setIsLoggedIn(true);
+  // Save user info on login
+  function handleLogin(userData) {
+    setUser(userData);
+    localStorage.setItem("helloviza_user", JSON.stringify(userData));
   }
 
+  // Clear user info on logout
+  function handleLogout() {
+    setUser(null);
+    localStorage.removeItem("helloviza_user");
+  }
+
+  // Open booking panel
   function openBookingPanel() {
-    if (bookingPanelRef.current && bookingPanelRef.current.openPanel) {
+    if (bookingPanelRef.current?.openPanel) {
       bookingPanelRef.current.openPanel();
     }
   }
 
   return (
-    <Router>
-      <Header onFlightClick={openBookingPanel} />
+    <>
+      <Header onFlightClick={openBookingPanel} user={user} onLogout={handleLogout} />
       <BookingPanelScheduler ref={bookingPanelRef} />
 
       <Routes>
@@ -63,35 +78,18 @@ function App() {
           }
         />
 
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+
+        <Route path="/reset-password" element={<ResetPassword />} />
+
         <Route
           path="/go-for-visa"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <GoForVisa />
+            <ProtectedRoute isLoggedIn={!!user}>
+               <GoForVisa user={user} />
             </ProtectedRoute>
           }
         />
-
-        <Route
-          path="/login"
-          element={
-            <Login
-              onLogin={() => {
-                handleLogin();
-                // Get ?from param to redirect after login
-                const params = new URLSearchParams(window.location.search);
-                const from = params.get("from");
-                if (from) {
-                  window.location.replace(from);
-                } else {
-                  window.location.replace("/");
-                }
-              }}
-            />
-          }
-        />
-
-        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/contact"
@@ -102,14 +100,10 @@ function App() {
             </>
           }
         />
-
-        {/* Add more routes here */}
       </Routes>
 
       <ScrollToHeroButton />
       <VisaFooterBlock />
-    </Router>
+    </>
   );
 }
-
-export default App;
