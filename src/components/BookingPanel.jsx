@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { useNavigate } from "react-router-dom";
 import allCountries from "../data/allCountries";
 
-const BookingPanel = ({ isOpen, onClose }) => {
+const BookingPanel = forwardRef(function BookingPanel({ }, ref) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [appearanceCount, setAppearanceCount] = useState(0);
+  const timersRef = useRef([]);
+
   // Controlled state for form
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -12,6 +16,45 @@ const BookingPanel = ({ isOpen, onClose }) => {
 
   const navigate = useNavigate();
 
+  // Expose openPanel for manual opening
+  useImperativeHandle(ref, () => ({
+    openPanel: () => setIsOpen(true)
+  }));
+
+  // Auto-appearance logic
+  useEffect(() => {
+    if (appearanceCount >= 3) return;
+
+    // Setup all timers on mount, will trigger only if not yet shown 3 times
+    if (appearanceCount === 0) {
+      // Show after 3s
+      timersRef.current[0] = setTimeout(() => {
+        setIsOpen(true);
+        setAppearanceCount(1);
+      }, 3000);
+    } else if (appearanceCount === 1) {
+      // After 1st close, show again after 4s
+      timersRef.current[1] = setTimeout(() => {
+        setIsOpen(true);
+        setAppearanceCount(2);
+      }, 4000);
+    } else if (appearanceCount === 2) {
+      // After 2nd close, show again after 5s
+      timersRef.current[2] = setTimeout(() => {
+        setIsOpen(true);
+        setAppearanceCount(3);
+      }, 5000);
+    }
+
+    // Cleanup on unmount
+    return () => timersRef.current.forEach(timer => clearTimeout(timer));
+    // eslint-disable-next-line
+  }, [appearanceCount]);
+
+  // Panel close handler
+  const handleClose = () => setIsOpen(false);
+
+  // Form submit handler
   const handleSubmit = (e) => {
     e.preventDefault();
     const params = new URLSearchParams({
@@ -22,16 +65,15 @@ const BookingPanel = ({ isOpen, onClose }) => {
       type: visaType,
     });
     navigate(`/go-for-visa?${params.toString()}`);
-    if (onClose) onClose();
+    handleClose();
   };
 
   return (
     <div style={{ ...styles.overlay, top: isOpen ? 0 : "-100%" }}>
-      <button style={styles.closeButton} onClick={onClose}>×</button>
+      <button style={styles.closeButton} onClick={handleClose}>×</button>
       <h2 style={styles.heading}>Explore your Gateway, Book your Visa</h2>
       <form onSubmit={handleSubmit}>
         <div style={styles.grid}>
-          {/* Origin Country */}
           <div style={styles.inputGroup}>
             <label>Origin Country</label>
             <select value={origin} onChange={e => setOrigin(e.target.value)} required>
@@ -41,7 +83,6 @@ const BookingPanel = ({ isOpen, onClose }) => {
               ))}
             </select>
           </div>
-          {/* Destination Country */}
           <div style={styles.inputGroup}>
             <label>Destination Country</label>
             <select value={destination} onChange={e => setDestination(e.target.value)} required>
@@ -51,17 +92,14 @@ const BookingPanel = ({ isOpen, onClose }) => {
               ))}
             </select>
           </div>
-          {/* Earliest departure */}
           <div style={styles.inputGroup}>
             <label>Earliest departure</label>
             <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
           </div>
-          {/* Visa Required by */}
           <div style={styles.inputGroup}>
             <label>Visa Required by</label>
             <input type="date" value={visaRequiredBy} onChange={e => setVisaRequiredBy(e.target.value)} required />
           </div>
-          {/* Visa Type */}
           <div style={styles.inputGroup}>
             <label>Visa Type</label>
             <select value={visaType} onChange={e => setVisaType(e.target.value)} required>
@@ -81,7 +119,7 @@ const BookingPanel = ({ isOpen, onClose }) => {
       </form>
     </div>
   );
-};
+});
 
 const styles = {
   overlay: {
@@ -112,7 +150,7 @@ const styles = {
     fontWeight: "600",
     marginBottom: "1.5rem",
     fontFamily: "inherit",
-    color: "#00477f", // example: dark text color
+    color: "#00477f",
   },
   grid: {
     display: "grid",
@@ -122,7 +160,7 @@ const styles = {
   inputGroup: {
     display: "flex",
     flexDirection: "column",
-    color: "#00477f", // example: dark text color
+    color: "#00477f",
   },
   buttonWrapper: {
     gridColumn: "span 2",

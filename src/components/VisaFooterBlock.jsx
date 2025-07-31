@@ -61,8 +61,8 @@ const VisaFooterBlock = () => (
         </div>
         <div style={styles.col}>
           <div style={styles.headingFooter}>MANAGEMENT</div>
-          <a href="/visa-destinations" style={styles.link}>About Us</a>
-          <a href="/hotels" style={styles.link}>Career</a>
+          <a href="/about" style={styles.link}>About Us</a>
+          <a href="/careers" style={styles.link}>Career</a>
         </div>
         <div style={styles.col}>
           <div style={styles.headingFooter}>OUR SERVICE</div>
@@ -80,8 +80,8 @@ const VisaFooterBlock = () => (
       <div style={styles.bottomBar}>
         <div style={styles.left}>&copy; {new Date().getFullYear()} Helloviza, All rights reserved</div>
         <div style={styles.center}>
-          <a href="/privacy-policy" style={styles.bottomLink}>Privacy Policy</a>
-          <a href="/terms-of-use" style={styles.bottomLink}>Terms of Use</a>
+          <a href="/privacy" style={styles.bottomLink}>Privacy Policy</a>
+          <a href="/terms" style={styles.bottomLink}>Terms of Use</a>
           <a href="/Newsroom" style={styles.bottomLink}>Newsroom</a>
         </div>
         <div style={styles.right}>

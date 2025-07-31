@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import ContactSection from "./components/ContactSection";
 import BackgroundBreakSection from "./components/BackgroundBreakSection";
-import BookingPanelScheduler from "./components/BookingPanelScheduler";
+import BookingPanel from "./components/BookingPanel"; // <-- Updated import
 import VisaFooterBlock from "./components/VisaFooterBlock";
 import ScrollTextSections from "./components/ScrollTextSections";
 import ExploreSection from "./components/ExploreSection";
@@ -16,6 +16,10 @@ import VisaCountryGrid from "./components/VisaCountryGrid";
 import VisaStatsSection from "./components/VisaStatsSection";
 import ScrollToHeroButton from "./components/ScrollToHeroButton";
 import GoForVisa from "./pages/GoForVisa";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Careers from './pages/Careers';
+import AboutUs from './pages/AboutUs';
 
 function ProtectedRoute({ isLoggedIn, children, redirectTo = "/login" }) {
   const location = useLocation();
@@ -51,7 +55,7 @@ export default function App() {
     localStorage.removeItem("helloviza_user");
   }
 
-  // Open booking panel
+  // Open booking panel (called from header icon)
   function openBookingPanel() {
     if (bookingPanelRef.current?.openPanel) {
       bookingPanelRef.current.openPanel();
@@ -61,7 +65,7 @@ export default function App() {
   return (
     <>
       <Header onFlightClick={openBookingPanel} user={user} onLogout={handleLogout} />
-      <BookingPanelScheduler ref={bookingPanelRef} />
+      <BookingPanel ref={bookingPanelRef} />
 
       <Routes>
         <Route
@@ -86,7 +90,7 @@ export default function App() {
           path="/go-for-visa"
           element={
             <ProtectedRoute isLoggedIn={!!user}>
-               <GoForVisa user={user} />
+              <GoForVisa user={user} />
             </ProtectedRoute>
           }
         />
@@ -100,6 +104,12 @@ export default function App() {
             </>
           }
         />
+
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/about" element={<AboutUs />} />  
+
       </Routes>
 
       <ScrollToHeroButton />
