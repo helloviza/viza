@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import ContactSection from "./components/ContactSection";
 import BackgroundBreakSection from "./components/BackgroundBreakSection";
-import BookingPanel from "./components/BookingPanel"; // <-- Updated import
+import BookingPanel from "./components/BookingPanel";
 import VisaFooterBlock from "./components/VisaFooterBlock";
 import ScrollTextSections from "./components/ScrollTextSections";
 import ExploreSection from "./components/ExploreSection";
@@ -41,7 +41,9 @@ export default function App() {
     }
   });
 
+  // Two refs: one for header flight (slide), one for Discover Now (modal)
   const bookingPanelRef = useRef();
+  const modalPanelRef = useRef();
 
   // Save user info on login
   function handleLogin(userData) {
@@ -62,17 +64,28 @@ export default function App() {
     }
   }
 
+  // Open modal booking panel (called from Home Discover Now)
+  function openModalBookingPanel() {
+    if (modalPanelRef.current?.openPanel) {
+      modalPanelRef.current.openPanel();
+    }
+  }
+
   return (
     <>
       <Header onFlightClick={openBookingPanel} user={user} onLogout={handleLogout} />
+      {/* Slide-down Booking Panel (header/flight icon) */}
       <BookingPanel ref={bookingPanelRef} />
+      {/* Modal Popup Booking Panel (for Discover Now) */}
+      <BookingPanel ref={modalPanelRef} mode="modal" />
 
       <Routes>
         <Route
           path="/"
           element={
             <>
-              <Home />
+              {/* Pass trigger function to Home page */}
+              <Home onDiscoverNow={openModalBookingPanel} />
               <ScrollTextSections />
               <ExploreSection />
               <VisaServicesSection />
@@ -108,8 +121,7 @@ export default function App() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/careers" element={<Careers />} />
-        <Route path="/about" element={<AboutUs />} />  
-
+        <Route path="/about" element={<AboutUs />} />
       </Routes>
 
       <ScrollToHeroButton />

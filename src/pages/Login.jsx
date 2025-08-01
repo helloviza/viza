@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import loginBg from "../assets/login-bg.jpg"; // Adjust path as needed
 import { GoogleLogin } from "@react-oauth/google";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
+
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
@@ -71,44 +72,150 @@ export default function Login({ onLogin }) {
     setError("Google login failed, please try again.");
   };
 
+  // ----- YOUR STYLE INJECTION FOR MOBILE ONLY -----
+  // This only runs on render, so is safe for SSR.
+  // Unique classnames (login-outer, login-left-bg, login-form-area, etc.)
+  // so you can use anywhere else in your app safely.
+  // You can also copy-paste this <style> block into your CSS file if you want.
+
   return (
-    <div style={styles.outer}>
-      <div style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }} />
-      <div style={styles.formArea}>
+    <div className="login-outer" style={styles.outer}>
+      {/* Mobile style only: no desktop UI change */}
+      <style>{`
+        @media (max-width: 600px) {
+          .login-outer {
+            flex-direction: column !important;
+            min-height: 100vh !important;
+            align-items: stretch !important;
+          }
+          .login-left-bg {
+            min-height: 140px !important;
+            flex-basis: 32vw !important;
+            width: 100% !important;
+            background-size: cover !important;
+            background-position: center !important;
+            display: block !important;
+            border-radius: 0 !important;
+          }
+          .login-form-area {
+            max-width: 100vw !important;
+            padding: 2.4rem 4vw 2.2rem 4vw !important;
+            min-width: unset !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+          }
+          .login-tabs {
+            gap: 1.1rem !important;
+            margin-bottom: 1.1rem !important;
+          }
+          .login-tab {
+            font-size: 1.1rem !important;
+          }
+          .login-form-area input,
+          .login-form-area select {
+            font-size: 0.96rem !important;
+            padding: 0.54rem 0.7rem !important;
+          }
+          .login-form-area button[type="submit"] {
+            padding: 0.88rem 0.6rem !important;
+            font-size: 1.09rem !important;
+          }
+          .login-form-area label {
+            font-size: 0.95rem !important;
+          }
+        }
+      `}</style>
+      <div
+        className="login-left-bg"
+        style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }}
+      />
+      <div className="login-form-area" style={styles.formArea}>
         {/* Tabs */}
-        <div role="tablist" aria-label="Login and Signup Tabs" style={styles.tabs}>
+        <div
+          className="login-tabs"
+          role="tablist"
+          aria-label="Login and Signup Tabs"
+          style={styles.tabs}
+        >
           <div
+            className="login-tab"
             role="tab"
             tabIndex={0}
             aria-selected={mode === "login"}
             onClick={() => setMode("login")}
             onKeyDown={(e) => handleKeyDown(e, "login")}
-            style={{ ...styles.tabWrap, ...(mode === "login" ? styles.activeTabWrap : {}), cursor: "pointer" }}
+            style={{
+              ...styles.tabWrap,
+              ...(mode === "login" ? styles.activeTabWrap : {}),
+              cursor: "pointer",
+            }}
           >
-            <span style={{ ...styles.tab, ...(mode === "login" ? styles.activeTab : {}) }}>• Log in</span>
-            <div style={{ ...styles.underline, ...(mode === "login" ? styles.activeUnderline : {}) }} />
+            <span
+              style={{
+                ...styles.tab,
+                ...(mode === "login" ? styles.activeTab : {}),
+              }}
+            >
+              • Log in
+            </span>
+            <div
+              style={{
+                ...styles.underline,
+                ...(mode === "login" ? styles.activeUnderline : {}),
+              }}
+            />
           </div>
           <div
+            className="login-tab"
             role="tab"
             tabIndex={0}
             aria-selected={mode === "signup"}
             onClick={() => setMode("signup")}
             onKeyDown={(e) => handleKeyDown(e, "signup")}
-            style={{ ...styles.tabWrap, ...(mode === "signup" ? styles.activeTabWrap : {}), cursor: "pointer" }}
+            style={{
+              ...styles.tabWrap,
+              ...(mode === "signup" ? styles.activeTabWrap : {}),
+              cursor: "pointer",
+            }}
           >
-            <span style={{ ...styles.tab, ...(mode === "signup" ? styles.activeTab : {}) }}>• Sign Up</span>
-            <div style={{ ...styles.underline, ...(mode === "signup" ? styles.activeUnderline : {}) }} />
+            <span
+              style={{
+                ...styles.tab,
+                ...(mode === "signup" ? styles.activeTab : {}),
+              }}
+            >
+              • Sign Up
+            </span>
+            <div
+              style={{
+                ...styles.underline,
+                ...(mode === "signup" ? styles.activeUnderline : {}),
+              }}
+            />
           </div>
         </div>
 
         {/* Google Login Button */}
         <div style={{ marginBottom: 20, textAlign: "center" }}>
-          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleFailure}
+          />
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={styles.form}>
-          {error && <div style={{ color: "#c00", fontWeight: "bold", marginBottom: 8 }}>{error}</div>}
+          {error && (
+            <div
+              style={{
+                color: "#c00",
+                fontWeight: "bold",
+                marginBottom: 8,
+              }}
+            >
+              {error}
+            </div>
+          )}
 
           <div style={{ display: "flex", gap: "2vw" }}>
             {mode === "signup" && (
@@ -222,7 +329,8 @@ export default function Login({ onLogin }) {
                   required
                 />
                 <span style={styles.agreeText}>
-                  By creating an account, I agree to this website's privacy policy and terms of service
+                  By creating an account, I agree to this website's privacy
+                  policy and terms of service
                 </span>
               </div>
             </>
@@ -302,6 +410,7 @@ export default function Login({ onLogin }) {
   );
 }
 
+// ...your styles object is unchanged!
 const styles = {
   outer: {
     display: "flex",

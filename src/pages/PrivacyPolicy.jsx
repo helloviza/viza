@@ -152,56 +152,117 @@ Email: privacy@helloviza.com
   }
 ];
 
+
+// Assume `sections` is already defined as an array of {title, content} objects
+
+// Paste your existing sections array here!
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Responsive mobile-only style */}
+      <style>{`
+        @media (max-width: 600px) {
+          .hv-pp-wrap {
+            margin: 24px 0 0 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            padding: 18px 6vw 24px 6vw !important;
+            max-width: 100vw !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+          }
+          .hv-pp-title {
+            font-size: 2.1rem !important;
+            padding-top: 0.7rem !important;
+          }
+          .hv-pp-date {
+            font-size: 1.18rem !important;
+            margin-bottom: 20px !important;
+          }
+          .hv-pp-section h2 {
+            font-size: 1.07rem !important;
+            margin-bottom: 9px !important;
+            margin-top: 22px !important;
+          }
+          .hv-pp-section pre {
+            font-size: 0.98rem !important;
+            line-height: 1.57 !important;
+            white-space: pre-wrap !important;
+          }
+        }
+      `}</style>
       <div
-        className="max-w-3xl mx-auto px-6 py-10 bg-white rounded-2xl shadow-xl"
+        className="hv-pp-wrap max-w-3xl mx-auto bg-white rounded-2xl shadow-xl"
         style={{
-          marginTop: "120px",
+          marginTop: "150px",
           marginBottom: "60px",
-          marginLeft: "16px",
-          marginRight: "16px",
-          color: "#d06549",
-          fontFamily: baseFont
+          marginLeft: "60px",
+          marginRight: "60px",
+          color: "#1a237e",
+          fontFamily: baseFont,
+          padding: "56px 48px 56px 48px"
         }}
       >
-        <h1 className="text-3xl font-bold mb-4 text-center" style={{ color: "#003366", fontFamily: baseFont }}>
+        <h1
+          className="hv-pp-title"
+          style={{
+            color: "#003366",
+            fontFamily: baseFont,
+            fontSize: "3.5rem",
+            fontWeight: 800,
+            marginBottom: "18px",
+            lineHeight: 1.12,
+            textAlign: "center"
+          }}
+        >
           Privacy Policy
         </h1>
-        <p className="mb-10 text-center text-gray-700" style={{ fontFamily: baseFont }}>
+        <p
+          className="hv-pp-date"
+          style={{
+            fontFamily: baseFont,
+            color: "#2634b7",
+            fontSize: "2rem",
+            marginBottom: "40px",
+            textAlign: "center"
+          }}
+        >
           Last updated: 31 July 2025
         </p>
         <div>
           {sections.map((section, idx) => (
             <section
               key={idx}
-              className="mb-12"
+              className="hv-pp-section"
               style={{
-                borderBottom:
-                  idx !== sections.length - 1
-                    ? "1px solid #e0e7ef"
-                    : "none",
-                paddingBottom: idx !== sections.length - 1 ? "36px" : "0"
+                borderBottom: idx !== sections.length - 1 ? "1px solid #e0e7ef" : "none",
+                paddingBottom: idx !== sections.length - 1 ? "36px" : "0",
+                marginBottom: "32px"
               }}
             >
               <h2
-                className="text-xl font-semibold mb-2"
-                style={{ color: "#d06549", fontFamily: baseFont }}
+                style={{
+                  color: "#d06549",
+                  fontFamily: baseFont,
+                  fontWeight: 700,
+                  fontSize: "2rem",
+                  marginBottom: "12px"
+                }}
               >
                 {section.title}
               </h2>
               <pre
-                className="whitespace-pre-line"
                 style={{
                   color: "#00477f",
-                  fontSize: "1rem",
+                  fontSize: "1.2rem",
                   lineHeight: "1.7",
+                  fontFamily: baseFont,
+                  marginBottom: "8px",
                   background: "none",
                   border: "none",
                   padding: 0,
-                  margin: 0,
-                  fontFamily: baseFont
+                  whiteSpace: "pre-wrap"
                 }}
               >
                 {section.content}
@@ -209,9 +270,18 @@ export default function PrivacyPolicy() {
             </section>
           ))}
         </div>
-        <div className="mt-12 text-sm text-gray-600 text-center" style={{ fontFamily: baseFont }}>
+        <div
+          style={{
+            fontFamily: baseFont,
+            marginTop: "50px",
+            fontSize: "1rem",
+            color: "#888",
+            textAlign: "center"
+          }}
+        >
           By using Helloviza.com, you acknowledge that you have read, understood, and agree to this Privacy Policy.<br /><br />
-          For privacy questions or requests: <a href="mailto:privacy@helloviza.com" className="text-blue-700 underline">
+          For privacy questions or requests:{" "}
+          <a href="mailto:privacy@helloviza.com" className="text-blue-700 underline">
             privacy@helloviza.com
           </a>
         </div>

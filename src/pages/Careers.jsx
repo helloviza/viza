@@ -67,7 +67,17 @@ const jobs = [
   }
 ];
 
+// Dynamic helpers for responsive style
+function getWidth() {
+  if (typeof window !== "undefined") return window.innerWidth;
+  return 1200; // fallback desktop
+}
+
 export default function Careers() {
+  const w = getWidth();
+  const mobile = w < 700;
+  const tab = w < 1050;
+
   return (
     <div
       style={{
@@ -78,18 +88,21 @@ export default function Careers() {
         minHeight: "100vh"
       }}
     >
+      {/* Safe padding for mobile header */}
+      <div style={{ height: mobile ? 82 : 36 }}></div>
+
       <div
         style={{
           maxWidth: 1100,
           margin: "0 auto",
-          padding: "120px 18px 24px 18px"
+          padding: mobile ? "24px 5vw 14px 5vw" : "120px 18px 24px 18px"
         }}
       >
         {/* HEADER */}
         <div
           style={{
             textAlign: "center",
-            marginBottom: 60
+            marginBottom: mobile ? 30 : 60
           }}
         >
           <span
@@ -97,7 +110,7 @@ export default function Careers() {
               color: "#00477f",
               letterSpacing: "1.5px",
               fontWeight: 700,
-              fontSize: 18,
+              fontSize: mobile ? 15 : 18,
               textTransform: "uppercase",
               marginBottom: 8,
               display: "inline-block"
@@ -107,7 +120,7 @@ export default function Careers() {
           </span>
           <h1
             style={{
-              fontSize: 48,
+              fontSize: mobile ? 28 : 48,
               fontWeight: 800,
               margin: "20px 0 18px 0",
               color: "#00477f",
@@ -119,7 +132,7 @@ export default function Careers() {
           </h1>
           <p
             style={{
-              fontSize: 22,
+              fontSize: mobile ? 15 : 22,
               color: "#d06549",
               margin: "0 auto",
               maxWidth: 540,
@@ -135,19 +148,20 @@ export default function Careers() {
         <div
           style={{
             display: "flex",
-            gap: 32,
-            marginBottom: 60,
-            flexWrap: "wrap"
+            gap: mobile ? 12 : 32,
+            marginBottom: mobile ? 32 : 60,
+            flexDirection: mobile ? "column" : "row",
+            flexWrap: mobile ? "nowrap" : "wrap"
           }}
         >
           <img
             src={teamImg1}
             alt="Helloviza Team 1"
             style={{
-              borderRadius: 18,
+              borderRadius: mobile ? 12 : 18,
               width: "100%",
-              maxWidth: 500,
-              minHeight: 210,
+              maxWidth: mobile ? "100%" : 500,
+              minHeight: mobile ? 100 : 210,
               objectFit: "cover",
               boxShadow: "0 4px 32px #89a5f4b0",
               flex: 1
@@ -157,10 +171,10 @@ export default function Careers() {
             src={teamImg2}
             alt="Helloviza Team 2"
             style={{
-              borderRadius: 18,
+              borderRadius: mobile ? 12 : 18,
               width: "100%",
-              maxWidth: 500,
-              minHeight: 210,
+              maxWidth: mobile ? "100%" : 500,
+              minHeight: mobile ? 100 : 210,
               objectFit: "cover",
               boxShadow: "0 4px 32px #ffad43a0",
               flex: 1
@@ -169,7 +183,7 @@ export default function Careers() {
         </div>
 
         {/* PERKS */}
-        <div style={{ marginBottom: 70 }}>
+        <div style={{ marginBottom: mobile ? 38 : 70 }}>
           <div
             style={{
               color: "#00477f",
@@ -177,17 +191,17 @@ export default function Careers() {
               letterSpacing: "1.5px",
               marginBottom: 12,
               textTransform: "uppercase",
-              fontSize: 18
+              fontSize: mobile ? 15 : 18
             }}
           >
             PERKS
           </div>
           <h2
             style={{
-              fontSize: 34,
+              fontSize: mobile ? 20 : 34,
               fontWeight: 700,
               color: "#002c55",
-              marginBottom: 36,
+              marginBottom: 24,
               lineHeight: 1.14
             }}
           >
@@ -196,8 +210,12 @@ export default function Careers() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-              gap: 32
+              gridTemplateColumns: mobile
+                ? "1fr"
+                : tab
+                ? "1fr 1fr"
+                : "repeat(auto-fit, minmax(210px, 1fr))",
+              gap: mobile ? 18 : 32
             }}
           >
             {perks.map((perk, i) => (
@@ -206,7 +224,7 @@ export default function Careers() {
                 <div
                   style={{
                     fontWeight: 700,
-                    fontSize: 19,
+                    fontSize: mobile ? 16 : 19,
                     color: "#00477f",
                     marginBottom: 6
                   }}
@@ -216,7 +234,7 @@ export default function Careers() {
                 <div
                   style={{
                     color: "#6a778e",
-                    fontSize: 15,
+                    fontSize: mobile ? 13 : 15,
                     minHeight: 38
                   }}
                 >
@@ -228,7 +246,7 @@ export default function Careers() {
         </div>
 
         {/* JOBS */}
-        <div style={{ marginBottom: 80 }}>
+        <div style={{ marginBottom: mobile ? 44 : 80 }}>
           <div
             style={{
               color: "#00477f",
@@ -236,14 +254,14 @@ export default function Careers() {
               letterSpacing: "1.5px",
               marginBottom: 12,
               textTransform: "uppercase",
-              fontSize: 18
+              fontSize: mobile ? 15 : 18
             }}
           >
             JOBS
           </div>
           <h2
             style={{
-              fontSize: 30,
+              fontSize: mobile ? 18 : 30,
               fontWeight: 700,
               color: "#00477f",
               marginBottom: 16
@@ -254,7 +272,7 @@ export default function Careers() {
           <p
             style={{
               color: "#444",
-              fontSize: 17,
+              fontSize: mobile ? 13 : 17,
               marginBottom: 20,
               lineHeight: 1.3
             }}
@@ -269,13 +287,13 @@ export default function Careers() {
                   style={{
                     color: "#00477f",
                     fontWeight: 700,
-                    fontSize: 19,
+                    fontSize: mobile ? 16 : 19,
                     textDecoration: "none"
                   }}
                 >
                   {job.title}
                 </a>
-                <span style={{ color: "#aaa", marginLeft: 16, fontSize: 16 }}>{job.location}</span>
+                <span style={{ color: "#aaa", marginLeft: 16, fontSize: mobile ? 12 : 16 }}>{job.location}</span>
               </div>
             ))}
           </div>
@@ -285,8 +303,8 @@ export default function Careers() {
         <div
           style={{
             background: "linear-gradient(100deg, #d06549 55%, #d06549 35%, #00477f 200%)",
-            borderRadius: 30,
-            padding: "36px 36px",
+            borderRadius: mobile ? 16 : 30,
+            padding: mobile ? "18px 7vw" : "36px 36px",
             boxShadow: "0 4px 44px #ffe38430",
             marginBottom: 30
           }}
@@ -294,7 +312,7 @@ export default function Careers() {
           <h3
             style={{
               fontWeight: 800,
-              fontSize: 28,
+              fontSize: mobile ? 16 : 28,
               color: "#00477f",
               marginBottom: 15,
               lineHeight: 1.18
@@ -305,12 +323,13 @@ export default function Careers() {
           <div
             style={{
               display: "flex",
-              gap: 22,
+              gap: mobile ? 10 : 22,
               flexWrap: "wrap",
               color: "#00477f",
               fontWeight: 600,
-              fontSize: 16,
-              marginBottom: 22
+              fontSize: mobile ? 12 : 16,
+              marginBottom: 22,
+              justifyContent: "center"
             }}
           >
             <span>✔ 24x7 Customer Support</span>
@@ -320,12 +339,12 @@ export default function Careers() {
           </div>
           <button
             style={{
-              padding: "12px 34px",
+              padding: mobile ? "8px 16px" : "12px 34px",
               background: "#00477f",
               color: "#fff",
               fontWeight: 700,
-              borderRadius: 10,
-              fontSize: 17,
+              borderRadius: mobile ? 6 : 10,
+              fontSize: mobile ? 13 : 17,
               border: "none",
               cursor: "pointer",
               boxShadow: "0 2px 12px #002c5550"

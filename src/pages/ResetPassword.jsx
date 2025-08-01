@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // <-- Import useNavigate
-import loginBg from "../assets/login-bg.jpg"; // Adjust path if needed
+import { useNavigate } from "react-router-dom";
+import loginBg from "../assets/login-bg.jpg";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const scale = 0.64;
@@ -11,18 +11,76 @@ export default function ResetPassword() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // TODO: Integrate with your backend for real password reset logic
     alert("Password reset link sent (demo only)");
   }
 
   return (
-    <div style={styles.outer}>
+    <div className="resetpw-outer" style={styles.outer}>
+      <style>{`
+        @media (max-width: 600px) {
+          .resetpw-outer {
+            flex-direction: column !important;
+            min-height: 100vh !important;
+            align-items: stretch !important;
+          }
+          .resetpw-left-bg {
+            min-height: 140px !important;
+            width: 100% !important;
+            flex-basis: 32vw !important;
+            background-size: cover !important;
+            background-position: center !important;
+            display: block !important;
+            border-radius: 0 !important;
+          }
+          .resetpw-form-area {
+            max-width: 100vw !important;
+            padding: 2.3rem 4vw 2.1rem 4vw !important;
+            min-width: unset !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            align-items: flex-start !important;
+            min-height: unset !important;
+          }
+          .resetpw-title {
+            font-size: 2rem !important;
+            margin-bottom: 1.4rem !important;
+            margin-top: 0 !important;
+            text-align: left !important;
+          }
+          .resetpw-form label,
+          .resetpw-form input,
+          .resetpw-form button {
+            font-size: 1.02rem !important;
+          }
+          .resetpw-form input {
+            padding: 0.5em 0.7em !important;
+          }
+          .resetpw-form button[type="submit"] {
+            padding: 0.88rem 0.6rem !important;
+            font-size: 1.1rem !important;
+            margin-top: 1rem !important;
+          }
+          .resetpw-below-links {
+            font-size: 0.99rem !important;
+            margin-top: 1.1rem !important;
+          }
+        }
+      `}</style>
       {/* Left-side background image */}
-      <div style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }} />
+      <div
+        className="resetpw-left-bg"
+        style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }}
+      />
       {/* Right-side form */}
-      <div style={styles.formArea}>
-        <h1 style={styles.title}>Reset Password</h1>
-        <form onSubmit={handleSubmit} style={styles.form}>
+      <div className="resetpw-form-area" style={styles.formArea}>
+        <h1 className="resetpw-title" style={styles.title}>
+          Reset Password
+        </h1>
+        <form
+          className="resetpw-form"
+          onSubmit={handleSubmit}
+          style={styles.form}
+        >
           <label style={styles.label}>Email</label>
           <input
             type="email"
@@ -36,7 +94,7 @@ export default function ResetPassword() {
           <button type="submit" style={styles.submitBtn}>
             Reset Password
           </button>
-          <div style={styles.belowLinks}>
+          <div className="resetpw-below-links" style={styles.belowLinks}>
             <span>
               Already have an account?{" "}
               <a
