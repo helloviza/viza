@@ -28,13 +28,18 @@ const labelStyle = {
 };
 
 export default function ContactSection() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [mobile, setMobile] = useState("");
   const [extraEmail, setExtraEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
-    // Add your logic here
+    // Optional: Add your backend/API call here
+    window.location.reload();
   }
 
   const showExtra = subject === "login" || subject === "signup";
@@ -167,16 +172,37 @@ export default function ContactSection() {
           >
             <div style={{ flex: 1, display: "flex", flexDirection: "column", marginBottom: window.innerWidth <= 700 ? "1rem" : 0 }}>
               <label style={labelStyle}>First Name*</label>
-              <input style={inputStyle} type="text" placeholder="Enter name" required />
+              <input
+                style={inputStyle}
+                type="text"
+                placeholder="Enter name"
+                required
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+              />
             </div>
             <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               <label style={labelStyle}>Last Name*</label>
-              <input style={inputStyle} type="text" placeholder="Enter last name" required />
+              <input
+                style={inputStyle}
+                type="text"
+                placeholder="Enter last name"
+                required
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+              />
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={labelStyle}>Email Address*</label>
-            <input style={inputStyle} type="email" placeholder="Enter e-mail" required />
+            <input
+              style={inputStyle}
+              type="email"
+              placeholder="Enter e-mail"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={labelStyle}>Subject*</label>
@@ -234,6 +260,8 @@ export default function ContactSection() {
               rows={5}
               placeholder="Enter message"
               required
+              value={message}
+              onChange={e => setMessage(e.target.value)}
             />
           </div>
           <button
