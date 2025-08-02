@@ -35,14 +35,57 @@ export default function ContactSection() {
   const [mobile, setMobile] = useState("");
   const [extraEmail, setExtraEmail] = useState("");
   const [message, setMessage] = useState("");
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    // Optional: Add your backend/API call here
-    window.location.reload();
-  }
+  const [statusMsg, setStatusMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const showExtra = subject === "login" || subject === "signup";
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatusMsg("");
+    setLoading(true);
+
+    // Prepare payload for backend
+    const payload = {
+      firstName,
+      lastName,
+      email,
+      subject,
+      message,
+      loginMobile: showExtra ? mobile : "",
+      loginEmail: showExtra ? extraEmail : "",
+    };
+
+    try {
+      const response = await fetch(
+        "http://helloviza-backend-env.eba-eesmminn.ap-south-1.elasticbeanstalk.com/api/contact",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await response.json();
+      if (response.status === 201) {
+        setStatusMsg("✅ Your query has been submitted!");
+        // Reset form
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setSubject("");
+        setMobile("");
+        setExtraEmail("");
+        setMessage("");
+      } else {
+        setStatusMsg(data.message || "❌ Something went wrong.");
+      }
+    } catch (err) {
+      setStatusMsg("❌ Could not connect to server. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <section
@@ -278,12 +321,27 @@ export default function ContactSection() {
               borderRadius: "0px",
               fontSize: window.innerWidth <= 700 ? "1.05rem" : "1.25rem",
               letterSpacing: "0.01em",
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1,
               transition: "background .18s",
             }}
+            disabled={loading}
           >
-            Submit Your Query
+            {loading ? "Submitting..." : "Submit Your Query"}
           </button>
+          {statusMsg && (
+            <div
+              style={{
+                marginTop: "1rem",
+                color: statusMsg.startsWith("✅") ? "#087d41" : "#d06549",
+                fontWeight: 700,
+                fontSize: "1.1rem",
+                minHeight: 30,
+              }}
+            >
+              {statusMsg}
+            </div>
+          )}
         </form>
       </div>
     </section>
