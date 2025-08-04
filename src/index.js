@@ -7,10 +7,15 @@ import './index.css';
 
 const GOOGLE_CLIENT_ID = "709917234172-qksoun2rn12ikrc4t7mft9hdsjepb731.apps.googleusercontent.com";
 
+// Disable automatic scroll restoration by browser
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="709917234172-qksoun2rn12ikrc4t7mft9hdsjepb731.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <App />
       </BrowserRouter>

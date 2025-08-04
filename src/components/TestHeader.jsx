@@ -10,7 +10,6 @@ export default function Header({ onFlightClick, user, onLogout }) {
   const [visible, setVisible] = useState(true);
   const [inHero, setInHero] = useState(true);
   const [showMobileNav, setShowMobileNav] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,7 +44,7 @@ export default function Header({ onFlightClick, user, onLogout }) {
 
   const linkColor = inHero ? "#d06549" : "#000000";
 
-  const handleVisaServicesClick = (e) => {
+  const handleVisaServicesClick = e => {
     e.preventDefault();
     setShowMobileNav(false);
     if (location.pathname !== "/") {
@@ -61,7 +60,6 @@ export default function Header({ onFlightClick, user, onLogout }) {
   };
 
   const handleLogoutClick = () => {
-    setDropdownOpen(false);
     setShowMobileNav(false);
     if (onLogout) onLogout();
     navigate("/");
@@ -115,93 +113,18 @@ export default function Header({ onFlightClick, user, onLogout }) {
           </Link>
 
           {user ? (
-            <div
-              style={{ position: "relative", display: "inline-block" }}
-              onMouseEnter={() => setDropdownOpen(true)}
-              onMouseLeave={() => setDropdownOpen(false)}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  color: linkColor,
-                  fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                  userSelect: "none",
-                }}
+            <>
+              <span style={{ ...styles.link, color: linkColor }}>
+                Hello, {user.name || user.email}
+              </span>
+              <button
+                onClick={handleLogoutClick}
+                style={styles.logoutBtn}
+                aria-label="Logout"
               >
-                {/* User Icon Circle with Initial */}
-                <div
-                  style={{
-                    backgroundColor: "#d06549",
-                    color: "#fff",
-                    borderRadius: "50%",
-                    width: 32,
-                    height: 32,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontWeight: "bold",
-                    fontSize: 16,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {user.name ? user.name.charAt(0) : "U"}
-                </div>
-                <span>
-                  {user.name || user.email} ▼
-                </span>
-              </div>
-
-              {dropdownOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 4px)",
-                    right: 0,
-                    backgroundColor: "#fff",
-                    color: "#00477f",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-                    borderRadius: "6px",
-                    minWidth: "160px",
-                    zIndex: 2000,
-                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                  }}
-                >
-                  {[
-                    { label: "My Profile", path: "/my-profile" },
-                    { label: "My Visa History", path: "/my-visa-history" },
-                    { label: "My Wallet", path: "/my-wallet" },
-                    { label: "My Documents", path: "/my-documents" },
-                    { label: "My Future Wishlist", path: "/my-future-wishlist" },
-                  ].map(({ label, path }, i) => (
-                    <Link
-                      key={i}
-                      to={path}
-                      style={styles.dropdownItem}
-                      onClick={() => setDropdownOpen(false)}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "#d06549")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "#00477f")}
-                    >
-                      {label}
-                    </Link>
-                  ))}
-
-                  <button
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      handleLogoutClick();
-                    }}
-                    style={styles.dropdownLogout}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#a53828")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#d06549")}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+                Logout
+              </button>
+            </>
           ) : (
             <Link to="/login" style={{ ...styles.link, color: linkColor }}>
               Login / Sign Up
@@ -225,44 +148,21 @@ export default function Header({ onFlightClick, user, onLogout }) {
 
       {/* ---- MOBILE: Slide Drawer ---- */}
       {showMobileNav && (
-        <div
-          className="mobile-nav-overlay"
-          onClick={() => setShowMobileNav(false)}
-        >
-          <div className="mobile-nav" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setShowMobileNav(false)}>
-              ×
-            </button>
-            <Link to="/" onClick={() => setShowMobileNav(false)}>
-              Home
-            </Link>
-            <a href="#visa-services" onClick={handleVisaServicesClick}>
-              Visa Services
-            </a>
-            <Link to="/go-for-visa" onClick={() => setShowMobileNav(false)}>
-              Go for Visa
-            </Link>
-            <a
-              href="https://www.plumtrips.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Book Flight
-            </a>
-            <Link to="/contact" onClick={() => setShowMobileNav(false)}>
-              Support / Contact
-            </Link>
+        <div className="mobile-nav-overlay" onClick={() => setShowMobileNav(false)}>
+          <div className="mobile-nav" onClick={e => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setShowMobileNav(false)}>×</button>
+            <Link to="/" onClick={() => setShowMobileNav(false)}>Home</Link>
+            <a href="#visa-services" onClick={handleVisaServicesClick}>Visa Services</a>
+            <Link to="/go-for-visa" onClick={() => setShowMobileNav(false)}>Go for Visa</Link>
+            <a href="https://www.plumtrips.com" target="_blank" rel="noopener noreferrer">Book Flight</a>
+            <Link to="/contact" onClick={() => setShowMobileNav(false)}>Support / Contact</Link>
             {user ? (
               <>
                 <span>Hello, {user.name || user.email}</span>
-                <button className="logout-btn" onClick={handleLogoutClick}>
-                  Logout
-                </button>
+                <button className="logout-btn" onClick={handleLogoutClick}>Logout</button>
               </>
             ) : (
-              <Link to="/login" onClick={() => setShowMobileNav(false)}>
-                Login / Sign Up
-              </Link>
+              <Link to="/login" onClick={() => setShowMobileNav(false)}>Login / Sign Up</Link>
             )}
           </div>
         </div>
@@ -410,26 +310,5 @@ const styles = {
     fontSize: "1rem",
     cursor: "pointer",
     marginLeft: "1rem",
-  },
-  dropdownItem: {
-    display: "block",
-    padding: "0.6rem 1rem",
-    color: "#00477f",
-    textDecoration: "none",
-    fontWeight: "normal",
-    cursor: "pointer",
-    borderBottom: "1px solid #e5e5e5",
-    transition: "color 0.2s ease",
-  },
-  dropdownLogout: {
-    width: "100%",
-    padding: "0.6rem 1rem",
-    background: "none",
-    border: "none",
-    color: "#d06549",
-    cursor: "pointer",
-    fontWeight: 700,
-    textAlign: "left",
-    transition: "color 0.2s ease",
   },
 };

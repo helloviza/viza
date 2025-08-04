@@ -58,7 +58,7 @@ export default function ContactSection() {
 
     try {
       const response = await fetch(
-        "http://helloviza-backend-env.eba-eesmminn.ap-south-1.elasticbeanstalk.com/api/contact",
+        "https://api.helloviza.com/api/contact",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

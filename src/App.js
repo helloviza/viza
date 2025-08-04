@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
@@ -18,8 +18,19 @@ import ScrollToHeroButton from "./components/ScrollToHeroButton";
 import GoForVisa from "./pages/GoForVisa";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Careers from './pages/Careers';
-import AboutUs from './pages/AboutUs';
+import Careers from "./pages/Careers";
+import AboutUs from "./pages/AboutUs";
+import MyProfile from "./pages/MyProfile";
+import ResetPasswordConfirm from "./pages/ResetPasswordConfirm"; // Adjust path if needed
+import EmailOTPVerify from "./pages/EmailOTPVerify";
+import TrackVisaApplication from "./pages/TrackVisaApplication";
+
+// Then use <Route path="/my-profile" element={<MyProfile />} />
+
+
+import ScrollToTop from "./components/ScrollToTop";
+import WelcomePopup from "./components/WelcomePopup";
+import ReturnLoginPopup from "./components/ReturnLoginPopup";
 
 function ProtectedRoute({ isLoggedIn, children, redirectTo = "/login" }) {
   const location = useLocation();
@@ -37,13 +48,48 @@ export default function App() {
       const storedUser = localStorage.getItem("helloviza_user");
       return storedUser ? JSON.parse(storedUser) : null;
     } catch {
-      return null; // fallback if localStorage data is corrupted
+      return null;
     }
   });
+
+  // State to track popups
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showReturnLoginPopup, setShowReturnLoginPopup] = useState(false);
 
   // Two refs: one for header flight (slide), one for Discover Now (modal)
   const bookingPanelRef = useRef();
   const modalPanelRef = useRef();
+
+  useLayoutEffect(() => {
+    if (user) {
+      let autoCloseTimer;
+      const hasSeenWelcome = localStorage.getItem("hasSeenWelcomePopup");
+
+      if (!hasSeenWelcome) {
+        console.log("Showing Welcome Popup immediately");
+        setShowWelcomePopup(true);
+        localStorage.setItem("hasSeenWelcomePopup", "true");
+
+        autoCloseTimer = setTimeout(() => {
+          setShowWelcomePopup(false);
+        }, 10000);
+      } else {
+        console.log("Showing Return Login Popup immediately");
+        setShowReturnLoginPopup(true);
+
+        autoCloseTimer = setTimeout(() => {
+          setShowReturnLoginPopup(false);
+        }, 10000);
+      }
+
+      return () => {
+        clearTimeout(autoCloseTimer);
+      };
+    } else {
+      setShowWelcomePopup(false);
+      setShowReturnLoginPopup(false);
+    }
+  }, [user]);
 
   // Save user info on login
   function handleLogin(userData) {
@@ -55,6 +101,8 @@ export default function App() {
   function handleLogout() {
     setUser(null);
     localStorage.removeItem("helloviza_user");
+    setShowWelcomePopup(false);
+    setShowReturnLoginPopup(false);
   }
 
   // Open booking panel (called from header icon)
@@ -71,20 +119,44 @@ export default function App() {
     }
   }
 
+  // Helper to get user's first name or fallback
+  const getFirstName = () => {
+    if (!user?.name) return "there";
+    return user.name.split(" ")[0];
+  };
+
   return (
     <>
       <Header onFlightClick={openBookingPanel} user={user} onLogout={handleLogout} />
-      {/* Slide-down Booking Panel (header/flight icon) */}
       <BookingPanel ref={bookingPanelRef} />
-      {/* Modal Popup Booking Panel (for Discover Now) */}
       <BookingPanel ref={modalPanelRef} mode="modal" />
+
+      <ScrollToTop />
+
+      {showWelcomePopup && (
+        <WelcomePopup
+          message={`Hello, ${getFirstName()}! Hello, amazing soul!
+
+We’re beyond thrilled to have you join the Helloviza family! You’re now part of a vibrant, creative, and inspiring community that’s all about connection, growth, and making every moment sparkle. 🌟
+You’re a unique spark in our universe, and we can’t wait to see the incredible energy you bring. Dive in, explore, and let’s create something extraordinary together!
+With all the love and excitement,
+The Helloviza Community 💖`}
+          onClose={() => setShowWelcomePopup(false)}
+        />
+      )}
+
+      {showReturnLoginPopup && (
+        <ReturnLoginPopup
+          message={`Welcome back, ${getFirstName()}! We’re absolutely delighted to see you return to the Helloviza family! Your presence lights up our community, and we’re thrilled to have you back in the mix. Get ready to dive back into the magic, connect with awesome souls, and continue your journey of inspiration and creativity with us. You’re truly one of a kind, and we can’t wait to see what amazing moments we’ll share next!`}
+          onClose={() => setShowReturnLoginPopup(false)}
+        />
+      )}
 
       <Routes>
         <Route
           path="/"
           element={
             <>
-              {/* Pass trigger function to Home page */}
               <Home onDiscoverNow={openModalBookingPanel} />
               <ScrollTextSections />
               <ExploreSection />
@@ -94,11 +166,11 @@ export default function App() {
             </>
           }
         />
-
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
         <Route path="/reset-password" element={<ResetPassword />} />
-
+        <Route path="/reset-password-confirm" element={<ResetPasswordConfirm />} />
+        <Route path="/verify-email" element={<EmailOTPVerify />} />
+          <Route path="/my-profile" element={<MyProfile />} />
         <Route
           path="/go-for-visa"
           element={
@@ -107,7 +179,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/contact"
           element={
@@ -117,11 +188,11 @@ export default function App() {
             </>
           }
         />
-
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/trackyourvisaapplication" element={<TrackVisaApplication />} />
       </Routes>
 
       <ScrollToHeroButton />

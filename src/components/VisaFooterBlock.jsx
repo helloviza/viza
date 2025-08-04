@@ -367,8 +367,22 @@ const VisaFooterBlock = () => {
             >
               OUR SERVICE
             </div>
-            <a href="https://www.plumtrips.com" style={footerLinkStyle}>Book my Flight</a>
-            <a href="https://www.plumtrips.com" style={footerLinkStyle}>Book my Hotel</a>
+            <a
+  href="https://www.plumtrips.com"
+  style={footerLinkStyle}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Book my Flight
+</a>
+<a
+  href="https://www.plumtrips.com"
+  style={footerLinkStyle}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Book my Hotel
+</a>
           </div>
           <div
             style={{

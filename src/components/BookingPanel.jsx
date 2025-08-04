@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from "react";
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import allCountries from "../data/allCountries";
 
@@ -147,7 +147,6 @@ const mystyle = {
     width: "100%",
     boxSizing: "border-box",
   },
-  // Slide styles (unchanged)
   overlay: {
     position: "fixed",
     top: "-100%",
@@ -209,6 +208,18 @@ const mystyle = {
 
 const BookingPanel = forwardRef(function BookingPanel(props, ref) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // One-time 10 seconds delayed open on first visit
+  useEffect(() => {
+    const shown = localStorage.getItem("bookingPanelShown");
+    if (!shown) {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        localStorage.setItem("bookingPanelShown", "true");
+      }, 10000); // 10 seconds delay
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Form state
   const [origin, setOrigin] = useState("");

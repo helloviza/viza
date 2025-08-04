@@ -1,44 +1,71 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import loginBg from "../assets/login-bg.jpg";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const scale = 0.64;
 
-export default function ResetPassword() {
+export default function ResetPasswordConfirm() {
   const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract token and email from URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tokenParam = params.get("token");
+    const emailParam = params.get("email");
+    if (tokenParam && emailParam) {
+      setToken(tokenParam);
+      setEmail(decodeURIComponent(emailParam));
+    }
+  }, [location.search]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSuccess(false);
+
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match. Please re-enter.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch(
-        "http://localhost:5055/api/reset-password",
+        "http://localhost:5055/api/reset-password/confirm",
         {
-          // For production: use your live backend URL (uncomment below)
-          // "https://api.helloviza.com/api/reset-password",
+          // For production:
+          // "https://api.helloviza.com/api/reset-password/confirm",
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email, token, newPassword }),
         }
       );
 
+      const resData = await response.json();
       if (!response.ok) {
-        const resData = await response.json();
-        throw new Error(resData.error || "Failed to send reset email");
+        throw new Error(resData.error || "Failed to reset password");
       }
 
       setSuccess(true);
-      setTimeout(() => navigate("/login"), 3200); // Redirect after success
+      setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -92,10 +119,6 @@ export default function ResetPassword() {
             font-size: 1.1rem !important;
             margin-top: 1rem !important;
           }
-          .resetpw-below-links {
-            font-size: 0.99rem !important;
-            margin-top: 1.1rem !important;
-          }
         }
       `}</style>
 
@@ -108,7 +131,7 @@ export default function ResetPassword() {
       {/* Right-side form */}
       <div className="resetpw-form-area" style={styles.formArea}>
         <h1 className="resetpw-title" style={styles.title}>
-          Reset Password
+          Set a New Password
         </h1>
 
         <form
@@ -122,10 +145,35 @@ export default function ResetPassword() {
             name="email"
             style={styles.input}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            disabled
+          />
+
+          <label style={styles.label}>Enter New Password</label>
+          <input
+            type="password"
+            name="newPassword"
+            style={styles.input}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password"
+            minLength={8}
             required
             disabled={loading || success}
+            autoComplete="new-password"
+          />
+
+          <label style={styles.label}>Confirm New Password</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            style={styles.input}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Re-enter new password"
+            minLength={8}
+            required
+            disabled={loading || success}
+            autoComplete="new-password"
           />
 
           {error && (
@@ -148,7 +196,7 @@ export default function ResetPassword() {
                 marginBottom: 10,
               }}
             >
-              Password reset link sent! Please check your email.
+              Password has been reset! Redirecting to login...
             </div>
           )}
 
@@ -158,38 +206,8 @@ export default function ResetPassword() {
             disabled={loading || success}
             aria-busy={loading}
           >
-            {loading ? "Sending..." : "Reset Password"}
+            {loading ? "Updating..." : "Set New Password"}
           </button>
-
-          <div className="resetpw-below-links" style={styles.belowLinks}>
-            <span>
-              Already have an account?{" "}
-              <a
-                href="#"
-                style={styles.link}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/login");
-                }}
-              >
-                Log In here
-              </a>
-            </span>
-            <br />
-            <span>
-              Trouble signing up?{" "}
-              <a
-                href="#"
-                style={styles.link}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/contact");
-                }}
-              >
-                Contact us
-              </a>
-            </span>
-          </div>
         </form>
       </div>
     </div>
@@ -276,17 +294,5 @@ const styles = {
     fontFamily: baseFont,
     transition: "background .14s",
     marginTop: "0.5vw",
-  },
-  belowLinks: {
-    marginTop: "0.5vw",
-    color: "#bfbfbf",
-    fontSize: `${1.05 * scale}rem`,
-    fontWeight: 400,
-  },
-  link: {
-    color: "#fff",
-    textDecoration: "underline",
-    fontWeight: 700,
-    cursor: "pointer",
   },
 };
