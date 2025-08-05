@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bgImg from "../assets/visa-bg.jpg";
-import hellovizaLogo from "../assets/helloviza-logo.png"; // <-- Use your logo
+import hellovizaLogo from "../assets/helloviza-logo.png"; // Import your logo!
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
-// We'll keep the latest track URL in a global variable for the Track page.
-// (You can improve with Context or Redux for multi-user.)
-let latestTrackUrl = "";
+// Set API URL for backend
+const BASE_API =
+  process.env.NODE_ENV === "production"
+    ? "https://api.helloviza.com"
+    : ""; // Local dev will use proxy
 
 const GoForVisa = ({ user }) => {
   const navigate = useNavigate();
@@ -33,7 +35,8 @@ const GoForVisa = ({ user }) => {
         start_date: "",
         end_date: "",
       };
-      const res = await fetch("/api/partner/initiate-visa", {
+      // Use BASE_API in all fetch calls
+      const res = await fetch(`${BASE_API}/api/partner/initiate-visa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -42,8 +45,6 @@ const GoForVisa = ({ user }) => {
       if (data.status === 1 && data.data?.evm_url) {
         setEvmUrl(data.data.evm_url);
         setTrackUrl(data.data.evm_track_url);
-        // Set latest for the tracking page
-        latestTrackUrl = data.data.evm_track_url;
       } else {
         setApiError(data.message || JSON.stringify(data));
       }
@@ -60,7 +61,10 @@ const GoForVisa = ({ user }) => {
         <div style={styles.noUserCard}>
           <h2 style={styles.title}>Login Required</h2>
           <p>Please log in to access the Visa application service.</p>
-          <button onClick={() => navigate("/login")} style={styles.loginBtn}>
+          <button
+            onClick={() => navigate("/login")}
+            style={styles.loginBtn}
+          >
             Login Now
           </button>
         </div>
@@ -68,7 +72,7 @@ const GoForVisa = ({ user }) => {
     );
   }
 
-  // ====== Visa App: Fullscreen Iframe Mode ======
+  // ====== Visa App: Fullscreen Iframe Mode with logo in subtitle ======
   if (evmUrl) {
     return (
       <div style={styles.fullScreenWrapper}>
@@ -80,14 +84,14 @@ const GoForVisa = ({ user }) => {
               src={hellovizaLogo}
               alt="Helloviza"
               style={{
-                height: "1.4em",
+                height: "1.7em",
                 verticalAlign: "middle",
-                margin: "0 0.2em",
+                margin: "0 0.24em",
                 display: "inline-block",
               }}
             />
-              for a seamless and distinguished experience.
-            </p>
+            for a seamless and distinguished experience.
+          </p>
         </div>
         <iframe
           src={evmUrl}
@@ -99,9 +103,9 @@ const GoForVisa = ({ user }) => {
           <button
             style={styles.secondaryBtnFS}
             onClick={() => {
-              // Save the latest track URL in the global var, then route
-              latestTrackUrl = trackUrl;
+              // Route to clean URL, masking the actual link
               navigate("/trackyourvisaapplication");
+              // If you want to pass trackUrl, do it via state or context, not URL param
             }}
           >
             Track Your Visa Application
@@ -128,12 +132,13 @@ const GoForVisa = ({ user }) => {
             src={hellovizaLogo}
             alt="Helloviza"
             style={{
-              height: "1.4rem",
+              height: "1.2em",
               verticalAlign: "middle",
-              margin: "0 0.16em",
+              margin: "0 0.18em",
               display: "inline-block",
             }}
           />
+          <span style={{ fontWeight: 700, marginLeft: "0.16em" }}></span>
         </p>
       </div>
       <div style={styles.centerCard}>
@@ -178,7 +183,7 @@ const styles = {
     overflow: "hidden",
     position: "relative",
     fontFamily: baseFont,
-    paddingTop: 120, // Leave space for any fixed header!
+    paddingTop: 120,
   },
   heroSection: {
     textAlign: "center",
@@ -188,7 +193,7 @@ const styles = {
   mainTitle: {
     fontSize: "2.6rem",
     fontWeight: 800,
-    margin: "-4rem 0 0.45rem 0",
+    margin: "0rem 0 0.45rem 0",
     color: "#23456b",
     letterSpacing: "-.01em",
   },
@@ -199,7 +204,6 @@ const styles = {
     marginBottom: 0,
     letterSpacing: ".01em",
     lineHeight: 1.3,
-    display: "inline-block",
   },
   fullScreenIframe: {
     border: "none",
@@ -253,7 +257,7 @@ const styles = {
     alignItems: "center",
     fontFamily: baseFont,
     paddingBottom: "1rem",
-    paddingTop: "5rem", // for header space
+    paddingTop: "5rem",
   }),
   bannerArea: {
     width: "100%",
@@ -364,17 +368,3 @@ const styles = {
 // @keyframes spin { 100% { transform: rotate(360deg); } }
 
 export default GoForVisa;
-
-// ----
-// For your tracking page component (TrackVisaApplication.jsx):
-// import React from "react";
-// export default function TrackVisaApplication() {
-//   return (
-//     <iframe
-//       src={latestTrackUrl}
-//       title="Visa Tracking"
-//       style={{ width: "100vw", height: "100vh", border: "none" }}
-//       allowFullScreen
-//     />
-//   );
-// }

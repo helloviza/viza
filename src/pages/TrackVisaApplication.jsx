@@ -1,15 +1,21 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import logo from "../assets/helloviza-logo.png";
 
-const TRACKER_URL = "https://evm.visaero.com/evm/track-application?external_user_id=febce517-f33c-3b1e-951f-7dc4183d8c30&host=demo";
+// Default demo tracker, but allow passing the actual trackUrl via React Router state (best UX!)
+const DEFAULT_TRACKER_URL = "https://evm.visaero.com/evm/track-application?external_user_id=febce517-f33c-3b1e-951f-7dc4183d8c30&host=demo";
 
 export default function TrackVisaApplication() {
+  const location = useLocation();
+  // Accept a trackUrl from the router state if present
+  const trackerUrl = location.state?.trackUrl || DEFAULT_TRACKER_URL;
+
   return (
     <div style={styles.outer}>
       <div style={styles.headerSection}>
         <h1 style={styles.heading}>Track Your Visa Application</h1>
         <p style={styles.subtext}>
-          You’re in a secure tracking window powered by{" "}
+          You’re in a secure tracking window powered by
           <img
             src={logo}
             alt="Helloviza"
@@ -19,7 +25,7 @@ export default function TrackVisaApplication() {
       </div>
       <div style={styles.iframeBox}>
         <iframe
-          src={TRACKER_URL}
+          src={trackerUrl}
           title="Visa Application Tracking"
           style={styles.iframe}
           allowFullScreen
@@ -39,7 +45,7 @@ const styles = {
   },
   headerSection: {
     textAlign: "center",
-    paddingTop: "80px",
+    paddingTop: "72px",
     paddingBottom: "24px",
     background: "#fff",
     borderBottom: "1px solid #e5eaf0",
@@ -52,18 +58,19 @@ const styles = {
     letterSpacing: "-.01em",
   },
   subtext: {
-    fontSize: "1.42rem",
+    fontSize: "1.35rem",
     color: "#28334c",
     margin: 0,
     fontWeight: 400,
     letterSpacing: ".01em",
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
+    gap: 10,
     justifyContent: "center",
-    gap: 8,
+    verticalAlign: "middle"
   },
   inlineLogo: {
-    height: "1.4em",
+    height: "1.5em",
     verticalAlign: "middle",
     display: "inline-block",
     margin: "0 0.16em",
