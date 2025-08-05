@@ -26,7 +26,7 @@ const GoForVisa = ({ user }) => {
         nationality: "",
         travelling_to: "",
         travelling_to_identity: "",
-        no_of_applicants: "1",
+        no_of_applicants: 1,
         start_date: "",
         end_date: "",
       };

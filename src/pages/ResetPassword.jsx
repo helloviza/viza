@@ -5,6 +5,12 @@ import loginBg from "../assets/login-bg.jpg";
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const scale = 0.64;
 
+// Smart API URL for dev/prod
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://api.helloviza.com"
+    : "http://localhost:5055";
+
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,10 +26,8 @@ export default function ResetPassword() {
 
     try {
       const response = await fetch(
-        "http://localhost:5055/api/reset-password",
+        `${API_BASE_URL}/api/reset-password`,
         {
-          // For production: use your live backend URL (uncomment below)
-          // "https://api.helloviza.com/api/reset-password",
           method: "POST",
           headers: {
             "Content-Type": "application/json",
