@@ -1,15 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bgImg from "../assets/visa-bg.jpg";
-import hellovizaLogo from "../assets/helloviza-logo.png"; // Import your logo!
+import hellovizaLogo from "../assets/helloviza-logo.png";
+import { API_BASE_URL } from "../utils/api"; // Import your base URL
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
-
-// Set API URL for backend
-const BASE_API =
-  process.env.NODE_ENV === "production"
-    ? "https://api.helloviza.com"
-    : ""; // Local dev will use proxy
 
 const GoForVisa = ({ user }) => {
   const navigate = useNavigate();
@@ -35,8 +30,8 @@ const GoForVisa = ({ user }) => {
         start_date: "",
         end_date: "",
       };
-      // Use BASE_API in all fetch calls
-      const res = await fetch(`${BASE_API}/api/partner/initiate-visa`, {
+      // Always use API_BASE_URL for all fetch calls
+      const res = await fetch(`${API_BASE_URL}/api/partner/initiate-visa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -103,9 +98,8 @@ const GoForVisa = ({ user }) => {
           <button
             style={styles.secondaryBtnFS}
             onClick={() => {
-              // Route to clean URL, masking the actual link
               navigate("/trackyourvisaapplication");
-              // If you want to pass trackUrl, do it via state or context, not URL param
+              // You can use React context or global state to pass trackUrl if needed!
             }}
           >
             Track Your Visa Application
@@ -138,7 +132,6 @@ const GoForVisa = ({ user }) => {
               display: "inline-block",
             }}
           />
-          <span style={{ fontWeight: 700, marginLeft: "0.16em" }}></span>
         </p>
       </div>
       <div style={styles.centerCard}>
