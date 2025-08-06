@@ -19,7 +19,7 @@ const GoForVisa = ({ user }) => {
     setApiError("");
     try {
       const payload = {
-        external_user_id: "febce517-f33c-3b1e-951f-7dc4183d8c30",
+        external_user_id: "febce587-f33c-321e-951f-7dc4183d8c30",
         token: "ajskhdiusatciusghfdwqhjfgwqhjgfsajkhcjkasgcjhg",
         host: "demo",
         cor: "",
@@ -186,7 +186,7 @@ const styles = {
   mainTitle: {
     fontSize: "2.6rem",
     fontWeight: 800,
-    margin: "0rem 0 0.45rem 0",
+    margin: "-4rem 0 0.45rem 0",
     color: "#23456b",
     letterSpacing: "-.01em",
   },
