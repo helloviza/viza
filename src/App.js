@@ -21,16 +21,12 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Careers from "./pages/Careers";
 import AboutUs from "./pages/AboutUs";
 import MyProfile from "./pages/MyProfile";
-import ResetPasswordConfirm from "./pages/ResetPasswordConfirm"; // Adjust path if needed
+import ResetPasswordConfirm from "./pages/ResetPasswordConfirm";
 import EmailOTPVerify from "./pages/EmailOTPVerify";
 import TrackVisaApplication from "./pages/TrackVisaApplication";
-
-// Then use <Route path="/my-profile" element={<MyProfile />} />
-
-
 import ScrollToTop from "./components/ScrollToTop";
 import WelcomePopup from "./components/WelcomePopup";
-import ReturnLoginPopup from "./components/ReturnLoginPopup";
+// import ReturnLoginPopup from "./components/ReturnLoginPopup"; // No longer needed unless you want it
 
 function ProtectedRoute({ isLoggedIn, children, redirectTo = "/login" }) {
   const location = useLocation();
@@ -52,9 +48,8 @@ export default function App() {
     }
   });
 
-  // State to track popups
+  // State to track welcome popup
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-  const [showReturnLoginPopup, setShowReturnLoginPopup] = useState(false);
 
   // Two refs: one for header flight (slide), one for Discover Now (modal)
   const bookingPanelRef = useRef();
@@ -62,32 +57,14 @@ export default function App() {
 
   useLayoutEffect(() => {
     if (user) {
-      let autoCloseTimer;
-      const hasSeenWelcome = localStorage.getItem("hasSeenWelcomePopup");
-
-      if (!hasSeenWelcome) {
-        console.log("Showing Welcome Popup immediately");
+      const welcomeClosed = localStorage.getItem("welcomePopupClosed");
+      if (!welcomeClosed) {
         setShowWelcomePopup(true);
-        localStorage.setItem("hasSeenWelcomePopup", "true");
-
-        autoCloseTimer = setTimeout(() => {
-          setShowWelcomePopup(false);
-        }, 10000);
       } else {
-        console.log("Showing Return Login Popup immediately");
-        setShowReturnLoginPopup(true);
-
-        autoCloseTimer = setTimeout(() => {
-          setShowReturnLoginPopup(false);
-        }, 10000);
+        setShowWelcomePopup(false);
       }
-
-      return () => {
-        clearTimeout(autoCloseTimer);
-      };
     } else {
       setShowWelcomePopup(false);
-      setShowReturnLoginPopup(false);
     }
   }, [user]);
 
@@ -95,6 +72,8 @@ export default function App() {
   function handleLogin(userData) {
     setUser(userData);
     localStorage.setItem("helloviza_user", JSON.stringify(userData));
+    // Reset popup state for new user if you want:
+    // localStorage.removeItem("welcomePopupClosed");
   }
 
   // Clear user info on logout
@@ -102,7 +81,7 @@ export default function App() {
     setUser(null);
     localStorage.removeItem("helloviza_user");
     setShowWelcomePopup(false);
-    setShowReturnLoginPopup(false);
+    // localStorage.removeItem("welcomePopupClosed"); // Only do this if you want popup again on next login
   }
 
   // Open booking panel (called from header icon)
@@ -141,14 +120,10 @@ We’re beyond thrilled to have you join the Helloviza family! You’re now part
 You’re a unique spark in our universe, and we can’t wait to see the incredible energy you bring. Dive in, explore, and let’s create something extraordinary together!
 With all the love and excitement,
 The Helloviza Community 💖`}
-          onClose={() => setShowWelcomePopup(false)}
-        />
-      )}
-
-      {showReturnLoginPopup && (
-        <ReturnLoginPopup
-          message={`Welcome back, ${getFirstName()}! We’re absolutely delighted to see you return to the Helloviza family! Your presence lights up our community, and we’re thrilled to have you back in the mix. Get ready to dive back into the magic, connect with awesome souls, and continue your journey of inspiration and creativity with us. You’re truly one of a kind, and we can’t wait to see what amazing moments we’ll share next!`}
-          onClose={() => setShowReturnLoginPopup(false)}
+          onClose={() => {
+            setShowWelcomePopup(false);
+            localStorage.setItem("welcomePopupClosed", "true");
+          }}
         />
       )}
 
@@ -170,7 +145,7 @@ The Helloviza Community 💖`}
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/reset-password-confirm" element={<ResetPasswordConfirm />} />
         <Route path="/verify-email" element={<EmailOTPVerify />} />
-          <Route path="/my-profile" element={<MyProfile />} />
+        <Route path="/my-profile" element={<MyProfile />} />
         <Route
           path="/go-for-visa"
           element={
