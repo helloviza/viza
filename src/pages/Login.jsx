@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
-const API_BASE = "https://api.helloviza.com"; // ✅ Backend
+const API_BASE = "https://api.helloviza.com"; // ✅ Backend API
 
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
@@ -79,7 +79,10 @@ export default function Login({ onLogin }) {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("helloviza_user") || localStorage.getItem("hv_user") || sessionStorage.getItem("hv_user");
+      const stored =
+        localStorage.getItem("helloviza_user") ||
+        localStorage.getItem("hv_user") ||
+        sessionStorage.getItem("hv_user");
       const hasNext = !!sessionStorage.getItem(LOGIN_REDIRECT_KEY);
       if (stored && hasNext) popRedirectOrHome();
     } catch {}
@@ -147,11 +150,11 @@ export default function Login({ onLogin }) {
 
     setLoading(true);
     try {
-      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
+      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ important for cookies
+        credentials: "include",
         body: JSON.stringify({
           email: form.email,
           password: form.password,
@@ -160,7 +163,7 @@ export default function Login({ onLogin }) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Auth failed");
+      if (!res.ok) throw new Error(data.message || data.error || "Auth failed");
 
       const userData = { id: data.user?.id, name: data.user?.name, email: data.user?.email };
       try {
@@ -186,13 +189,18 @@ export default function Login({ onLogin }) {
       const res = await fetch(`${API_BASE}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ keep cookies
+        credentials: "include",
         body: JSON.stringify({ token: credentialResponse.credential }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Google login failed");
 
-      const userData = { id: data.user?.id, name: data.user?.name, email: data.user?.email, picture: decoded.picture };
+      const userData = {
+        id: data.user?.id,
+        name: data.user?.name,
+        email: data.user?.email,
+        picture: decoded.picture,
+      };
       try {
         localStorage.setItem("helloviza_user", JSON.stringify(userData));
         localStorage.setItem("hv_user", JSON.stringify(userData));
@@ -212,7 +220,6 @@ export default function Login({ onLogin }) {
   /** -------- UI -------- */
   return (
     <div className="login-outer" style={styles.outer}>
-      {/* Responsive tweaks for mobile only */}
       <style>{`
         @media (max-width: 600px) {
           .login-outer { flex-direction: column !important; min-height: 100vh !important; align-items: stretch !important; }
@@ -229,11 +236,10 @@ export default function Login({ onLogin }) {
       <div className="login-left-bg" style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }} />
       <div className="login-form-area" style={styles.formArea}>
         {/* Tabs */}
-        <div className="login-tabs" role="tablist" aria-label="Login and Signup Tabs" style={styles.tabs}>
+        <div className="login-tabs" role="tablist" style={styles.tabs}>
           <div
             className="login-tab"
             role="tab"
-            tabIndex={0}
             aria-selected={mode === "login"}
             onClick={() => setMode("login")}
             style={{ ...styles.tabWrap, ...(mode === "login" ? styles.activeTabWrap : {}), cursor: "pointer" }}
@@ -244,7 +250,6 @@ export default function Login({ onLogin }) {
           <div
             className="login-tab"
             role="tab"
-            tabIndex={0}
             aria-selected={mode === "signup"}
             onClick={() => setMode("signup")}
             style={{ ...styles.tabWrap, ...(mode === "signup" ? styles.activeTabWrap : {}), cursor: "pointer" }}
@@ -263,8 +268,89 @@ export default function Login({ onLogin }) {
         <form onSubmit={handleSubmit} style={styles.form}>
           {error && <div style={{ color: "#c00", fontWeight: "bold", marginBottom: 8 }}>{error}</div>}
 
-          {/* Rest of form unchanged (First name, last name, email, OTP, password, etc.) */}
-          {/* ... keep your full JSX here exactly as before ... */}
+          {/* Signup fields */}
+          <div style={{ display: "flex", gap: "2vw" }}>
+            {mode === "signup" && (
+              <>
+                <div style={{ flex: 1 }}>
+                  <label style={styles.label}>First Name*</label>
+                  <input type="text" name="firstName" style={styles.input} value={form.firstName} onChange={handleChange} required />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={styles.label}>Last Name*</label>
+                  <input type="text" name="lastName" style={styles.input} value={form.lastName} onChange={handleChange} required />
+                </div>
+              </>
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: "2vw" }}>
+            <div style={{ flex: 1 }}>
+              <label style={styles.label}>Email*</label>
+              <input
+                type="email"
+                name="email"
+                style={styles.input}
+                value={form.email}
+                onChange={(e) => { setOtpVerified(false); setOtpSent(false); setOtp(""); handleChange(e); }}
+                required
+              />
+            </div>
+
+            {mode === "signup" && (
+              <div style={{ flex: 1 }}>
+                <label style={styles.label}>Country (optional)</label>
+                <input type="text" name="country" style={styles.input} value={form.country} onChange={handleChange} />
+              </div>
+            )}
+
+            {mode === "login" && (
+              <div style={{ flex: 1 }}>
+                <label style={styles.label}>Password</label>
+                <input type="password" name="password" style={styles.input} value={form.password} onChange={handleChange} required />
+              </div>
+            )}
+          </div>
+
+          {mode === "signup" && (
+            <>
+              <div style={{ marginBottom: "1rem" }}>
+                {!otpSent ? (
+                  <button type="button" onClick={sendOtp} disabled={loading || !form.email} style={styles.otpBtn}>
+                    {loading ? "Sending OTP..." : "Send OTP"}
+                  </button>
+                ) : !otpVerified ? (
+                  <>
+                    <label style={styles.label}>Enter OTP</label>
+                    <input type="text" name="otp" style={styles.input} value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} />
+                    <button type="button" onClick={verifyOtp} disabled={loading || otp.length !== 6} style={styles.otpBtn}>
+                      {loading ? "Verifying OTP..." : "Verify OTP"}
+                    </button>
+                  </>
+                ) : (
+                  <p style={{ color: "green", fontWeight: "bold" }}>Email verified!</p>
+                )}
+              </div>
+
+              <div style={{ display: "flex", gap: "2vw" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={styles.label}>Password</label>
+                  <input type="password" name="password" style={styles.input} value={form.password} onChange={handleChange} required />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={styles.label}>Confirm Password</label>
+                  <input type="password" name="confirmPassword" style={styles.input} value={form.confirmPassword} onChange={handleChange} required />
+                </div>
+              </div>
+
+              <div style={styles.checkboxWrap}>
+                <input type="checkbox" name="agree" checked={form.agree} onChange={handleChange} style={styles.checkbox} required />
+                <span style={styles.agreeText}>
+                  By creating an account, I agree to this website&apos;s privacy policy and terms of service
+                </span>
+              </div>
+            </>
+          )}
 
           <button type="submit" style={styles.submitBtn} disabled={mode === "signup" && !otpVerified}>
             {mode === "login" ? "Log In" : "Sign Up"}
@@ -272,7 +358,41 @@ export default function Login({ onLogin }) {
         </form>
 
         {/* Below links */}
-        {/* (Unchanged from your code) */}
+        <div style={styles.belowLinks}>
+          {mode === "login" ? (
+            <>
+              <span>
+                Forgot your password?{" "}
+                <a href="#" style={styles.link} onClick={(e) => { e.preventDefault(); navigate("/reset-password"); }}>
+                  Reset here
+                </a>
+              </span>
+              <br />
+              <span>
+                Trouble logging in?{" "}
+                <a href="#" style={styles.link} onClick={(e) => { e.preventDefault(); navigate("/contact"); }}>
+                  Contact us
+                </a>
+              </span>
+            </>
+          ) : (
+            <>
+              <span>
+                Already have an account?{" "}
+                <a href="#" style={styles.link} onClick={(e) => { e.preventDefault(); setMode("login"); }}>
+                  Log in here
+                </a>
+              </span>
+              <br />
+              <span>
+                Trouble signing up?{" "}
+                <a href="#" style={styles.link} onClick={(e) => { e.preventDefault(); navigate("/contact"); }}>
+                  Contact us
+                </a>
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
