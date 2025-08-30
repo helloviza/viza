@@ -3,6 +3,8 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
+  /* Ensure a clean stacking context so content stays above bg */
+  z-index: 0;
 }
 
 .hero-bg {
@@ -11,9 +13,23 @@
   left: 0;
   width: 100%;
   height: 100vh;
+  /* The Three.js canvas will be appended inside this container */
+  z-index: 0;
+  pointer-events: none;                 /* background shouldn’t block clicks */
+  will-change: opacity;                 /* smoother fades */
+  transition: opacity .7s cubic-bezier(.7,0,.3,1);
+  /* If you ever need a static fallback, you can still use background-* */
   background-size: cover;
   background-position: center;
-  z-index: -1;
+}
+
+/* Ensure an appended canvas fills the container (extra safety) */
+.hero-bg canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .hero-content {
@@ -22,8 +38,10 @@
   align-items: center;
   padding-left: 5%;
   color: #ffffff;
-  /* === Add this line for extra top padding on desktop === */
+  /* extra top padding on desktop */
   padding-top: 90px;
+  position: relative; /* stays above bg */
+  z-index: 1;
 }
 
 .text-block {
@@ -75,7 +93,7 @@
   }
 
   .hero-content {
-    /* === Add/adjust top padding for mobile === */
+    /* top padding for mobile */
     padding: 110px 10px 40px 10px;
     align-items: flex-start;
     justify-content: flex-start;
@@ -98,6 +116,14 @@
     width: 100%;
     border-radius: 6px;
     margin-top: 0.6rem;
+  }
+}
+
+/* Respect users who prefer reduced motion – keep bg visible, no animated fades */
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg {
+    transition: none;
+    opacity: 1 !important;
   }
 }
 

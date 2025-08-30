@@ -1,10 +1,14 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import loginBg from "../assets/login-bg.jpg"; // Adjust path as needed
+// client/src/pages/Login.jsx
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import loginBg from "../assets/login-bg.jpg";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
+
+/** Single source of truth for redirect storage */
+const LOGIN_REDIRECT_KEY = "postLoginRedirect";
 
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
@@ -24,15 +28,72 @@ export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
 
+  /** -------- Redirect helpers -------- */
+  function normalizeNext(urlish) {
+    try {
+      const u = new URL(urlish, window.location.origin);
+      // Only allow same-origin paths
+      let path = u.pathname + (u.search || "");
+      // If target is /go-for-visa, ensure autostart=1 once
+      if (u.pathname === "/go-for-visa") {
+        const sp = new URLSearchParams(u.search);
+        if (!sp.has("autostart")) sp.set("autostart", "1");
+        path = u.pathname + "?" + sp.toString();
+      }
+      return path.startsWith("/") ? path : "/";
+    } catch {
+      return typeof urlish === "string" && urlish.startsWith("/") ? urlish : "/";
+    }
+  }
+
+  function stashRedirectFromQuery() {
+    const sp = new URLSearchParams(location.search);
+    const qFrom = sp.get("from");
+    const qNext = sp.get("next");
+    const candidate = qFrom || qNext;
+    if (candidate) {
+      const normalized = normalizeNext(candidate);
+      try {
+        sessionStorage.setItem(LOGIN_REDIRECT_KEY, normalized);
+      } catch {}
+    }
+  }
+
+  function popRedirectOrHome() {
+    let next = "/";
+    try {
+      const saved = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+      if (saved) next = normalizeNext(saved);
+      sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+    } catch {}
+    // tiny defer to avoid any race with header state
+    setTimeout(() => navigate(next, { replace: true }), 0);
+  }
+
+  /** On arrival, capture ?from= or ?next= */
+  useEffect(() => {
+    stashRedirectFromQuery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
+  /** If already signed-in (local state) and we have a redirect saved, go there */
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("helloviza_user") || localStorage.getItem("hv_user") || sessionStorage.getItem("hv_user");
+      const hasNext = !!sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+      if (stored && hasNext) popRedirectOrHome();
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** -------- OTP stubs (backed by your /api endpoints) -------- */
   async function sendOtp() {
     setError("");
     if (!form.email) {
@@ -49,7 +110,6 @@ export default function Login({ onLogin }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send OTP");
       setOtpSent(true);
-      setError("");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -73,7 +133,6 @@ export default function Login({ onLogin }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "OTP verification failed");
       setOtpVerified(true);
-      setError("");
     } catch (err) {
       setError(err.message);
       setOtpVerified(false);
@@ -82,6 +141,7 @@ export default function Login({ onLogin }) {
     }
   }
 
+  /** -------- Submit (fake auth for now) -------- */
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -91,24 +151,22 @@ export default function Login({ onLogin }) {
       return;
     }
 
-    // TODO: Replace with actual API login/signup calls
+    // Replace with real auth; we persist minimal user for downstream flows
     const userData = {
       name: form.firstName ? `${form.firstName} ${form.lastName}` : "User",
       email: form.email,
     };
+    try {
+      localStorage.setItem("helloviza_user", JSON.stringify(userData));
+      localStorage.setItem("hv_user", JSON.stringify(userData));
+      sessionStorage.setItem("hv_user", JSON.stringify(userData));
+    } catch {}
+
     if (onLogin) onLogin(userData);
-    navigate("/"); // Redirect to homepage after login/signup
-    if (mode === "signup") setMode("login");
+    popRedirectOrHome(); // go to saved target (/go-for-visa?autostart=1) or "/"
   }
 
-  const handleKeyDown = (e, newMode) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      setMode(newMode);
-    }
-  };
-
-  // Google login success callback with token decoding
+  /** -------- Google login -------- */
   const handleGoogleSuccess = (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
@@ -118,107 +176,52 @@ export default function Login({ onLogin }) {
         picture: decoded.picture || "",
         token: credentialResponse.credential,
       };
-      if (onLogin) {
-        onLogin(userData);
-      }
-      navigate("/");
-    } catch (error) {
-      console.error("Failed to decode token", error);
+      try {
+        localStorage.setItem("helloviza_user", JSON.stringify(userData));
+        localStorage.setItem("hv_user", JSON.stringify(userData));
+        sessionStorage.setItem("hv_user", JSON.stringify(userData));
+        localStorage.setItem("hv_token", userData.token);
+      } catch {}
+      if (onLogin) onLogin(userData);
+      popRedirectOrHome();
+    } catch {
       setError("Failed to process Google login. Please try again.");
     }
   };
+  const handleGoogleFailure = () => setError("Google login failed, please try again.");
 
-  // Google login failure callback
-  const handleGoogleFailure = () => {
-    setError("Google login failed, please try again.");
-  };
-
+  /** -------- UI -------- */
   return (
     <div className="login-outer" style={styles.outer}>
-      {/* Mobile style only: no desktop UI change */}
+      {/* Responsive tweaks for mobile only; desktop unchanged */}
       <style>{`
         @media (max-width: 600px) {
-          .login-outer {
-            flex-direction: column !important;
-            min-height: 100vh !important;
-            align-items: stretch !important;
-          }
-          .login-left-bg {
-            min-height: 140px !important;
-            flex-basis: 32vw !important;
-            width: 100% !important;
-            background-size: cover !important;
-            background-position: center !important;
-            display: block !important;
-            border-radius: 0 !important;
-          }
-          .login-form-area {
-            max-width: 100vw !important;
-            padding: 2.4rem 4vw 2.2rem 4vw !important;
-            min-width: unset !important;
-            border-radius: 0 !important;
-            margin: 0 !important;
-          }
-          .login-tabs {
-            gap: 1.1rem !important;
-            margin-bottom: 1.1rem !important;
-          }
-          .login-tab {
-            font-size: 1.1rem !important;
-          }
-          .login-form-area input,
-          .login-form-area select {
-            font-size: 0.96rem !important;
-            padding: 0.54rem 0.7rem !important;
-          }
-          .login-form-area button[type="submit"] {
-            padding: 0.88rem 0.6rem !important;
-            font-size: 1.09rem !important;
-          }
-          .login-form-area label {
-            font-size: 0.95rem !important;
-          }
+          .login-outer { flex-direction: column !important; min-height: 100vh !important; align-items: stretch !important; }
+          .login-left-bg { min-height: 140px !important; flex-basis: 32vw !important; width: 100% !important; background-size: cover !important; background-position: center !important; display: block !important; border-radius: 0 !important; }
+          .login-form-area { max-width: 100vw !important; padding: 2.4rem 4vw 2.2rem !important; min-width: unset !important; border-radius: 0 !important; margin: 0 !important; }
+          .login-tabs { gap: 1.1rem !important; margin-bottom: 1.1rem !important; }
+          .login-tab { font-size: 1.1rem !important; }
+          .login-form-area input, .login-form-area select { font-size: .96rem !important; padding: .54rem .7rem !important; }
+          .login-form-area button[type="submit"] { padding: .88rem .6rem !important; font-size: 1.09rem !important; }
+          .login-form-area label { font-size: .95rem !important; }
         }
       `}</style>
-      <div
-        className="login-left-bg"
-        style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }}
-      />
+
+      <div className="login-left-bg" style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }} />
       <div className="login-form-area" style={styles.formArea}>
         {/* Tabs */}
-        <div
-          className="login-tabs"
-          role="tablist"
-          aria-label="Login and Signup Tabs"
-          style={styles.tabs}
-        >
+        <div className="login-tabs" role="tablist" aria-label="Login and Signup Tabs" style={styles.tabs}>
           <div
             className="login-tab"
             role="tab"
             tabIndex={0}
             aria-selected={mode === "login"}
             onClick={() => setMode("login")}
-            onKeyDown={(e) => handleKeyDown(e, "login")}
-            style={{
-              ...styles.tabWrap,
-              ...(mode === "login" ? styles.activeTabWrap : {}),
-              cursor: "pointer",
-            }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setMode("login"); } }}
+            style={{ ...styles.tabWrap, ...(mode === "login" ? styles.activeTabWrap : {}), cursor: "pointer" }}
           >
-            <span
-              style={{
-                ...styles.tab,
-                ...(mode === "login" ? styles.activeTab : {}),
-              }}
-            >
-              • Log in
-            </span>
-            <div
-              style={{
-                ...styles.underline,
-                ...(mode === "login" ? styles.activeUnderline : {}),
-              }}
-            />
+            <span style={{ ...styles.tab, ...(mode === "login" ? styles.activeTab : {}) }}>• Log in</span>
+            <div style={{ ...styles.underline, ...(mode === "login" ? styles.activeUnderline : {}) }} />
           </div>
           <div
             className="login-tab"
@@ -226,78 +229,33 @@ export default function Login({ onLogin }) {
             tabIndex={0}
             aria-selected={mode === "signup"}
             onClick={() => setMode("signup")}
-            onKeyDown={(e) => handleKeyDown(e, "signup")}
-            style={{
-              ...styles.tabWrap,
-              ...(mode === "signup" ? styles.activeTabWrap : {}),
-              cursor: "pointer",
-            }}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setMode("signup"); } }}
+            style={{ ...styles.tabWrap, ...(mode === "signup" ? styles.activeTabWrap : {}), cursor: "pointer" }}
           >
-            <span
-              style={{
-                ...styles.tab,
-                ...(mode === "signup" ? styles.activeTab : {}),
-              }}
-            >
-              • Sign Up
-            </span>
-            <div
-              style={{
-                ...styles.underline,
-                ...(mode === "signup" ? styles.activeUnderline : {}),
-              }}
-            />
+            <span style={{ ...styles.tab, ...(mode === "signup" ? styles.activeTab : {}) }}>• Sign Up</span>
+            <div style={{ ...styles.underline, ...(mode === "signup" ? styles.activeUnderline : {}) }} />
           </div>
         </div>
 
-        {/* Google Login Button */}
+        {/* Google */}
         <div style={{ marginBottom: 20, textAlign: "center" }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleFailure}
-          />
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={styles.form}>
-          {error && (
-            <div
-              style={{
-                color: "#c00",
-                fontWeight: "bold",
-                marginBottom: 8,
-              }}
-            >
-              {error}
-            </div>
-          )}
+          {error && <div style={{ color: "#c00", fontWeight: "bold", marginBottom: 8 }}>{error}</div>}
 
           <div style={{ display: "flex", gap: "2vw" }}>
             {mode === "signup" && (
               <>
                 <div style={{ flex: 1 }}>
                   <label style={styles.label}>First Name*</label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    style={styles.input}
-                    value={form.firstName}
-                    onChange={handleChange}
-                    placeholder="Enter first name"
-                    required
-                  />
+                  <input type="text" name="firstName" style={styles.input} value={form.firstName} onChange={handleChange} placeholder="Enter first name" required />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={styles.label}>Last Name*</label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    style={styles.input}
-                    value={form.lastName}
-                    onChange={handleChange}
-                    placeholder="Enter last name"
-                    required
-                  />
+                  <input type="text" name="lastName" style={styles.input} value={form.lastName} onChange={handleChange} placeholder="Enter last name" required />
                 </div>
               </>
             )}
@@ -311,13 +269,7 @@ export default function Login({ onLogin }) {
                 name="email"
                 style={styles.input}
                 value={form.email}
-                onChange={(e) => {
-                  // Reset OTP verification state when email changes
-                  setOtpVerified(false);
-                  setOtpSent(false);
-                  setOtp("");
-                  handleChange(e);
-                }}
+                onChange={(e) => { setOtpVerified(false); setOtpSent(false); setOtp(""); handleChange(e); }}
                 placeholder="Enter email"
                 required
               />
@@ -326,29 +278,14 @@ export default function Login({ onLogin }) {
             {mode === "signup" && (
               <div style={{ flex: 1 }}>
                 <label style={styles.label}>Country (optional)</label>
-                <input
-                  type="text"
-                  name="country"
-                  style={styles.input}
-                  value={form.country}
-                  onChange={handleChange}
-                  placeholder="Enter country"
-                />
+                <input type="text" name="country" style={styles.input} value={form.country} onChange={handleChange} placeholder="Enter country" />
               </div>
             )}
 
             {mode === "login" && (
               <div style={{ flex: 1 }}>
                 <label style={styles.label}>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  style={styles.input}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Enter password"
-                  required
-                />
+                <input type="password" name="password" style={styles.input} value={form.password} onChange={handleChange} placeholder="Enter password" required />
               </div>
             )}
           </div>
@@ -357,94 +294,41 @@ export default function Login({ onLogin }) {
             <>
               <div style={{ marginBottom: "1rem" }}>
                 {!otpSent ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={sendOtp}
-                      disabled={loading || !form.email}
-                      style={styles.otpBtn}
-                    >
-                      {loading ? "Sending OTP..." : "Send OTP"}
-                    </button>
-                  </>
+                  <button type="button" onClick={sendOtp} disabled={loading || !form.email} style={styles.otpBtn}>
+                    {loading ? "Sending OTP..." : "Send OTP"}
+                  </button>
                 ) : !otpVerified ? (
                   <>
                     <label style={styles.label}>Enter OTP</label>
-                    <input
-                      type="text"
-                      name="otp"
-                      style={styles.input}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder="Enter OTP"
-                      disabled={loading}
-                      maxLength={6}
-                    />
-                    <button
-                      type="button"
-                      onClick={verifyOtp}
-                      disabled={loading || otp.length !== 6}
-                      style={styles.otpBtn}
-                    >
+                    <input type="text" name="otp" style={styles.input} value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Enter OTP" disabled={loading} maxLength={6} />
+                    <button type="button" onClick={verifyOtp} disabled={loading || otp.length !== 6} style={styles.otpBtn}>
                       {loading ? "Verifying OTP..." : "Verify OTP"}
                     </button>
                   </>
                 ) : (
-                  <p style={{ color: "green", fontWeight: "bold" }}>
-                    Email verified!
-                  </p>
+                  <p style={{ color: "green", fontWeight: "bold" }}>Email verified!</p>
                 )}
               </div>
 
               <div style={{ display: "flex", gap: "2vw" }}>
                 <div style={{ flex: 1 }}>
                   <label style={styles.label}>Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    style={styles.input}
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder="Enter password"
-                    required
-                  />
+                  <input type="password" name="password" style={styles.input} value={form.password} onChange={handleChange} placeholder="Enter password" required />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={styles.label}>Confirm Password</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    style={styles.input}
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Enter confirm password"
-                    required
-                  />
+                  <input type="password" name="confirmPassword" style={styles.input} value={form.confirmPassword} onChange={handleChange} placeholder="Enter confirm password" required />
                 </div>
               </div>
 
               <div style={styles.checkboxWrap}>
-                <input
-                  type="checkbox"
-                  name="agree"
-                  checked={form.agree}
-                  onChange={handleChange}
-                  style={styles.checkbox}
-                  required
-                />
-                <span style={styles.agreeText}>
-                  By creating an account, I agree to this website's privacy
-                  policy and terms of service
-                </span>
+                <input type="checkbox" name="agree" checked={form.agree} onChange={handleChange} style={styles.checkbox} required />
+                <span style={styles.agreeText}>By creating an account, I agree to this website&apos;s privacy policy and terms of service</span>
               </div>
             </>
           )}
 
-          <button
-            type="submit"
-            style={styles.submitBtn}
-            disabled={mode === "signup" && !otpVerified}
-          >
+          <button type="submit" style={styles.submitBtn} disabled={mode === "signup" && !otpVerified}>
             {mode === "login" ? "Log In" : "Sign Up"}
           </button>
         </form>
@@ -516,47 +400,6 @@ export default function Login({ onLogin }) {
       </div>
     </div>
   );
-
-  // ------------------
-
-  async function sendOtp() {
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:5055/api/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
-      setOtpSent(true);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function verifyOtp() {
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:5055/api/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, otp }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "OTP verification failed");
-      setOtpVerified(true);
-    } catch (err) {
-      setError(err.message);
-      setOtpVerified(false);
-    } finally {
-      setLoading(false);
-    }
-  }
 }
 
 const styles = {

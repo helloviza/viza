@@ -16,54 +16,6 @@ const ScrollTextSections = () => {
 
   return (
     <>
-      {/* Section 1 */}
-      <section
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "transparent",
-          color: "#fff",
-          zIndex: 2,
-          position: "relative",
-          width: "100vw",
-          boxSizing: "border-box",
-          padding: sectionPad,
-          minHeight,
-          textAlign,
-          fontFamily: baseFont,
-        }}
-      >
-        <div style={{ maxWidth: contentMaxWidth, margin: "0 auto" }}>
-          <h2
-            style={{
-              fontWeight: 700,
-              marginBottom: "1.5rem",
-              fontSize: headingSize,
-              lineHeight: 1.12,
-              letterSpacing: "-1px",
-              fontFamily: baseFont,
-              textAlign,
-            }}
-          >
-            A Window to<br />New Adventures
-          </h2>
-          <p
-            style={{
-              lineHeight: 1.56,
-              opacity: 0.96,
-              margin: 0,
-              maxWidth: "98vw",
-              fontSize: paraSize,
-              fontFamily: baseFont,
-              textAlign,
-            }}
-          >
-            The path to discovery is limitless, offering views of landscapes yet to be explored. Every journey starts with curiosity, and helloviza is here to turn that curiosity into unforgettable experiences.
-          </p>
-        </div>
-      </section>
-
       {/* Section 2 */}
       <section
         style={{
@@ -91,7 +43,7 @@ const ScrollTextSections = () => {
               lineHeight: 1.12,
               letterSpacing: "-1px",
               fontFamily: baseFont,
-              textAlign,
+              textAlign:"Center",
             }}
           >
             Where the Sky<br />Meets the Earth
@@ -104,7 +56,7 @@ const ScrollTextSections = () => {
               maxWidth: "98vw",
               fontSize: paraSize,
               fontFamily: baseFont,
-              textAlign,
+              textAlign:"left",
             }}
           >
             Travel to places where nature’s beauty and human wonder come together in perfect harmony. Let your curiosity guide you to new heights, where unforgettable experiences and breathtaking destinations await.

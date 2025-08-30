@@ -126,7 +126,7 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
     gap: "2.3rem",
     width: "90vw",
     maxWidth: 1150,
@@ -141,11 +141,11 @@ const styles = {
     alignItems: "center",
     overflow: "hidden",
     transition: "transform .19s",
-    minHeight: 340,
+    minHeight: 300,
   },
   img: {
     width: "100%",
-    height: 160,
+    height: 140,
     objectFit: "cover",
     borderRadius: "0px 0px 0 0",
   },

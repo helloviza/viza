@@ -1,65 +1,112 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import bgImg from "../assets/visa-bg.jpg";
 import hellovizaLogo from "../assets/helloviza-logo.png";
-import { API_BASE_URL } from "../utils/api"; // Import your base URL
+import { API_BASE } from "../utils/api"; // <- matches your utils/api exports
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
-const GoForVisa = ({ user }) => {
+// --- tiny helpers -----------------------------------------------------------
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function toDDMMMYYYY(v) {
+  if (!v) return "";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return "";
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const mon = MONTHS[d.getUTCMonth()];
+  const yyyy = d.getUTCFullYear();
+  return `${dd}-${mon}-${yyyy}`;
+}
+
+// ----------------------------------------------------------------------------
+export default function GoForVisa({ user }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+
   const [evmUrl, setEvmUrl] = useState(null);
   const [trackUrl, setTrackUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  // ====== Visa API Integration ======
+  // optional prefill coming from your search bar
+  const prefill = useMemo(() => {
+    const to = params.get("to") || "";
+    const start = params.get("start") || "";
+    const end = params.get("end") || "";
+    return {
+      to,
+      startISO: start,
+      endISO: end,
+      startFmt: toDDMMMYYYY(start),
+      endFmt: toDDMMMYYYY(end),
+    };
+  }, [params]);
+
   async function handleInitiateVisa() {
     setLoading(true);
     setApiError("");
+
     try {
+      // NOTE: keep your existing ids/tokens here (demo placeholders below)
       const payload = {
         external_user_id: "febce587-f33c-321e-951f-7dc4183d8c30",
         token: "ajskhdiusatciusghfdwqhjfgwqhjgfsajkhcjkasgcjhg",
         host: "demo",
         cor: "",
         nationality: "",
-        travelling_to: "",
+        travelling_to: prefill.to || "",
         travelling_to_identity: "",
         no_of_applicants: 1,
-        start_date: "",
-        end_date: "",
+        start_date: prefill.startFmt,
+        end_date: prefill.endFmt,
       };
-      // Always use API_BASE_URL for all fetch calls
-      const res = await fetch(`${API_BASE_URL}/api/partner/initiate-visa`, {
+
+      // Always call your backend – never Visaero directly from the browser
+      const res = await fetch(`${API_BASE}/api/partner/initiate-visa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (data.status === 1 && data.data?.evm_url) {
-        setEvmUrl(data.data.evm_url);
-        setTrackUrl(data.data.evm_track_url);
-      } else {
-        setApiError(data.message || JSON.stringify(data));
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(
+          data?.details?.message ||
+          data?.message ||
+          data?.error ||
+          `HTTP ${res.status}`
+        );
       }
+
+      // Visaero success: { status: 1, data: { evm_url, evm_track_url, ... } }
+      const ok = data?.status === 1;
+      const url = data?.data?.evm_url || data?.data?.evmUrl || null;
+      const turl = data?.data?.evm_track_url || data?.data?.evmTrackUrl || null;
+
+      if (!ok || !url) {
+        throw new Error(data?.message || "Visaero did not return a launch URL.");
+      }
+
+      setEvmUrl(url);
+      setTrackUrl(turl || null);
     } catch (err) {
-      setApiError("Network error: " + err.message);
+      setApiError(
+        typeof err?.message === "string" ? err.message : "Failed to start visa application."
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
-  // ====== Not logged in (show login prompt) ======
+  // --- not logged in: gentle prompt -----------------------------------------
   if (!user) {
     return (
       <div style={styles.outerNoUser}>
         <div style={styles.noUserCard}>
           <h2 style={styles.title}>Login Required</h2>
           <p>Please log in to access the Visa application service.</p>
-          <button
-            onClick={() => navigate("/login")}
-            style={styles.loginBtn}
-          >
+          <button onClick={() => navigate("/login?next=/go-for-visa")} style={styles.loginBtn}>
             Login Now
           </button>
         </div>
@@ -67,7 +114,7 @@ const GoForVisa = ({ user }) => {
     );
   }
 
-  // ====== Visa App: Fullscreen Iframe Mode with logo in subtitle ======
+  // --- fullscreen Visaero iframe once we have a URL --------------------------
   if (evmUrl) {
     return (
       <div style={styles.fullScreenWrapper}>
@@ -78,44 +125,41 @@ const GoForVisa = ({ user }) => {
             <img
               src={hellovizaLogo}
               alt="Helloviza"
-              style={{
-                height: "1.7em",
-                verticalAlign: "middle",
-                margin: "0 0.24em",
-                display: "inline-block",
-              }}
+              style={{ height: "1.7em", verticalAlign: "middle", margin: "0 0.24em", display: "inline-block" }}
             />
             for a seamless and distinguished experience.
           </p>
         </div>
+
         <iframe
+          key={evmUrl}
           src={evmUrl}
-          style={styles.fullScreenIframe}
           title="Visa Application"
+          style={styles.fullScreenIframe}
           allowFullScreen
         />
+
         <div style={styles.afterIframeActionsFS}>
-          <button
-            style={styles.secondaryBtnFS}
-            onClick={() => {
-              navigate("/trackyourvisaapplication");
-              // You can use React context or global state to pass trackUrl if needed!
-            }}
-          >
-            Track Your Visa Application
-          </button>
-          <button
-            style={styles.linkBtnFS}
-            onClick={() => window.location.reload()}
-          >
+          {trackUrl && (
+            <button
+              style={styles.secondaryBtnFS}
+              onClick={() => navigate("/trackyourvisaapplication", { state: { trackUrl } })}
+            >
+              Track Your Visa Application
+            </button>
+          )}
+          <button style={styles.linkBtnFS} onClick={() => window.location.reload()}>
             Start New Application
           </button>
+          <a href={evmUrl} target="_blank" rel="noopener noreferrer" style={styles.linkBtnFS}>
+            Open in New Tab
+          </a>
         </div>
       </div>
     );
   }
 
-  // ====== "Get Started" Mode ======
+  // --- “Get Started” screen --------------------------------------------------
   return (
     <div style={styles.fullPageBg(bgImg)}>
       <div style={styles.bannerArea}>
@@ -125,15 +169,11 @@ const GoForVisa = ({ user }) => {
           <img
             src={hellovizaLogo}
             alt="Helloviza"
-            style={{
-              height: "1.2em",
-              verticalAlign: "middle",
-              margin: "0 0.18em",
-              display: "inline-block",
-            }}
+            style={{ height: "1.2em", verticalAlign: "middle", margin: "0 0.18em", display: "inline-block" }}
           />
         </p>
       </div>
+
       <div style={styles.centerCard}>
         <div style={styles.stepContent}>
           <h2 style={styles.cardTitle}>Let's Get Started</h2>
@@ -141,21 +181,24 @@ const GoForVisa = ({ user }) => {
             Click the button below to launch your personalized visa application journey. <br />
             <span style={{ color: "#d06549", fontWeight: 700 }}>No paperwork, no hassle.</span>
           </p>
+
+          {(prefill.to || prefill.startFmt || prefill.endFmt) && (
+            <div style={styles.prefillNotice}>
+              <strong>We’ll prefill from your search:</strong>{" "}
+              {prefill.to && <>Destination: <b>{prefill.to}</b> • </>}
+              {(prefill.startFmt || prefill.endFmt) && (
+                <>Dates: <b>{prefill.startFmt || "—"}</b>{prefill.endFmt ? " → " : ""}<b>{prefill.endFmt || ""}</b></>
+              )}
+              <div style={{ marginTop: 6, opacity: 0.9 }}>You can still change these on the next page.</div>
+            </div>
+          )}
+
           {apiError && <div style={styles.errorMsg}>{apiError}</div>}
-          <button
-            style={styles.ctaBtn}
-            onClick={handleInitiateVisa}
-            disabled={loading}
-          >
-            {loading ? (
-              <span>
-                <span className="loader" style={styles.loader}></span>
-                Starting...
-              </span>
-            ) : (
-              <span>Start Visa Application</span>
-            )}
+
+          <button style={styles.ctaBtn} onClick={handleInitiateVisa} disabled={loading}>
+            {loading ? <span>Starting…</span> : <span>Start Visa Application</span>}
           </button>
+
           <div style={styles.infoFooter}>
             <span role="img" aria-label="secure">🔒</span> 100% Secure &amp; Trusted Partner
           </div>
@@ -163,9 +206,9 @@ const GoForVisa = ({ user }) => {
       </div>
     </div>
   );
-};
+}
 
-// ====== Styles ======
+// ------------------------------- styles --------------------------------------
 const styles = {
   fullScreenWrapper: {
     minHeight: "100vh",
@@ -177,27 +220,25 @@ const styles = {
     position: "relative",
     fontFamily: baseFont,
     paddingTop: 120,
+    zIndex: 0, // ensure the iframe can sit above other page layers
   },
+  // Important: prevent this decorative block from intercepting clicks
   heroSection: {
     textAlign: "center",
-    padding: "2rem 0 0.8rem 0",
+    padding: "2rem 0 .8rem 0",
     background: "transparent",
+    pointerEvents: "none",
   },
   mainTitle: {
     fontSize: "2.6rem",
     fontWeight: 800,
-    margin: "-4rem 0 0.45rem 0",
+    margin: "-4rem 0 .45rem 0",
     color: "#23456b",
     letterSpacing: "-.01em",
   },
-  subtitle: {
-    fontSize: "1.19rem",
-    color: "#1c274c",
-    fontWeight: 400,
-    marginBottom: 0,
-    letterSpacing: ".01em",
-    lineHeight: 1.3,
-  },
+  subtitle: { fontSize: "1.19rem", color: "#1c274c", fontWeight: 400, marginBottom: 0, letterSpacing: ".01em", lineHeight: 1.3 },
+
+  // Critical: make iframe the click target
   fullScreenIframe: {
     border: "none",
     width: "100vw",
@@ -209,15 +250,21 @@ const styles = {
     background: "#fcfdfe",
     marginTop: 28,
     marginBottom: 20,
+    position: "relative",
+    zIndex: 1,
+    pointerEvents: "auto",
   },
+
+  // Do not block clicks to the iframe; re-enable on children
   afterIframeActionsFS: {
     position: "absolute",
     left: "50%",
-    bottom: "32px",
+    bottom: 32,
     transform: "translateX(-50%)",
     display: "flex",
-    gap: "18px",
+    gap: 18,
     zIndex: 10,
+    pointerEvents: "none",
   },
   secondaryBtnFS: {
     background: "#e3f2fd",
@@ -228,7 +275,7 @@ const styles = {
     fontSize: "1.08rem",
     padding: "0.98rem 2.4rem",
     cursor: "pointer",
-    transition: "background 0.16s",
+    pointerEvents: "auto",
   },
   linkBtnFS: {
     background: "none",
@@ -238,7 +285,9 @@ const styles = {
     fontSize: "1.08rem",
     textDecoration: "underline",
     cursor: "pointer",
+    pointerEvents: "auto",
   },
+
   fullPageBg: (img) => ({
     minHeight: "100vh",
     width: "100vw",
@@ -252,11 +301,7 @@ const styles = {
     paddingBottom: "1rem",
     paddingTop: "5rem",
   }),
-  bannerArea: {
-    width: "100%",
-    padding: "6vw 0 1.5vw 0",
-    textAlign: "center",
-  },
+  bannerArea: { width: "100%", padding: "6vw 0 1.5vw 0", textAlign: "center" },
   centerCard: {
     width: "100%",
     maxWidth: 520,
@@ -264,28 +309,14 @@ const styles = {
     background: "#fff",
     borderRadius: 20,
     boxShadow: "0 6px 38px 0 rgba(44,44,44,0.12)",
-    padding: "2.6rem 2.2rem 2.1rem 2.2rem",
+    padding: "2.6rem 2.2rem 2.1rem",
     textAlign: "center",
     position: "relative",
     marginBottom: "3vw",
   },
-  stepContent: {
-    padding: "0 0 1.6rem 0",
-  },
-  cardTitle: {
-    fontWeight: 700,
-    fontSize: "2.1rem",
-    margin: "0 0 1.2rem 0",
-    color: "#23456b",
-    letterSpacing: "-.01em",
-  },
-  cardDesc: {
-    color: "#343a40",
-    fontSize: "1.18rem",
-    marginBottom: "1.3rem",
-    fontWeight: 400,
-    lineHeight: 1.45,
-  },
+  stepContent: { padding: "0 0 1.6rem 0" },
+  cardTitle: { fontWeight: 700, fontSize: "2.1rem", margin: "0 0 1.2rem 0", color: "#23456b", letterSpacing: "-.01em" },
+  cardDesc: { color: "#343a40", fontSize: "1.18rem", marginBottom: "1.3rem", fontWeight: 400, lineHeight: 1.45 },
   ctaBtn: {
     width: "100%",
     background: "linear-gradient(90deg, #00477f 0%, #2196f3 100%)",
@@ -295,17 +326,23 @@ const styles = {
     border: "none",
     borderRadius: 10,
     padding: "1.06rem 0",
-    margin: "1.2rem 0 0.8rem 0",
+    margin: "1.2rem 0 .8rem",
     boxShadow: "0 3px 18px #7fbdff24",
     cursor: "pointer",
-    transition: "background 0.18s",
     letterSpacing: ".03em",
   },
-  infoFooter: {
-    marginTop: "1.1rem",
-    fontSize: "1.07rem",
-    color: "#8e949e",
+  infoFooter: { marginTop: "1.1rem", fontSize: "1.07rem", color: "#8e949e" },
+
+  prefillNotice: {
+    background: "#eef6ff",
+    border: "1px solid #d7e9ff",
+    color: "#0d3a66",
+    padding: "12px 14px",
+    borderRadius: 10,
+    textAlign: "left",
+    marginBottom: 12,
   },
+
   errorMsg: {
     background: "#ffe6e6",
     color: "#e53935",
@@ -313,9 +350,10 @@ const styles = {
     padding: "0.65rem 0.85rem",
     fontWeight: 600,
     fontSize: "1rem",
-    margin: "1rem 0 0.2rem 0",
+    margin: "1rem 0 .2rem",
     textAlign: "center",
   },
+
   outerNoUser: {
     minHeight: "90vh",
     display: "flex",
@@ -327,11 +365,12 @@ const styles = {
   noUserCard: {
     background: "#fff",
     padding: "2.5rem",
-    borderRadius: "18px",
+    borderRadius: 18,
     boxShadow: "0 6px 28px 0 rgba(44,44,44,0.09)",
     minWidth: 330,
     textAlign: "center",
   },
+  title: { marginTop: 0, marginBottom: 10 },
   loginBtn: {
     marginTop: 20,
     background: "linear-gradient(90deg,#00477f,#2196f3)",
@@ -344,20 +383,4 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 1px 7px #b8d6ff1a",
   },
-  loader: {
-    display: "inline-block",
-    width: 16,
-    height: 16,
-    border: "3px solid #fff",
-    borderTop: "3px solid #2196f3",
-    borderRadius: "50%",
-    animation: "spin 0.7s linear infinite",
-    marginRight: 8,
-    verticalAlign: "middle",
-  }
 };
-
-// Loader keyframes (add in your global CSS!)
-// @keyframes spin { 100% { transform: rotate(360deg); } }
-
-export default GoForVisa;
