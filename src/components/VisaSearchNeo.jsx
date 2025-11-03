@@ -9,7 +9,7 @@ const LOGIN_REDIRECT_KEY = "postLoginRedirect";
 const GV_PAYLOAD_KEY = "gv_payload";
 
 /* =====================  POSITION / SIZE  ===================== */
-const ANCHOR = { topVh: 39, leftPct: 60, width: "min(720px, 48vw)" };
+const ANCHOR = { topVh: 70, leftPct: 60, width: "min(720px, 48vw)" };
 /* ============================================================= */
 
 const BRAND = "#00477f";
@@ -645,7 +645,7 @@ export default function VisaSearchNeo({ onResults, user }) {
     } catch {}
 
     const qs = new URLSearchParams(payload).toString();
-    const target = `/go-for-visa?${qs}`;
+    const target = `/go/visa?${qs}`;
 
     if (!isLoggedIn()) {
       try {

@@ -209,19 +209,17 @@ const mystyle = {
 const BookingPanel = forwardRef(function BookingPanel(props, ref) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // One-time 10 seconds delayed open on first visit
   useEffect(() => {
     const shown = localStorage.getItem("bookingPanelShown");
     if (!shown) {
       const timer = setTimeout(() => {
         setIsOpen(true);
         localStorage.setItem("bookingPanelShown", "true");
-      }, 10000); // 10 seconds delay
+      }, 10000);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  // Form state
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -230,37 +228,48 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
 
   const navigate = useNavigate();
 
-  // Expose openPanel/closePanel for parent (props.mode to distinguish style)
   useImperativeHandle(ref, () => ({
     openPanel: () => setIsOpen(true),
     closePanel: () => setIsOpen(false),
   }));
 
-  // Panel close handler
   const handleClose = () => setIsOpen(false);
 
-  // Form submit handler
+  // ✅ Updated submit handler with same redirect/login logic
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const params = new URLSearchParams({
-      origin,
-      destination,
-      start: startDate,
-      visaBy: visaRequiredBy,
-      type: visaType,
+      from: origin || "IN",
+      to: destination,
+      autostart: "1",
     });
-    navigate(`/go-for-visa?${params.toString()}`);
+    const nextUrl = `/go/visa?${params.toString()}`;
+
+    try {
+      const stored =
+        localStorage.getItem("helloviza_user") ||
+        localStorage.getItem("hv_user") ||
+        sessionStorage.getItem("hv_user");
+
+      if (!stored) {
+        const encodedNext = encodeURIComponent(nextUrl);
+        navigate(`/login?next=${encodedNext}`);
+      } else {
+        navigate(nextUrl);
+      }
+    } catch {
+      navigate(`/login?next=${encodeURIComponent(nextUrl)}`);
+    }
+
     handleClose();
   };
 
-  // Use JS media query for fully correct mobile detection
   const isMobile = window.innerWidth < 650;
   const isModal = props.mode === "modal";
-
   if (!isOpen) return null;
 
   return isModal ? (
-    // MODAL POPUP VERSION (centered, overlay)
     <div style={mystyle.backdrop}>
       <div
         style={{
@@ -270,15 +279,13 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
       >
         <button style={mystyle.closeButton} onClick={handleClose}>×</button>
         <h2 style={mystyle.heading}>Explore your Gateway, Book your Visa</h2>
-        <form onSubmit={handleSubmit} style={{ width: "100%", boxSizing: "border-box" }}>
-          <div
-            style={isMobile ? mystyle.gridMobile : mystyle.grid}
-          >
+        <form onSubmit={handleSubmit}>
+          <div style={isMobile ? mystyle.gridMobile : mystyle.grid}>
             <div style={mystyle.inputGroup}>
               <label>Origin Country</label>
               <select
                 value={origin}
-                onChange={e => setOrigin(e.target.value)}
+                onChange={(e) => setOrigin(e.target.value)}
                 required
                 style={mystyle.select}
               >
@@ -292,7 +299,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
               <label>Destination Country</label>
               <select
                 value={destination}
-                onChange={e => setDestination(e.target.value)}
+                onChange={(e) => setDestination(e.target.value)}
                 required
                 style={mystyle.select}
               >
@@ -307,7 +314,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
               <input
                 type="date"
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={(e) => setStartDate(e.target.value)}
                 required
                 style={mystyle.input}
               />
@@ -317,7 +324,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
               <input
                 type="date"
                 value={visaRequiredBy}
-                onChange={e => setVisaRequiredBy(e.target.value)}
+                onChange={(e) => setVisaRequiredBy(e.target.value)}
                 required
                 style={mystyle.input}
               />
@@ -326,7 +333,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
               <label>Visa Type</label>
               <select
                 value={visaType}
-                onChange={e => setVisaType(e.target.value)}
+                onChange={(e) => setVisaType(e.target.value)}
                 required
                 style={mystyle.select}
               >
@@ -347,7 +354,6 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
       </div>
     </div>
   ) : (
-    // SLIDE-DOWN PANEL VERSION (desktop)
     <div style={{ ...mystyle.overlay, top: isOpen ? 0 : "-100%" }}>
       <button style={mystyle.slideCloseButton} onClick={handleClose}>×</button>
       <h2 style={mystyle.slideHeading}>Explore your Gateway, Book your Visa</h2>
@@ -357,7 +363,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
             <label>Origin Country</label>
             <select
               value={origin}
-              onChange={e => setOrigin(e.target.value)}
+              onChange={(e) => setOrigin(e.target.value)}
               required
               style={mystyle.select}
             >
@@ -371,7 +377,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
             <label>Destination Country</label>
             <select
               value={destination}
-              onChange={e => setDestination(e.target.value)}
+              onChange={(e) => setDestination(e.target.value)}
               required
               style={mystyle.select}
             >
@@ -386,7 +392,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
             <input
               type="date"
               value={startDate}
-              onChange={e => setStartDate(e.target.value)}
+              onChange={(e) => setStartDate(e.target.value)}
               required
               style={mystyle.input}
             />
@@ -396,7 +402,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
             <input
               type="date"
               value={visaRequiredBy}
-              onChange={e => setVisaRequiredBy(e.target.value)}
+              onChange={(e) => setVisaRequiredBy(e.target.value)}
               required
               style={mystyle.input}
             />
@@ -405,7 +411,7 @@ const BookingPanel = forwardRef(function BookingPanel(props, ref) {
             <label>Visa Type</label>
             <select
               value={visaType}
-              onChange={e => setVisaType(e.target.value)}
+              onChange={(e) => setVisaType(e.target.value)}
               required
               style={mystyle.select}
             >

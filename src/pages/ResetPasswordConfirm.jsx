@@ -47,7 +47,7 @@ export default function ResetPasswordConfirm() {
 
     try {
       const response = await fetch(
-        "http://localhost:5055/api/reset-password/confirm",
+        "http://localhost:8080/api/reset-password/confirm",
         {
           // For production:
           // "https://api.helloviza.com/api/reset-password/confirm",

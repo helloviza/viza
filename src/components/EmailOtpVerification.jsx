@@ -1,6 +1,9 @@
 // src/components/EmailOtpVerification.jsx
 import React, { useState } from "react";
 
+// Optional: read API base from environment, fallback to proxy mode
+const API_BASE = process.env.REACT_APP_API_BASE || "";
+
 export default function EmailOtpVerification({ onVerified }) {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -19,7 +22,7 @@ export default function EmailOtpVerification({ onVerified }) {
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5055/api/send-otp", {
+      const res = await fetch(`${API_BASE}/api/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -45,7 +48,7 @@ export default function EmailOtpVerification({ onVerified }) {
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5055/api/verify-otp", {
+      const res = await fetch(`${API_BASE}/api/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -53,7 +56,7 @@ export default function EmailOtpVerification({ onVerified }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "OTP verification failed");
       setSuccess("OTP verified successfully!");
-      onVerified(); // Notify parent (e.g., allow signup to continue)
+      onVerified?.(); // Notify parent
     } catch (err) {
       setError(err.message);
     } finally {

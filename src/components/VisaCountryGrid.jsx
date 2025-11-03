@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom"; // <-- Add at the top of VisaCountryGrid.jsx
+import { useNavigate } from "react-router-dom"; // <-- Add at the top of VisaCountryGrid.jsx
 const countries = [
   { img: "/images/uae.jpg", name: "UAE", price: "₹4,999" },
   { img: "/images/thailand.jpg", name: "Thailand", price: "₹3,499" },
@@ -82,32 +82,71 @@ const countries = [
   { img: "/images/cambodia.jpg", name: "Cambodia", price: "₹X,XXX" },
 ];
 
-// Memoized Card Component (prevents unnecessary re-renders)
-const CountryCard = React.memo(function CountryCard({ img, name, price }) {
+const baseFont = "'Barlow Condensed', Arial, sans-serif";
+
+const CountryCard = React.memo(function CountryCard({ img, name, price, onApply }) {
   return (
     <div style={styles.card}>
       <img src={img} alt={name} style={styles.img} loading="lazy" />
       <div style={styles.cardContent}>
         <div style={styles.country}>{name}</div>
         <div style={styles.price}>{price}</div>
-        <a href="/go-for-visa" style={styles.applyBtn}>Apply Now</a>
+        <button onClick={() => onApply(name)} style={styles.applyBtn}>
+          Apply Now
+        </button>
       </div>
     </div>
   );
 });
 
-const baseFont = "'Barlow Condensed', Arial, sans-serif";
+const VisaCountryGrid = () => {
+  const navigate = useNavigate();
 
-const VisaCountryGrid = () => (
-  <section style={styles.section}>
-    <h2 style={styles.title}>Popular Visa Destinations</h2>
-    <div style={styles.grid}>
-      {countries.map((c, idx) => (
-        <CountryCard key={c.name + idx} img={c.img} name={c.name} price={c.price} />
-      ))}
-    </div>
-  </section>
-);
+  function handleApply(country) {
+    // ✅ Correct target path: /go/visa
+    const params = new URLSearchParams({
+      from: "IN",
+      to: country,
+      autostart: "1",
+    });
+    const nextUrl = `/go/visa?${params.toString()}`;
+
+    try {
+      const stored =
+        localStorage.getItem("helloviza_user") ||
+        localStorage.getItem("hv_user") ||
+        sessionStorage.getItem("hv_user");
+
+      if (!stored) {
+        // Not logged in → redirect to login with next param
+        const encodedNext = encodeURIComponent(nextUrl);
+        navigate(`/login?next=${encodedNext}`);
+      } else {
+        // Logged in → go directly
+        navigate(nextUrl);
+      }
+    } catch {
+      navigate(`/login?next=${encodeURIComponent(nextUrl)}`);
+    }
+  }
+
+  return (
+    <section style={styles.section}>
+      <h2 style={styles.title}>Popular Visa Destinations</h2>
+      <div style={styles.grid}>
+        {countries.map((c, idx) => (
+          <CountryCard
+            key={c.name + idx}
+            img={c.img}
+            name={c.name}
+            price={c.price}
+            onApply={handleApply}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const styles = {
   section: {
@@ -122,7 +161,7 @@ const styles = {
     textAlign: "center",
     marginBottom: "2rem",
     letterSpacing: ".01em",
-    color: "#00477f", // example: dark text color
+    color: "#00477f",
   },
   grid: {
     display: "grid",
@@ -147,7 +186,6 @@ const styles = {
     width: "100%",
     height: 140,
     objectFit: "cover",
-    borderRadius: "0px 0px 0 0",
   },
   cardContent: {
     padding: "1.3rem",
@@ -184,7 +222,6 @@ const styles = {
     cursor: "pointer",
     marginTop: "auto",
     transition: "background .15s",
-    display: "inline-block",
   },
 };
 
