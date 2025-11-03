@@ -123,44 +123,17 @@ const Home = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Mount Three.js background lazily into .hero-bg
-  useEffect(() => {
-    let engine;
-    const el = bgRef.current;
-    if (!el) return;
+// Set static background image (no animation)
+useEffect(() => {
+  const el = bgRef.current;
+  if (!el) return;
 
-    const reduced =
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  el.style.backgroundImage = `url(${bgImg})`;
+  el.style.backgroundSize = "cover";
+  el.style.backgroundPosition = "center";
+  el.style.backgroundRepeat = "no-repeat";
+}, []);
 
-    if (reduced) {
-      // Fallback: keep static image
-      el.style.backgroundImage = `url(${bgImg})`;
-      el.style.backgroundSize = "cover";
-      el.style.backgroundPosition = "center";
-      return;
-    }
-
-    let cancelled = false;
-    import("../lib/three/heroBackground").then((mod) => {
-      if (cancelled) return;
-      if (!mod.isWebGLAvailable || !mod.isWebGLAvailable()) {
-        // Fallback: static image
-        el.style.backgroundImage = `url(${bgImg})`;
-        el.style.backgroundSize = "cover";
-        el.style.backgroundPosition = "center";
-        return;
-      }
-      engine = mod.createHeroBackground(el, {
-        noiseUrl: "/assets/noise.png",
-      });
-    });
-
-    return () => {
-      cancelled = true;
-      if (engine && engine.destroy) engine.destroy();
-    };
-  }, []);
 
   return (
     <>

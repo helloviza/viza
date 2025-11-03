@@ -1,12 +1,18 @@
 // helloviza/client/src/context/AuthContext.jsx
-'use strict';
-
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 
-// ✅ Always point to production API in deployment
-const API_BASE =
-  process.env.REACT_APP_API_BASE || 'https://api.helloviza.com';
+/**
+ * API base resolution:
+ * - If REACT_APP_API_BASE is set, use it (overrides everything).
+ * - If running on localhost / 127.0.0.1, use the local backend.
+ * - Otherwise default to production API.
+ */
+const HOST = typeof window !== 'undefined' ? window.location.hostname : '';
+const IS_LOCAL = HOST === 'localhost' || HOST === '127.0.0.1';
+export const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  (IS_LOCAL ? 'http://localhost:8080' : 'https://api.helloviza.com');
 
 const AuthContext = createContext({
   user: null,
@@ -24,15 +30,17 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('hv_token');
     const headers = new Headers(opts.headers || {});
     headers.set('Accept', 'application/json');
-    headers.set('Content-Type', 'application/json');
+    // Only set Content-Type if we're sending JSON (avoid messing with GETs)
+    if (!headers.has('Content-Type') && opts.body) {
+      headers.set('Content-Type', 'application/json');
+    }
 
-    // If we have a token (from #sso or Google), send it
     if (token && !headers.has('Authorization')) {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
     const res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include', // ✅ ensures session cookie goes across domains
+      credentials: 'include', // ensure cookie-based session works across origins
       ...opts,
       headers,
     });
@@ -50,7 +58,7 @@ export function AuthProvider({ children }) {
 
       localStorage.setItem('hv_token', sso);
 
-      // remove the sso hash without reloading
+      // remove only the sso fragment without reloading
       params.delete('sso');
       const rest = params.toString();
       const { pathname, search } = window.location;
@@ -62,22 +70,32 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Probe server truth: ask backend who the current user is
+  // Ask backend who the current user is
   async function refresh() {
     try {
       const res = await apiFetch('/api/auth/me', { method: 'GET' });
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
-        setUser(data?.user || null);
+        const u = data?.user || data || null;
+        setUser(u);
+        if (u) {
+          localStorage.setItem('hv_user', JSON.stringify(u));
+          sessionStorage.setItem('hv_user', JSON.stringify(u));
+        } else {
+          localStorage.removeItem('hv_user');
+          sessionStorage.removeItem('hv_user');
+        }
       } else {
         setUser(null);
+        localStorage.removeItem('hv_user');
+        sessionStorage.removeItem('hv_user');
       }
     } catch {
       setUser(null);
     }
   }
 
-  // Logout clears cookie server-side and local token
+  // Logout clears cookie server-side and local token/cache
   async function logout() {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });
@@ -91,9 +109,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  // Initial bootstrap:
-  // 1) consume #sso (if any)
-  // 2) call /me with credentials to get logged-in user
+  // Initial bootstrap
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -108,11 +124,7 @@ export function AuthProvider({ children }) {
     [user, loading]
   );
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -126,12 +138,10 @@ export function RequireAuth({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return null; // or a spinner component
+  if (loading) return null; // you can render a spinner instead
 
   if (!user) {
-    const next = encodeURIComponent(
-      location.pathname + (location.search || '')
-    );
+    const next = encodeURIComponent(location.pathname + (location.search || ''));
     return <Navigate to={`/login?next=${next}`} replace />;
   }
 

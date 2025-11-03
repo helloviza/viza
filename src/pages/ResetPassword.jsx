@@ -9,7 +9,7 @@ const scale = 0.64;
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
     ? "https://api.helloviza.com"
-    : "http://localhost:5055";
+    : "http://localhost:8080";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
