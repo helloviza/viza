@@ -1,5 +1,9 @@
 // src/pages/Login.jsx
+<<<<<<< HEAD
 import React, { useEffect, useState, useCallback } from "react";
+=======
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
@@ -14,17 +18,27 @@ const API_BASE =
     ? "http://localhost:8080"
     : "https://api.helloviza.com";
 
+<<<<<<< HEAD
 /* ====== post-login target (STRICT & STRING-SAFE) ======
    Allows:
    • https://visa.helloviza.com/...
    • https://www.helloviza.com/... (rarely needed)
+=======
+/* ====== Safe next resolver (strict) ======
+   Allows:
+   • https://visa.helloviza.com/...
+   • https://www.helloviza.com/...
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
    • local paths starting with "/"
    Falls back to https://visa.helloviza.com
 */
 function pickPostLoginTarget(searchOrSaved) {
   const fallback = "https://visa.helloviza.com";
 
+<<<<<<< HEAD
   // Prefer explicit saved string, else read from current query
+=======
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
   const rawSearch =
     typeof searchOrSaved === "string" && searchOrSaved.includes("=")
       ? searchOrSaved
@@ -39,7 +53,10 @@ function pickPostLoginTarget(searchOrSaved) {
   }
 
   if (!raw || typeof raw !== "string") {
+<<<<<<< HEAD
     // maybe caller passed an already-saved NEXT string instead of "?next=..."
+=======
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
     if (typeof searchOrSaved === "string" && searchOrSaved.trim()) {
       raw = searchOrSaved.trim();
     } else {
@@ -48,6 +65,7 @@ function pickPostLoginTarget(searchOrSaved) {
   }
 
   let next = "";
+<<<<<<< HEAD
   try {
     // decode once if it was encoded in the link
     next = decodeURIComponent(raw);
@@ -60,6 +78,12 @@ function pickPostLoginTarget(searchOrSaved) {
   if (/^https:\/\/(www\.)?helloviza\.com(\/|$)/i.test(next)) return next;
 
   // Local path only
+=======
+  try { next = decodeURIComponent(raw); } catch { next = raw; }
+
+  if (/^https:\/\/visa\.helloviza\.com(\/|$)/i.test(next)) return next;
+  if (/^https:\/\/(www\.)?helloviza\.com(\/|$)/i.test(next)) return next;
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
   if (next.startsWith("/")) return next;
 
   return fallback;
@@ -173,7 +197,11 @@ const M = {
   cancel: { marginTop: "1rem", background: "transparent", color: "#d06549", border: "none", cursor: "pointer" },
 };
 
+<<<<<<< HEAD
 /* ====== MAIN COMPONENT ====== */
+=======
+/* ===== MAIN COMPONENT ===== */
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
@@ -191,6 +219,16 @@ export default function Login({ onLogin }) {
   const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
+<<<<<<< HEAD
+
+  const [mobile, setMobile] = useState("");
+  const [mobileOtpSent, setMobileOtpSent] = useState(false);
+  const [mobileOtp, setMobileOtp] = useState("");
+
+  const [showMobileModal, setShowMobileModal] = useState(false);
+  const [pendingUser, setPendingUser] = useState(null);
+=======
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
 
   const [mobile, setMobile] = useState("");
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
@@ -199,10 +237,15 @@ export default function Login({ onLogin }) {
   const [showMobileModal, setShowMobileModal] = useState(false);
   const [pendingUser, setPendingUser] = useState(null);
 
+  const [checkingSession, setCheckingSession] = useState(true); // 🚦 block redirects until we confirm session
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
+<<<<<<< HEAD
   const { user, loading: authLoading } = useAuth();
+=======
+  const { /* user, loading: authLoading */ } = useAuth(); // we won't auto-redirect on this; guard with /session instead
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
 
   /* helpers */
   function handleChange(e) {
@@ -210,19 +253,28 @@ export default function Login({ onLogin }) {
     setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
   }
 
+<<<<<<< HEAD
   /* Persist ?next= very early for multi-step flows */
+=======
+  // Persist ?next= very early
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
   useEffect(() => {
     const n = params.get("next");
     if (n) sessionStorage.setItem(LOGIN_REDIRECT_KEY, n);
   }, [params]);
 
+<<<<<<< HEAD
   /* Also accept ?from= for legacy links */
+=======
+  // Also accept ?from= for legacy links
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
   useEffect(() => {
     const sp = new URLSearchParams(location.search);
     const candidate = sp.get("from") || sp.get("next");
     if (candidate) sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
   }, [location.search]);
 
+<<<<<<< HEAD
   /* If already authenticated, jump to saved/derived target */
   useEffect(() => {
     if (authLoading || !user) return;
@@ -250,6 +302,75 @@ export default function Login({ onLogin }) {
       navigate(target, { replace: true });
     }
   }, [location.search, navigate]);
+=======
+  const resolveNext = useCallback(() => {
+    const saved = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+    return pickPostLoginTarget(saved || location.search);
+  }, [location.search]);
+
+  // ✅ NEW: Only redirect away if /api/auth/session confirms logged-in
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+        if (!cancelled && res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data && data.user) {
+            const target = resolveNext();
+            sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            if (/^https?:\/\//i.test(target)) {
+              window.location.replace(target);
+            } else {
+              navigate(target, { replace: true });
+            }
+            return;
+          }
+        }
+      } catch (_) {}
+      if (!cancelled) setCheckingSession(false); // show the form if not logged-in
+    })();
+    return () => { cancelled = true; };
+  }, [navigate, resolveNext]);
+
+  useEffect(() => setGoogleReady(true), []);
+
+  // 🔁 Shared post-login finisher: re-check /session, then redirect once
+  const finishLogin = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data && data.user) {
+          const target = resolveNext();
+          sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+          if (/^https?:\/\//i.test(target)) {
+            window.location.replace(target);
+          } else {
+            navigate(target, { replace: true });
+          }
+          return;
+        }
+      }
+      // Optional: tiny delay + retry once if needed
+      setTimeout(async () => {
+        const res2 = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+        if (res2.ok) {
+          const data2 = await res2.json().catch(() => ({}));
+          if (data2 && data2.user) {
+            const target = resolveNext();
+            sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            if (/^https?:\/\//i.test(target)) {
+              window.location.replace(target);
+            } else {
+              navigate(target, { replace: true });
+            }
+          }
+        }
+      }, 300);
+    } catch (_) {}
+  }, [navigate, resolveNext]);
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
 
   /* ===== Email OTP (Signup) ===== */
   async function sendOtp() {
@@ -292,9 +413,14 @@ export default function Login({ onLogin }) {
     }
   }
 
+<<<<<<< HEAD
   /* ===== Mobile OTP (Manual Login + Backend + Timer) ===== */
   const [timer, setTimer] = useState(0);
 
+=======
+  /* ===== Mobile OTP (Manual Login + Timer) ===== */
+  const [timer, setTimer] = useState(0);
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
   useEffect(() => {
     let interval;
     if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
@@ -369,7 +495,10 @@ export default function Login({ onLogin }) {
         credentials: "include",
         body: JSON.stringify({ mobile }),
       });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
       const loginData = await loginRes.json().catch(() => ({}));
       if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
 
@@ -379,7 +508,11 @@ export default function Login({ onLogin }) {
       sessionStorage.setItem("hv_user", JSON.stringify(userData));
 
       onLogin?.(userData);
+<<<<<<< HEAD
       finishLogin();
+=======
+      await finishLogin();
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
     } catch (err) {
       console.error(err);
       setError(err.message || "Login failed");
@@ -396,6 +529,7 @@ export default function Login({ onLogin }) {
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const r = await fetch(`${API_BASE}${endpoint}`, {
+<<<<<<< HEAD
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -456,6 +590,67 @@ export default function Login({ onLogin }) {
       onLogin?.(userData);
       finishLogin();
     } catch (err) {
+=======
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "Auth failed");
+
+      const userData = d.user;
+      localStorage.setItem("helloviza_user", JSON.stringify(userData));
+      localStorage.setItem("hv_user", JSON.stringify(userData));
+      sessionStorage.setItem("hv_user", JSON.stringify(userData));
+
+      onLogin?.(userData);
+      await finishLogin();
+    } catch (err) {
+      setError(err.message || "Auth failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ===== Google Auth ===== */
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const idToken = credentialResponse?.credential;
+      const decoded = idToken ? jwtDecode(idToken) : null;
+
+      const r = await fetch(`${API_BASE}/api/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          credential: idToken || null,
+          email: decoded?.email || null,
+          name: decoded?.name || null,
+          picture: decoded?.picture || null,
+        }),
+      });
+
+      const txt = await r.text();
+      const d = txt ? JSON.parse(txt) : {};
+      if (!r.ok) throw new Error(d.error || "Google login failed");
+
+      const userData = { ...d.user, picture: decoded?.picture || d.user?.picture };
+      localStorage.setItem("helloviza_user", JSON.stringify(userData));
+      localStorage.setItem("hv_user", JSON.stringify(userData));
+      sessionStorage.setItem("hv_user", JSON.stringify(userData));
+      localStorage.setItem("hv_token", idToken || "");
+
+      if (!userData?.mobileVerified && !userData?.mobile) {
+        setPendingUser(userData);
+        setShowMobileModal(true);
+        return;
+      }
+
+      onLogin?.(userData);
+      await finishLogin();
+    } catch (err) {
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
       console.error(err);
       setError(err.message || "Google login failed, please try again.");
     }
@@ -464,6 +659,18 @@ export default function Login({ onLogin }) {
   const handleGoogleFailure = () => setError("Google login failed, please try again.");
 
   /* ===== UI ===== */
+<<<<<<< HEAD
+=======
+  // While checking session, keep the page blank (or a tiny spinner)
+  if (checkingSession) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", minHeight: "60vh", color: "#fff", fontFamily: baseFont }}>
+        Checking session…
+      </div>
+    );
+  }
+
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
   return (
     <div className="login-outer" style={S.outer}>
       <style>{responsiveCSS}</style>
@@ -598,11 +805,15 @@ export default function Login({ onLogin }) {
                   type="button"
                   onClick={handleResendMobileOtp}
                   disabled={timer > 0 || loading}
+<<<<<<< HEAD
                   style={{
                     ...S.otpBtn,
                     backgroundColor: timer > 0 ? "#888" : "#d06549",
                     marginTop: "10px",
                   }}
+=======
+                  style={{ ...S.otpBtn, backgroundColor: timer > 0 ? "#888" : "#d06549", marginTop: "10px" }}
+>>>>>>> 872b0dc (Login: session guard + safe next redirect; fix / ↔ /login loop)
                 >
                   {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
                 </button>
