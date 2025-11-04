@@ -5,20 +5,21 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import loginBg from "../assets/login-bg.jpg";
 
+/* ====== constants ====== */
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
-const API_BASE =
+export const API_BASE =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:8080"
     : "https://api.helloviza.com";
 
-/** Strict post-login target resolver
- *  Allows:
- *   • https://visa.helloviza.com/...
- *   • https://www.helloviza.com/...
- *   • local paths starting with "/"
- *  Falls back to https://visa.helloviza.com
- */
+/* ====== Safe next resolver (strict) ======
+   Allows:
+   • https://visa.helloviza.com/...
+   • https://www.helloviza.com/...
+   • local paths starting with "/"
+   Falls back to https://visa.helloviza.com
+*/
 function pickPostLoginTarget(searchOrSaved) {
   const fallback = "https://visa.helloviza.com";
 
@@ -44,11 +45,7 @@ function pickPostLoginTarget(searchOrSaved) {
   }
 
   let next = "";
-  try {
-    next = decodeURIComponent(raw);
-  } catch {
-    next = raw;
-  }
+  try { next = decodeURIComponent(raw); } catch { next = raw; }
 
   if (/^https:\/\/visa\.helloviza\.com(\/|$)/i.test(next)) return next;
   if (/^https:\/\/(www\.)?helloviza\.com(\/|$)/i.test(next)) return next;
@@ -57,7 +54,7 @@ function pickPostLoginTarget(searchOrSaved) {
   return fallback;
 }
 
-/* ===== Small modal for collecting mobile & verifying OTP (used after Google login) ===== */
+/* ====== small modal for mobile verification (used when Google user has no mobile) ====== */
 function MobileVerificationModal({ show, onClose, onVerified }) {
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -184,25 +181,30 @@ export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
 
+  // Mobile login states
   const [mobile, setMobile] = useState("");
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
   const [mobileOtp, setMobileOtp] = useState("");
+  const [timer, setTimer] = useState(0);
 
+  // Google users without mobile
   const [showMobileModal, setShowMobileModal] = useState(false);
   const [pendingUser, setPendingUser] = useState(null);
 
-  const [checkingSession, setCheckingSession] = useState(true); // block UI until session known
+  // Session guard
+  const [checkingSession, setCheckingSession] = useState(true);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
 
-  // form helpers
+  // helpers
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
   }
 
-  // Persist ?next= (and legacy ?from=) very early for multi-step flows
+  // Persist ?next= or ?from= very early for multi-step flows
   useEffect(() => {
     const n = params.get("next");
     if (n) sessionStorage.setItem(LOGIN_REDIRECT_KEY, n);
@@ -214,13 +216,12 @@ export default function Login({ onLogin }) {
     if (candidate) sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
   }, [location.search]);
 
-  // Resolve next target (reads sessionStorage or current query)
   const resolveNext = useCallback(() => {
     const saved = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
     return pickPostLoginTarget(saved || location.search);
   }, [location.search]);
 
-  // Only redirect away if backend confirms session is logged-in
+  // Check if already logged in → redirect to target
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -240,14 +241,14 @@ export default function Login({ onLogin }) {
           }
         }
       } catch (_) {}
-      if (!cancelled) setCheckingSession(false);
+      if (!cancelled) setCheckingSession(false); // show form if not logged-in
     })();
     return () => { cancelled = true; };
   }, [navigate, resolveNext]);
 
   useEffect(() => setGoogleReady(true), []);
 
-  // Re-check session and redirect after successful login
+  // After login, re-check session and then redirect
   const finishLogin = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
@@ -264,7 +265,7 @@ export default function Login({ onLogin }) {
           return;
         }
       }
-      // small retry once
+      // retry once
       setTimeout(async () => {
         const res2 = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
         if (res2.ok) {
@@ -325,7 +326,6 @@ export default function Login({ onLogin }) {
   }
 
   /* ===== Mobile OTP (Manual Login + Timer) ===== */
-  const [timer, setTimer] = useState(0);
   useEffect(() => {
     let interval;
     if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
@@ -400,6 +400,7 @@ export default function Login({ onLogin }) {
         credentials: "include",
         body: JSON.stringify({ mobile }),
       });
+
       const loginData = await loginRes.json().catch(() => ({}));
       if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
 
@@ -418,7 +419,7 @@ export default function Login({ onLogin }) {
     }
   }
 
-  /* ===== Email Login / Signup Submit ===== */
+  /* ===== Email Login / Signup ===== */
   async function handleSubmit(e) {
     e.preventDefault();
     if (mode === "signup" && !otpVerified) return setError("Please verify your email first");
@@ -492,7 +493,7 @@ export default function Login({ onLogin }) {
 
   const handleGoogleFailure = () => setError("Google login failed, please try again.");
 
-  // While checking session, keep the page minimal
+  /* ===== UI ===== */
   if (checkingSession) {
     return (
       <div style={{ display: "grid", placeItems: "center", minHeight: "60vh", color: "#fff", fontFamily: baseFont }}>
@@ -649,7 +650,7 @@ export default function Login({ onLogin }) {
         )}
       </div>
 
-      {/* Mobile modal after Google login if mobile missing */}
+      {/* mobile modal for Google users */}
       <MobileVerificationModal
         show={showMobileModal}
         onClose={() => setShowMobileModal(false)}
@@ -659,6 +660,7 @@ export default function Login({ onLogin }) {
           sessionStorage.setItem("hv_user", JSON.stringify(updated));
           setShowMobileModal(false);
           onLogin?.(updated);
+          // do not assume session; finishLogin will confirm then redirect
           finishLogin();
         }}
       />

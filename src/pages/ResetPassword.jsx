@@ -1,15 +1,11 @@
+// client/src/pages/ResetPassword.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import loginBg from "../assets/login-bg.jpg";
+import { API_BASE } from "../context/AuthContext";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const scale = 0.64;
-
-// Smart API URL for dev/prod
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://api.helloviza.com"
-    : "http://localhost:8080";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -25,24 +21,21 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/reset-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
-        const resData = await response.json();
+        const resData = await response.json().catch(() => ({}));
         throw new Error(resData.error || "Failed to send reset email");
       }
 
       setSuccess(true);
-      setTimeout(() => navigate("/login"), 3200); // Redirect after success
+      // brief pause, then navigate back to login
+      setTimeout(() => navigate("/login"), 1600);
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -107,6 +100,7 @@ export default function ResetPassword() {
       <div
         className="resetpw-left-bg"
         style={{ ...styles.leftBg, backgroundImage: `url(${loginBg})` }}
+        aria-hidden="true"
       />
 
       {/* Right-side form */}
@@ -115,30 +109,27 @@ export default function ResetPassword() {
           Reset Password
         </h1>
 
-        <form
-          className="resetpw-form"
-          onSubmit={handleSubmit}
-          style={styles.form}
-        >
-          <label style={styles.label}>Email</label>
+        <form className="resetpw-form" onSubmit={handleSubmit} style={styles.form}>
+          <label htmlFor="email" style={styles.label}>
+            Email
+          </label>
           <input
+            id="email"
             type="email"
             name="email"
             style={styles.input}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
+            autoComplete="email"
             required
             disabled={loading || success}
           />
 
           {error && (
             <div
-              style={{
-                color: "#f44336",
-                fontWeight: "bold",
-                marginBottom: 10,
-              }}
+              role="alert"
+              style={{ color: "#f44336", fontWeight: "bold", marginBottom: 10 }}
             >
               {error}
             </div>
@@ -146,11 +137,8 @@ export default function ResetPassword() {
 
           {success && (
             <div
-              style={{
-                color: "#388e3c",
-                fontWeight: "bold",
-                marginBottom: 10,
-              }}
+              role="status"
+              style={{ color: "#388e3c", fontWeight: "bold", marginBottom: 10 }}
             >
               Password reset link sent! Please check your email.
             </div>
@@ -160,38 +148,24 @@ export default function ResetPassword() {
             type="submit"
             style={styles.submitBtn}
             disabled={loading || success}
-            aria-busy={loading}
+            aria-busy={loading ? "true" : "false"}
           >
-            {loading ? "Sending..." : "Reset Password"}
+            {loading ? "Sending..." : "Send Reset Link"}
           </button>
 
           <div className="resetpw-below-links" style={styles.belowLinks}>
             <span>
               Already have an account?{" "}
-              <a
-                href="#"
-                style={styles.link}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/login");
-                }}
-              >
-                Log In here
-              </a>
+              <Link to="/login" style={styles.link}>
+                Log in here
+              </Link>
             </span>
             <br />
             <span>
               Trouble signing up?{" "}
-              <a
-                href="#"
-                style={styles.link}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/contact");
-                }}
-              >
+              <Link to="/contact" style={styles.link}>
                 Contact us
-              </a>
+              </Link>
             </span>
           </div>
         </form>
@@ -257,7 +231,7 @@ const styles = {
     background: "#fed7cd",
     border: "2px solid #222",
     color: "#111",
-    borderRadius: "0px",
+    borderRadius: 0,
     fontWeight: 400,
     marginBottom: "0.3vw",
     marginTop: "0.10vw",
@@ -274,7 +248,7 @@ const styles = {
     background: "#f3f3f3",
     color: "#d06549",
     border: "none",
-    borderRadius: "0px",
+    borderRadius: 0,
     margin: "0.6vw 0 0.3vw 0",
     cursor: "pointer",
     fontFamily: baseFont,

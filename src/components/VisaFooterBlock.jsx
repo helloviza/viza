@@ -1,22 +1,24 @@
 // client/src/components/VisaFooterBlock.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
-// Responsive helpers
+/** Responsive helper with resize listener (footer-only) */
 function useScreenSize() {
-  if (typeof window === "undefined") return { mobile: false, width: 1200 };
-  const width = window.innerWidth;
-  return {
-    mobile: width < 700,
-    width,
-  };
+  const get = () => (typeof window === "undefined" ? { mobile: false, width: 1200 } : { mobile: window.innerWidth < 700, width: window.innerWidth });
+  const [s, setS] = useState(get);
+  useEffect(() => {
+    const onR = () => setS(get());
+    window.addEventListener("resize", onR);
+    return () => window.removeEventListener("resize", onR);
+  }, []);
+  return s;
 }
 
 const VisaFooterBlock = () => {
   const { mobile } = useScreenSize();
 
-  // layout helpers for the FOOTER ONLY
   const footerRowDir = mobile ? "column" : "row";
   const padFooter = mobile ? "2.4rem 4vw 1rem 4vw" : "2.4rem 2.8vw 0.96rem 2.8vw";
   const bottomBarPad = mobile ? "0.8rem 4vw 0.32rem 4vw" : "0.8rem 2.8vw 0.32rem 2.8vw";
@@ -24,7 +26,6 @@ const VisaFooterBlock = () => {
   const colStack = mobile;
   const dividerHeight = mobile ? 3 : 6;
 
-  // Re-usable styles for the Subscribe form (same look as before)
   const subscribeFormStyles = {
     wrapper: {
       display: "flex",
@@ -63,20 +64,20 @@ const VisaFooterBlock = () => {
 
   return (
     <div>
-      {/* Optional divider above footer (kept as-is) */}
+      {/* Divider above footer */}
       <div
         style={{
           width: "100%",
           height: dividerHeight,
           background: "linear-gradient(90deg, #fff 0%, #48b4e0 80%, #fff 100%)",
           boxShadow: "0 1px 18px #48b4e080, 0 0px 0 #000, 0 2px 24px #fff2",
-          margin: "0",
+          margin: 0,
           border: "none",
           outline: "none",
         }}
       />
 
-      {/* === FOOTER SECTION === */}
+      {/* === FOOTER === */}
       <footer
         style={{
           background: "#d06549",
@@ -104,67 +105,29 @@ const VisaFooterBlock = () => {
           }}
         >
           {/* DISCOVER */}
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: "128px",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: colAlign,
-              gap: mobile ? "0.46rem" : "0.56rem",
-              fontFamily: baseFont,
-              marginBottom: colStack ? "1.3rem" : 0,
-            }}
-          >
+          <div style={colWrapStyle(colAlign, colStack, mobile)}>
             <div style={colHeaderStyle(mobile)}>DISCOVER</div>
-            <a href="/" style={footerLinkStyle}>Home</a>
-            <a href="/blog" style={footerLinkStyle}>Blog</a>
-            <a href="/contact" style={footerLinkStyle}>Contact</a>
+            <Link to="/" style={footerLinkStyle}>Home</Link>
+            <Link to="/blog" style={footerLinkStyle}>Blog</Link>
+            <Link to="/contact" style={footerLinkStyle}>Contact</Link>
           </div>
 
           {/* MANAGEMENT */}
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: "128px",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: colAlign,
-              gap: mobile ? "0.46rem" : "0.56rem",
-              fontFamily: baseFont,
-              marginBottom: colStack ? "1.3rem" : 0,
-            }}
-          >
+          <div style={colWrapStyle(colAlign, colStack, mobile)}>
             <div style={colHeaderStyle(mobile)}>MANAGEMENT</div>
-            <a href="/about" style={footerLinkStyle}>About Us</a>
-            <a href="/careers" style={footerLinkStyle}>Career</a>
+            <Link to="/about" style={footerLinkStyle}>About Us</Link>
+            <Link to="/careers" style={footerLinkStyle}>Career</Link>
           </div>
 
           {/* OUR SERVICE */}
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: "128px",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: colAlign,
-              gap: mobile ? "0.46rem" : "0.56rem",
-              fontFamily: baseFont,
-              marginBottom: colStack ? "1.3rem" : 0,
-            }}
-          >
+          <div style={colWrapStyle(colAlign, colStack, mobile)}>
             <div style={colHeaderStyle(mobile)}>OUR SERVICE</div>
             <a
               href="https://www.plumtrips.com"
               style={footerLinkStyle}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Book my Flight on PlumTrips (opens in a new tab)"
             >
               Book my Flight
             </a>
@@ -173,56 +136,56 @@ const VisaFooterBlock = () => {
               style={footerLinkStyle}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Book my Hotel on PlumTrips (opens in a new tab)"
             >
               Book my Hotel
             </a>
           </div>
 
           {/* SOCIAL MEDIA */}
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: "128px",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: colAlign,
-              gap: mobile ? "0.46rem" : "0.56rem",
-              fontFamily: baseFont,
-              marginBottom: colStack ? "1.3rem" : 0,
-            }}
-          >
+          <div style={colWrapStyle(colAlign, colStack, mobile)}>
             <div style={colHeaderStyle(mobile)}>SOCIAL MEDIA</div>
-            <a href="#" style={footerLinkStyle}>Instagram</a>
-            <a href="#" style={footerLinkStyle}>YouTube</a>
-            <a href="#" style={footerLinkStyle}>Facebook</a>
+            <a
+              href="https://instagram.com/helloviza"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={footerLinkStyle}
+              aria-label="Instagram (opens in a new tab)"
+            >
+              Instagram
+            </a>
+            <a
+              href="https://www.youtube.com/@helloviza"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={footerLinkStyle}
+              aria-label="YouTube (opens in a new tab)"
+            >
+              YouTube
+            </a>
+            <a
+              href="https://facebook.com/hellovizaofficial"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={footerLinkStyle}
+              aria-label="Facebook (opens in a new tab)"
+            >
+              Facebook
+            </a>
           </div>
 
-          {/* SUBSCRIBE (moved here, same UI as before) */}
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: "128px",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: colAlign,
-              gap: mobile ? "0.7rem" : "0.8rem",
-              fontFamily: baseFont,
-              marginBottom: colStack ? "1.3rem" : 0,
-            }}
-          >
+          {/* SUBSCRIBE */}
+          <div style={colWrapStyle(colAlign, colStack, mobile)}>
             <div style={colHeaderStyle(mobile)}>SUBSCRIBE</div>
             <div style={{ fontSize: mobile ? "0.7rem" : "0.8rem", opacity: 0.95 }}>
               Get updates in your inbox.
             </div>
-            <form style={subscribeFormStyles.wrapper} onSubmit={(e)=>e.preventDefault()}>
+            <form style={subscribeFormStyles.wrapper} onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your email address"
                 style={subscribeFormStyles.input}
+                aria-label="Email address"
               />
               <button type="submit" style={subscribeFormStyles.button}>Subscribe</button>
             </form>
@@ -238,7 +201,7 @@ const VisaFooterBlock = () => {
             display: "flex",
             flexDirection: footerRowDir,
             justifyContent: "space-between",
-            alignItems: mobile ? "center" : "center",
+            alignItems: "center",
             background: "#d06549",
             fontFamily: baseFont,
             gap: mobile ? "0.6rem" : 0,
@@ -256,6 +219,7 @@ const VisaFooterBlock = () => {
           >
             &copy; {new Date().getFullYear()} Helloviza, All rights reserved
           </div>
+
           <div
             style={{
               display: "flex",
@@ -264,12 +228,14 @@ const VisaFooterBlock = () => {
               alignItems: "center",
               flex: 1,
               fontFamily: baseFont,
+              flexWrap: "wrap",
             }}
           >
-            <a href="/privacy" style={bottomLinkStyle}>Privacy Policy</a>
-            <a href="/terms" style={bottomLinkStyle}>Terms of Use</a>
-            <a href="/Newsroom" style={bottomLinkStyle}>Newsroom</a>
+            <Link to="/privacy" style={bottomLinkStyle}>Privacy Policy</Link>
+            <Link to="/terms" style={bottomLinkStyle}>Terms of Use</Link>
+            <Link to="/newsroom" style={bottomLinkStyle}>Newsroom</Link>
           </div>
+
           <div
             style={{
               color: "#ffffff",
@@ -281,7 +247,14 @@ const VisaFooterBlock = () => {
               width: mobile ? "100%" : "auto",
             }}
           >
-            <a href="#" style={bottomCreditStyle}>Helloviza’s website</a>
+            <a
+              href="https://www.helloviza.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={bottomCreditStyle}
+            >
+              Helloviza’s website
+            </a>
           </div>
         </div>
       </footer>
@@ -289,7 +262,20 @@ const VisaFooterBlock = () => {
   );
 };
 
-// Shared small styles
+/* ===== Small style helpers ===== */
+const colWrapStyle = (align, colStack, mobile) => ({
+  flex: "1 1 0",
+  minWidth: "128px",
+  margin: 0,
+  padding: 0,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: align,
+  gap: mobile ? "0.46rem" : "0.56rem",
+  fontFamily: baseFont,
+  marginBottom: colStack ? "1.3rem" : 0,
+});
+
 const colHeaderStyle = (mobile) => ({
   color: "#ffffff",
   fontWeight: 700,

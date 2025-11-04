@@ -1,26 +1,33 @@
 // src/pages/VisaHandoff.jsx
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function VisaHandoff() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading } = useAuth();
 
+  // Memoized to satisfy react-hooks/exhaustive-deps
+  const buildTargetUrl = useCallback(() => {
+    const base = "https://visa.helloviza.com/go-for-visa";
+    const srcParams = new URLSearchParams(location.search);
+    if (!srcParams.has("autostart")) srcParams.set("autostart", "1");
+    const qs = srcParams.toString();
+    return qs ? `${base}?${qs}` : base;
+  }, [location.search]);
+
   useEffect(() => {
-    // Wait for AuthContext to finish loading
     if (loading) return;
 
     if (!user) {
-      // not logged in -> redirect to login with ?next
-      navigate(`/login?next=${encodeURIComponent('/go/visa')}`, { replace: true });
+      const nextPath = `/go/visa${location.search || ""}`;
+      navigate(`/login?next=${encodeURIComponent(nextPath)}`, { replace: true });
       return;
     }
 
-    // ✅ user ready: now redirect externally
-    const visaUrl = "https://visa.helloviza.com";
-    window.location.href = visaUrl;
-  }, [user, loading, navigate]);
+    window.location.href = buildTargetUrl();
+  }, [user, loading, navigate, location.search, buildTargetUrl]);
 
   return (
     <div
@@ -43,8 +50,18 @@ export default function VisaHandoff() {
         </>
       ) : user ? (
         <>
-          <h2>Redirecting to Visa Booking Page…</h2>
+          <h2>Redirecting to Visa Booking…</h2>
           <p>Connecting you securely to visa.helloviza.com</p>
+          <small style={{ opacity: 0.7 }}>
+            If this takes longer,{" "}
+            <a
+              href={buildTargetUrl()}
+              style={{ color: "#00477f", textDecoration: "underline" }}
+            >
+              click here
+            </a>
+            .
+          </small>
         </>
       ) : (
         <>
