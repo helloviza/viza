@@ -8,20 +8,34 @@ import loginBg from "../assets/login-bg.jpg";
 /* ====== constants ====== */
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
+
+const HOST = typeof window !== "undefined" ? window.location.hostname : "";
+const IS_LOCAL = HOST === "localhost" || HOST === "127.0.0.1";
+
 export const API_BASE =
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:8080"
-    : "https://api.helloviza.com";
+  process.env.REACT_APP_API_BASE ||
+  (IS_LOCAL ? "http://localhost:8080" : "https://api.helloviza.com");
+
+// ---- Feature Flags (env-driven) ----
+const ENABLE_GOOGLE = (process.env.REACT_APP_ENABLE_GOOGLE_OAUTH ?? "true") === "true";
+const ENABLE_MOBILE = (process.env.REACT_APP_ENABLE_MOBILE_LOGIN ?? "true") === "true";
+const ENABLE_EMAIL  = (process.env.REACT_APP_ENABLE_EMAIL_LOGIN ?? "true") === "true";
+
+// External redirects OFF by default to keep login/signup local
+const ALLOW_EXTERNAL_NEXT =
+  (process.env.REACT_APP_ALLOW_EXTERNAL_POST_LOGIN ?? "false") === "true";
 
 /* ====== Safe next resolver (strict) ======
-   Allows:
+   INTERNAL-FIRST: keep users inside this app.
+
+   If ALLOW_EXTERNAL_NEXT === true, we additionally allow:
    • https://visa.helloviza.com/...
    • https://www.helloviza.com/...
-   • local paths starting with "/"
-   Falls back to https://visa.helloviza.com
+
+   Fallback (internal home): "/"
 */
 function pickPostLoginTarget(searchOrSaved) {
-  const fallback = "https://visa.helloviza.com";
+  const fallback = "/";
 
   const rawSearch =
     typeof searchOrSaved === "string" && searchOrSaved.includes("=")
@@ -47,9 +61,14 @@ function pickPostLoginTarget(searchOrSaved) {
   let next = "";
   try { next = decodeURIComponent(raw); } catch { next = raw; }
 
-  if (/^https:\/\/visa\.helloviza\.com(\/|$)/i.test(next)) return next;
-  if (/^https:\/\/(www\.)?helloviza\.com(\/|$)/i.test(next)) return next;
-  if (next.startsWith("/")) return next;
+  // INTERNAL paths are always allowed
+  if (typeof next === "string" && next.startsWith("/")) return next || "/";
+
+  // Optionally allow trusted external domains
+  if (ALLOW_EXTERNAL_NEXT && typeof next === "string") {
+    if (/^https:\/\/visa\.helloviza\.com(\/|$)/i.test(next)) return next;
+    if (/^https:\/\/(www\.)?helloviza\.com(\/|$)/i.test(next)) return next;
+  }
 
   return fallback;
 }
@@ -221,7 +240,7 @@ export default function Login({ onLogin }) {
     return pickPostLoginTarget(saved || location.search);
   }, [location.search]);
 
-  // Check if already logged in → redirect to target
+  // Check if already logged in → redirect to target (strictly internal unless env allows)
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -233,11 +252,16 @@ export default function Login({ onLogin }) {
             const target = resolveNext();
             sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
             if (/^https?:\/\//i.test(target)) {
-              window.location.replace(target);
+              if (ALLOW_EXTERNAL_NEXT) {
+                window.location.replace(target);
+                return;
+              }
+              navigate("/", { replace: true });
+              return;
             } else {
               navigate(target, { replace: true });
+              return;
             }
-            return;
           }
         }
       } catch (_) {}
@@ -248,7 +272,7 @@ export default function Login({ onLogin }) {
 
   useEffect(() => setGoogleReady(true), []);
 
-  // After login, re-check session and then redirect
+  // After login, re-check session and then redirect (strictly internal unless env allows)
   const finishLogin = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
@@ -258,7 +282,11 @@ export default function Login({ onLogin }) {
           const target = resolveNext();
           sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
           if (/^https?:\/\//i.test(target)) {
-            window.location.replace(target);
+            if (ALLOW_EXTERNAL_NEXT) {
+              window.location.replace(target);
+            } else {
+              navigate("/", { replace: true });
+            }
           } else {
             navigate(target, { replace: true });
           }
@@ -274,7 +302,11 @@ export default function Login({ onLogin }) {
             const target = resolveNext();
             sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
             if (/^https?:\/\//i.test(target)) {
-              window.location.replace(target);
+              if (ALLOW_EXTERNAL_NEXT) {
+                window.location.replace(target);
+              } else {
+                navigate("/", { replace: true });
+              }
             } else {
               navigate(target, { replace: true });
             }
@@ -475,7 +507,6 @@ export default function Login({ onLogin }) {
       localStorage.setItem("helloviza_user", JSON.stringify(userData));
       localStorage.setItem("hv_user", JSON.stringify(userData));
       sessionStorage.setItem("hv_user", JSON.stringify(userData));
-      localStorage.setItem("hv_token", idToken || "");
 
       if (!userData?.mobileVerified && !userData?.mobile) {
         setPendingUser(userData);
@@ -493,7 +524,27 @@ export default function Login({ onLogin }) {
 
   const handleGoogleFailure = () => setError("Google login failed, please try again.");
 
-  /* ===== UI ===== */
+  /* ===== Unconditional tab definitions + guard (before any return) ===== */
+  const tabDefs = React.useMemo(() => {
+    const arr = [];
+    if (ENABLE_EMAIL) {
+      arr.push({ key: "login", label: "Log in" });
+      arr.push({ key: "signup", label: "Sign Up" });
+    }
+    if (ENABLE_MOBILE) {
+      arr.push({ key: "mobile", label: "Mobile Login" });
+    }
+    return arr;
+  }, []);
+
+  useEffect(() => {
+    const allowed = tabDefs.map(t => t.key);
+    if (!allowed.includes(mode) && allowed.length) {
+      setMode(allowed[0]);
+    }
+  }, [mode, tabDefs]);
+
+  /* ===== UI (safe early return AFTER all hooks) ===== */
   if (checkingSession) {
     return (
       <div style={{ display: "grid", placeItems: "center", minHeight: "60vh", color: "#fff", fontFamily: baseFont }}>
@@ -508,11 +559,7 @@ export default function Login({ onLogin }) {
       <div className="login-left-bg" style={{ ...S.leftBg, backgroundImage: `url(${loginBg})` }} />
       <div className="login-form-area" style={S.formArea}>
         <div className="login-tabs" style={S.tabs}>
-          {[
-            { key: "login", label: "Log in" },
-            { key: "signup", label: "Sign Up" },
-            { key: "mobile", label: "Mobile Login" },
-          ].map((t) => (
+          {tabDefs.map((t) => (
             <div
               key={t.key}
               onClick={() => { setMode(t.key); setError(""); }}
@@ -526,14 +573,15 @@ export default function Login({ onLogin }) {
           ))}
         </div>
 
-        {googleReady && mode !== "mobile" && (
+        {/* Google button (optional) */}
+        {ENABLE_GOOGLE && mode !== "mobile" && (
           <div style={{ marginBottom: 20, textAlign: "center" }}>
             <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} useOneTap={false} />
           </div>
         )}
 
         {/* === EMAIL LOGIN / SIGNUP === */}
-        {mode !== "mobile" && (
+        {ENABLE_EMAIL && mode !== "mobile" && (
           <form onSubmit={handleSubmit} style={S.form}>
             {error && <div style={S.error}>{error}</div>}
             {mode === "signup" && (
@@ -604,7 +652,7 @@ export default function Login({ onLogin }) {
         )}
 
         {/* === MOBILE LOGIN === */}
-        {mode === "mobile" && (
+        {ENABLE_MOBILE && mode === "mobile" && (
           <form onSubmit={mobileOtpSent ? handleVerifyMobileOtp : handleSendMobileOtp} style={S.form}>
             {error && <div style={S.error}>{error}</div>}
             <input
@@ -624,7 +672,7 @@ export default function Login({ onLogin }) {
                   placeholder="Enter OTP"
                   value={mobileOtp}
                   onChange={(e) => setMobileOtp(e.target.value)}
-                  maxLength={4}
+                  maxLength={6}
                   style={S.input}
                   required
                 />

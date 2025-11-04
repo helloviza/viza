@@ -45,36 +45,71 @@ import VisaHandoff from "./pages/VisaHandoff";
 /* ==== Auth Context ==== */
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-/* ==== Helpers for post-login redirect ==== */
+/* ==== Helpers for post-login redirect (cross-domain safe) ==== */
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
+const VISA_HOST = "https://visa.helloviza.com";
+const WWW_HOST = "https://www.helloviza.com";
+const DEFAULT_VISA = `${VISA_HOST}/qr-visa?autostart=1`;
 
-function normalizeNext(urlish) {
+function isAllowedAbsolute(u) {
   try {
-    const u = new URL(urlish, window.location.origin);
-    let path = u.pathname + (u.search || "");
-    if (u.pathname === "/go-for-visa" || u.pathname === "/go/visa") {
-      // ensure autostart once we land there
-      const sp = new URLSearchParams(u.search);
-      if (!sp.has("autostart")) sp.set("autostart", "1");
-      path = u.pathname + "?" + sp.toString();
-    }
-    return path.startsWith("/") ? path : "/";
+    const url = new URL(u);
+    return url.origin === VISA_HOST || url.origin === WWW_HOST;
   } catch {
-    return "/";
+    return false;
   }
 }
 
+/** Build ABSOLUTE https://visa.../qr-visa with preserved query & autostart=1 */
+function buildVisaQrFrom(urlish) {
+  try {
+    const base = new URL("/qr-visa", VISA_HOST);
+    const src = new URL(urlish, VISA_HOST); // tolerate relative input
+    const sp = new URLSearchParams(src.search);
+    if (!sp.has("autostart")) sp.set("autostart", "1");
+    base.search = sp.toString();
+    return base.toString();
+  } catch {
+    return DEFAULT_VISA;
+  }
+}
+
+/** Stash ?next (or ?from) EARLY without stripping absolute hosts */
 function stashRedirectFromQuery(search) {
   const sp = new URLSearchParams(search);
   const candidate = sp.get("next") || sp.get("from");
-  if (candidate) sessionStorage.setItem(LOGIN_REDIRECT_KEY, normalizeNext(candidate));
+  if (!candidate) return;
+
+  if (isAllowedAbsolute(candidate) || candidate.startsWith("/")) {
+    sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
+  } else {
+    // Unknown origins → normalize to safe visa QR
+    sessionStorage.setItem(LOGIN_REDIRECT_KEY, buildVisaQrFrom(candidate));
+  }
 }
 
+/** Resolve and clear saved redirect. Returns ABSOLUTE for cross-domain, else relative (rare). */
 function popRedirectOrHome() {
   const saved = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
-  const target = saved ? normalizeNext(saved) : "/";
   sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
-  return target;
+
+  if (!saved) return DEFAULT_VISA;
+
+  // Absolute allowed → keep absolute
+  if (isAllowedAbsolute(saved)) return saved;
+
+  // Legacy local paths → normalize to visa QR (preserving query if present)
+  if (
+    saved.startsWith("/go/visa") ||
+    saved.startsWith("/go-for-visa") ||
+    saved.startsWith("/qr-visa") ||
+    saved.startsWith("/")
+  ) {
+    return buildVisaQrFrom(saved);
+  }
+
+  // Fallback
+  return DEFAULT_VISA;
 }
 
 /* ==== Protected Route Wrapper ==== */
@@ -84,14 +119,14 @@ function RequireAuth({ user, children }) {
 }
 
 /* ==== Login Route Guard ==== */
-/* If user is already authenticated and visits /login (e.g., after clicking Go for Visa),
-   immediately redirect to saved ?next= (or home). */
+/* If user is already authenticated and visits /login,
+   immediately redirect to saved ?next= (absolute visa URL) or safe default. */
 function LoginRoute({ onLogin }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // stash ?next= as soon as we hit /login
+  // stash ?next= as soon as we hit /login (preserves absolute)
   React.useEffect(() => {
     stashRedirectFromQuery(location.search);
   }, [location.search]);
@@ -99,7 +134,13 @@ function LoginRoute({ onLogin }) {
   React.useEffect(() => {
     if (loading) return;
     if (user) {
-      navigate(popRedirectOrHome(), { replace: true });
+      const target = popRedirectOrHome();
+      if (/^https?:\/\//i.test(target)) {
+        // Cross-domain bounce: avoid back-loop
+        window.location.replace(target);
+      } else {
+        navigate(target, { replace: true });
+      }
     }
   }, [user, loading, navigate]);
 

@@ -1,12 +1,25 @@
 // src/pages/GoForVisa.jsx
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useMemo, useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import bgImg from "../assets/visa-bg.jpg";
 import hellovizaLogo from "../assets/helloviza-logo.png";
 import { API_BASE } from "../utils/api";
 
+/* =========================
+   Config & small utilities
+   ========================= */
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/**
+ * 🔒 Force the real visa subdomain (absolute, not relative)
+ * Ignore any env that might point to localhost for this page.
+ */
+const VISA_ORIGIN = "https://visa.helloviza.com";
+
+/** Choose the landing path on the subdomain */
+const VISA_DEFAULT_PATH = "/qr-visa?autostart=1"; // change to "/" if you prefer the root
+
 const toDDMMMYYYY = (v) => {
   if (!v) return "";
   const d = new Date(v);
@@ -14,18 +27,43 @@ const toDDMMMYYYY = (v) => {
   return `${String(d.getUTCDate()).padStart(2, "0")}-${MONTHS[d.getUTCMonth()]}-${d.getUTCFullYear()}`;
 };
 
-export default function GoForVisa({ user }) {
-  const navigate = useNavigate();
+/** Build ABSOLUTE target like https://visa.helloviza.com/qr-visa?autostart=1&to=... */
+function buildVisaAbsoluteUrl(currentSearch = "") {
+  // Start from an absolute base (prevents any relative navigation)
+  const baseAbs = new URL(VISA_DEFAULT_PATH, VISA_ORIGIN);
+
+  // Merge the current page’s query (to/start/end/etc.) into the visa URL
+  const incoming = new URLSearchParams(currentSearch || "");
+  incoming.forEach((val, key) => {
+    baseAbs.searchParams.set(key, val);
+  });
+
+  // Ensure autostart=1 present (idempotent)
+  if (!baseAbs.searchParams.has("autostart")) {
+    baseAbs.searchParams.set("autostart", "1");
+  }
+
+  // Final absolute URL
+  return baseAbs.toString();
+}
+
+/** Local login with next=<ABSOLUTE VISA URL> */
+function buildLoginUrlWithNext(nextAbs) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const u = new URL("/login", origin);
+  u.searchParams.set("next", nextAbs);
+  return u.toString();
+}
+
+/* =========================
+   Component
+   ========================= */
+export default function GoForVisa() {
   const [params] = useSearchParams();
-
-  const [evmUrl, setEvmUrl] = useState(null);
-  const [trackUrl, setTrackUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [iframeLoading, setIframeLoading] = useState(false);
   const [apiError, setApiError] = useState("");
-  const [resumeMsg, setResumeMsg] = useState("");
 
-  // Prefill from /go-for-visa?to=THA&start=...&end=...
+  // Prefill panel (informational only)
   const prefill = useMemo(() => {
     const to = params.get("to") || "";
     const start = params.get("start") || "";
@@ -39,167 +77,51 @@ export default function GoForVisa({ user }) {
     };
   }, [params]);
 
-  // 🔹 Try to auto-resume last session
-  useEffect(() => {
-    const lastVisa = localStorage.getItem("hv:lastVisaUrl");
-    const lastTrack = localStorage.getItem("hv:lastVisaTrackUrl");
-    if (lastVisa && user) {
-      setResumeMsg("Resuming your previous Visaero session...");
-      setTimeout(() => {
-        setEvmUrl(lastVisa);
-        setTrackUrl(lastTrack || null);
-      }, 800);
-    }
-  }, [user]);
-
-  // 🔹 Start Visaero flow
-  async function handleInitiateVisa(auto = false) {
-    if (!user) {
-      navigate(`/login?next=${encodeURIComponent("/go-for-visa")}`);
-      return;
-    }
-
-    setLoading(true);
+  /** Click → check session → either go to VISA or go to local /login?next=<VISA> */
+  const handleStart = useCallback(async () => {
     setApiError("");
-    setResumeMsg(auto ? "Connecting to Visaero..." : "");
-
+    setLoading(true);
     try {
-      const payload = {
-        external_user_id: user.id || "guest-user",
-        host: "demo",
-        nationality: "",
-        travelling_to: prefill.to || "",
-        no_of_applicants: 1,
-        start_date: prefill.startFmt,
-        end_date: prefill.endFmt,
-      };
+      // 1) Always compute an ABSOLUTE visa target (never relative)
+      const visaTargetAbs = buildVisaAbsoluteUrl(
+        typeof window !== "undefined" ? window.location.search : ""
+      );
 
-      const res = await fetch(`${API_BASE}/api/partner/initiate-visa`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      // 2) Extra hardening — normalize again to the absolute origin
+      const finalTarget = new URL(visaTargetAbs, VISA_ORIGIN).toString();
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.status !== 1) {
-        throw new Error(
-          data?.message || data?.error || `Visa initiation failed (HTTP ${res.status})`
-        );
+      // 3) Absolutely forbid localhost as target (belt & suspenders)
+      if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(finalTarget)) {
+        throw new Error("Blocked a localhost redirect. Target must be visa.helloviza.com");
       }
 
-      const url = data?.data?.evm_url || data?.data?.evmUrl;
-      const turl = data?.data?.evm_track_url || data?.data?.evmTrackUrl || "";
-      if (!url) throw new Error("Visaero did not return a valid URL.");
+      // 4) Check server-truth session
+      const r = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+      const d = await r.json().catch(() => ({}));
+      const hasSession = Boolean(r.ok && d && d.user);
 
-      setEvmUrl(url);
-      setTrackUrl(turl || null);
-      localStorage.setItem("hv:lastVisaUrl", url);
-      if (turl) localStorage.setItem("hv:lastVisaTrackUrl", turl);
+      if (hasSession) {
+        // 5a) Logged-in → handoff to subdomain
+        window.location.assign(finalTarget);
+      } else {
+        // 5b) Not logged-in → go to local /login with next=<absolute visa URL>
+        const loginUrl = buildLoginUrlWithNext(finalTarget);
+        window.location.assign(loginUrl);
+      }
     } catch (err) {
-      setApiError(err?.message || "Unable to start visa application.");
-    } finally {
+      setApiError(err?.message || "Something went wrong. Please try again.");
       setLoading(false);
     }
-  }
+  }, []);
 
-  // 🔹 If logged-in but no URL yet, auto-start flow after a short delay
-  useEffect(() => {
-    if (user && !evmUrl && !resumeMsg && !loading) {
-      handleInitiateVisa(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, evmUrl, resumeMsg, loading]);
+  /* =========================
+     UI (Get Started card)
+     ========================= */
+  const currentTarget =
+    typeof window !== "undefined"
+      ? buildVisaAbsoluteUrl(window.location.search)
+      : buildVisaAbsoluteUrl("");
 
-  // --- Logged-out screen ----------------------------------------------------
-  if (!user) {
-    return (
-      <div style={styles.outerNoUser}>
-        <div style={styles.noUserCard}>
-          <h2 style={styles.title}>Login Required</h2>
-          <p>Please log in to access the Visa application service.</p>
-          <button
-            onClick={() => navigate(`/login?next=${encodeURIComponent("/go-for-visa")}`)}
-            style={styles.loginBtn}
-          >
-            Login Now
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // --- Visaero iframe view --------------------------------------------------
-  if (evmUrl) {
-    return (
-      <div style={styles.fullScreenWrapper}>
-        <div style={styles.heroSection}>
-          <h1 style={styles.mainTitle}>Complete Your Visa Application</h1>
-          <p style={{ ...styles.subtitle, fontWeight: 400 }}>
-            Powered by{" "}
-            <img
-              src={hellovizaLogo}
-              alt="Helloviza"
-              style={{
-                height: "1.7em",
-                verticalAlign: "middle",
-                margin: "0 0.24em",
-                display: "inline-block",
-              }}
-            />
-            for a seamless, secure experience.
-          </p>
-        </div>
-
-        {iframeLoading && (
-          <div style={styles.loadingOverlay}>
-            <div style={styles.spinner} /> <span style={{ marginLeft: 10 }}>Loading Visaero...</span>
-          </div>
-        )}
-
-        <iframe
-          key={evmUrl}
-          src={evmUrl}
-          title="Visa Application"
-          style={styles.fullScreenIframe}
-          onLoad={() => setIframeLoading(false)}
-          allowFullScreen
-        />
-
-        <div style={styles.afterIframeActionsFS}>
-          {trackUrl && (
-            <button
-              style={styles.secondaryBtnFS}
-              onClick={() =>
-                navigate("/trackyourvisaapplication", { state: { trackUrl } })
-              }
-            >
-              Track Your Visa
-            </button>
-          )}
-          <button
-            style={styles.linkBtnFS}
-            onClick={() => {
-              localStorage.removeItem("hv:lastVisaUrl");
-              localStorage.removeItem("hv:lastVisaTrackUrl");
-              window.location.reload();
-            }}
-          >
-            Start New
-          </button>
-          <a
-            href={evmUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.linkBtnFS}
-          >
-            Open in New Tab
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  // --- “Get Started” screen -------------------------------------------------
   return (
     <div style={styles.fullPageBg(bgImg)}>
       <div style={styles.bannerArea}>
@@ -221,13 +143,10 @@ export default function GoForVisa({ user }) {
 
       <div style={styles.centerCard}>
         <div style={styles.stepContent}>
-          <h2 style={styles.cardTitle}>
-            {resumeMsg || "Let's Get Started"}
-          </h2>
+          <h2 style={styles.cardTitle}>Let’s Get Started</h2>
           <p style={styles.cardDesc}>
-            {resumeMsg
-              ? "We’re resuming your last visa application. Please wait..."
-              : "Click below to launch your personalized visa journey. No paperwork, no hassle."}
+            Click below to begin your seamless visa journey. We’ll hand you off securely to{" "}
+            <strong style={{ color: "#00477f" }}>{new URL(VISA_ORIGIN).host}</strong>.
           </p>
 
           {(prefill.to || prefill.startFmt || prefill.endFmt) && (
@@ -241,13 +160,10 @@ export default function GoForVisa({ user }) {
               {(prefill.startFmt || prefill.endFmt) && (
                 <>
                   Dates: <b>{prefill.startFmt || "—"}</b>
-                  {prefill.endFmt ? " → " : ""}
-                  <b>{prefill.endFmt || ""}</b>
+                  {prefill.endFmt ? " → " : ""}<b>{prefill.endFmt || ""}</b>
                 </>
               )}
-              <div style={{ marginTop: 6, opacity: 0.9 }}>
-                You can still change these later.
-              </div>
+              <div style={{ marginTop: 6, opacity: 0.9 }}>You can still change these later.</div>
             </div>
           )}
 
@@ -255,111 +171,35 @@ export default function GoForVisa({ user }) {
 
           <button
             style={styles.ctaBtn}
-            onClick={() => handleInitiateVisa(false)}
+            onClick={handleStart}
             disabled={loading}
+            aria-busy={loading ? "true" : "false"}
           >
-            {loading ? "Connecting…" : "Start Visa Application"}
+            {loading ? "Checking…" : "Start Visa Application"}
           </button>
 
+          {/* Tiny debug line to confirm absolute target */}
+          <div style={{ marginTop: "0.8rem", fontSize: "0.98rem", color: "#7a8594" }}>
+            Target:&nbsp;
+            <code style={{ wordBreak: "break-all" }}>{currentTarget}</code>
+          </div>
+
           <div style={styles.infoFooter}>
-            <span role="img" aria-label="secure">
-              🔒
-            </span>{" "}
+            <span role="img" aria-label="secure">🔒</span>{" "}
             100% Secure &amp; Trusted Partner
           </div>
         </div>
       </div>
+
+      <div style={{ height: "6vh" }} />
     </div>
   );
 }
 
-// ----------------------------- styles --------------------------------
+/* =========================
+   Styles
+   ========================= */
 const styles = {
-  fullScreenWrapper: {
-    minHeight: "100vh",
-    width: "100vw",
-    background: "#f7fafd",
-    paddingTop: 120,
-    overflow: "hidden",
-    fontFamily: baseFont,
-    position: "relative",
-  },
-  heroSection: {
-    textAlign: "center",
-    padding: "2rem 0 .8rem 0",
-    pointerEvents: "none",
-  },
-  mainTitle: {
-    fontSize: "2.6rem",
-    fontWeight: 800,
-    margin: "-4rem 0 .45rem 0",
-    color: "#23456b",
-    letterSpacing: "-.01em",
-  },
-  subtitle: {
-    fontSize: "1.19rem",
-    color: "#1c274c",
-    fontWeight: 400,
-    marginBottom: 0,
-    letterSpacing: ".01em",
-    lineHeight: 1.3,
-  },
-  fullScreenIframe: {
-    border: "none",
-    width: "100vw",
-    height: "100vh",
-    background: "#fcfdfe",
-    marginTop: 28,
-    position: "relative",
-    zIndex: 1,
-  },
-  afterIframeActionsFS: {
-    position: "absolute",
-    left: "50%",
-    bottom: 32,
-    transform: "translateX(-50%)",
-    display: "flex",
-    gap: 18,
-    zIndex: 10,
-  },
-  secondaryBtnFS: {
-    background: "#e3f2fd",
-    color: "#00477f",
-    border: "none",
-    fontWeight: 700,
-    borderRadius: 8,
-    fontSize: "1.08rem",
-    padding: "0.98rem 2.4rem",
-    cursor: "pointer",
-  },
-  linkBtnFS: {
-    background: "none",
-    color: "#0074D9",
-    border: "none",
-    fontWeight: 700,
-    fontSize: "1.08rem",
-    textDecoration: "underline",
-    cursor: "pointer",
-  },
-  loadingOverlay: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    display: "flex",
-    alignItems: "center",
-    color: "#00477f",
-    fontWeight: 700,
-    fontSize: "1.2rem",
-  },
-  spinner: {
-    width: 24,
-    height: 24,
-    border: "3px solid #d0e7ff",
-    borderTop: "3px solid #00477f",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
   fullPageBg: (img) => ({
     minHeight: "100vh",
     width: "100vw",
@@ -374,6 +214,21 @@ const styles = {
     paddingTop: "5rem",
   }),
   bannerArea: { width: "100%", padding: "6vw 0 1.5vw 0", textAlign: "center" },
+  mainTitle: {
+    fontSize: "2.6rem",
+    fontWeight: 800,
+    margin: "0 0 .45rem 0",
+    color: "#23456b",
+    letterSpacing: "-.01em",
+  },
+  subtitle: {
+    fontSize: "1.19rem",
+    color: "#1c274c",
+    fontWeight: 400,
+    marginBottom: 0,
+    letterSpacing: ".01em",
+    lineHeight: 1.3,
+  },
   centerCard: {
     width: "100%",
     maxWidth: 520,
@@ -431,33 +286,5 @@ const styles = {
     fontSize: "1rem",
     margin: "1rem 0 .2rem",
     textAlign: "center",
-  },
-  outerNoUser: {
-    minHeight: "90vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#fafafa",
-    fontFamily: baseFont,
-  },
-  noUserCard: {
-    background: "#fff",
-    padding: "2.5rem",
-    borderRadius: 18,
-    boxShadow: "0 6px 28px 0 rgba(44,44,44,0.09)",
-    minWidth: 330,
-    textAlign: "center",
-  },
-  title: { marginTop: 0, marginBottom: 10 },
-  loginBtn: {
-    marginTop: 20,
-    background: "linear-gradient(90deg,#00477f,#2196f3)",
-    color: "#fff",
-    fontWeight: 700,
-    fontSize: "1.12rem",
-    border: "none",
-    borderRadius: 8,
-    padding: "0.75rem 2.1rem",
-    cursor: "pointer",
   },
 };
