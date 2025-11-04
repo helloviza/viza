@@ -8,6 +8,7 @@ import loginBg from "../assets/login-bg.jpg";
 /* ====== constants ====== */
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
+const VISA_FLOW_FLAG = "HV:VISA_FLOW"; // <-- set only by GoForVisa.jsx
 
 const HOST = typeof window !== "undefined" ? window.location.hostname : "";
 const IS_LOCAL = HOST === "localhost" || HOST === "127.0.0.1";
@@ -21,16 +22,20 @@ const ENABLE_GOOGLE = (process.env.REACT_APP_ENABLE_GOOGLE_OAUTH ?? "true") === 
 const ENABLE_MOBILE = (process.env.REACT_APP_ENABLE_MOBILE_LOGIN ?? "true") === "true";
 const ENABLE_EMAIL  = (process.env.REACT_APP_ENABLE_EMAIL_LOGIN ?? "true") === "true";
 
-// External redirects OFF by default to keep login/signup local
-const ALLOW_EXTERNAL_NEXT =
-  (process.env.REACT_APP_ALLOW_EXTERNAL_POST_LOGIN ?? "false") === "true";
+/**
+ * IMPORTANT:
+ * Do NOT allow arbitrary external redirects on normal login.
+ * External next is allowed ONLY IF:
+ *   - VISA_FLOW_FLAG is present AND
+ *   - host is exactly visa.helloviza.com
+ */
+const VISA_HOST_REGEX = /^https:\/\/(visa\.helloviza\.com)(\/|$)/i;
 
-/* ====== Safe next resolver (strict) ======
+/* ====== Safe next resolver (strict + gated) ======
    INTERNAL-FIRST: keep users inside this app.
 
-   If ALLOW_EXTERNAL_NEXT === true, we additionally allow:
+   External 'next' is allowed ONLY for gated visa flow:
    • https://visa.helloviza.com/...
-   • https://www.helloviza.com/...
 
    Fallback (internal home): "/"
 */
@@ -64,16 +69,20 @@ function pickPostLoginTarget(searchOrSaved) {
   // INTERNAL paths are always allowed
   if (typeof next === "string" && next.startsWith("/")) return next || "/";
 
-  // Optionally allow trusted external domains
-  if (ALLOW_EXTERNAL_NEXT && typeof next === "string") {
-    if (/^https:\/\/visa\.helloviza\.com(\/|$)/i.test(next)) return next;
-    if (/^https:\/\/(www\.)?helloviza\.com(\/|$)/i.test(next)) return next;
+  // Gated external: only if GoForVisa set the flag AND host is the visa subdomain
+  const visaFlow = (() => {
+    try { return sessionStorage.getItem(VISA_FLOW_FLAG) === "1"; } catch { return false; }
+  })();
+
+  if (visaFlow && typeof next === "string" && VISA_HOST_REGEX.test(next)) {
+    return next;
   }
 
+  // otherwise reject external next
   return fallback;
 }
 
-/* ====== small modal for mobile verification (used when Google user has no mobile) ====== */
+/* ===== small modal for mobile verification (Google users without mobile) ===== */
 function MobileVerificationModal({ show, onClose, onVerified }) {
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -198,7 +207,6 @@ export default function Login({ onLogin }) {
   const [otp, setOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleReady, setGoogleReady] = useState(false);
 
   // Mobile login states
   const [mobile, setMobile] = useState("");
@@ -223,16 +231,34 @@ export default function Login({ onLogin }) {
     setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
   }
 
-  // Persist ?next= or ?from= very early for multi-step flows
+  /**
+   * Persist ?next= early, but ONLY if:
+   *  - internal path (startsWith("/")), OR
+   *  - visa flow flag is set (external allowed later by resolver)
+   */
   useEffect(() => {
     const n = params.get("next");
-    if (n) sessionStorage.setItem(LOGIN_REDIRECT_KEY, n);
+    if (!n) return;
+    const isInternal = n.startsWith("/");
+    const visaFlow = (() => {
+      try { return sessionStorage.getItem(VISA_FLOW_FLAG) === "1"; } catch { return false; }
+    })();
+    if (isInternal || visaFlow) {
+      sessionStorage.setItem(LOGIN_REDIRECT_KEY, n);
+    }
   }, [params]);
 
   useEffect(() => {
     const sp = new URLSearchParams(location.search);
     const candidate = sp.get("from") || sp.get("next");
-    if (candidate) sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
+    if (!candidate) return;
+    const isInternal = candidate.startsWith("/");
+    const visaFlow = (() => {
+      try { return sessionStorage.getItem(VISA_FLOW_FLAG) === "1"; } catch { return false; }
+    })();
+    if (isInternal || visaFlow) {
+      sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
+    }
   }, [location.search]);
 
   const resolveNext = useCallback(() => {
@@ -240,7 +266,7 @@ export default function Login({ onLogin }) {
     return pickPostLoginTarget(saved || location.search);
   }, [location.search]);
 
-  // Check if already logged in → redirect to target (strictly internal unless env allows)
+  // If already logged in → redirect using gated resolver
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -251,12 +277,12 @@ export default function Login({ onLogin }) {
           if (data && data.user) {
             const target = resolveNext();
             sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            // clear visa flow flag after using it
+            try { sessionStorage.removeItem(VISA_FLOW_FLAG); } catch {}
+
             if (/^https?:\/\//i.test(target)) {
-              if (ALLOW_EXTERNAL_NEXT) {
-                window.location.replace(target);
-                return;
-              }
-              navigate("/", { replace: true });
+              // only allowed if resolver returned external (i.e., visa flow)
+              window.location.replace(target);
               return;
             } else {
               navigate(target, { replace: true });
@@ -265,14 +291,19 @@ export default function Login({ onLogin }) {
           }
         }
       } catch (_) {}
-      if (!cancelled) setCheckingSession(false); // show form if not logged-in
+      if (!cancelled) setCheckingSession(false); // show form if not logged in
     })();
     return () => { cancelled = true; };
   }, [navigate, resolveNext]);
 
-  useEffect(() => setGoogleReady(true), []);
+  // Countdown for mobile resend
+  useEffect(() => {
+    let interval;
+    if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
 
-  // After login, re-check session and then redirect (strictly internal unless env allows)
+  // After login, re-check session and then redirect using gated resolver
   const finishLogin = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
@@ -281,12 +312,10 @@ export default function Login({ onLogin }) {
         if (data && data.user) {
           const target = resolveNext();
           sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+          try { sessionStorage.removeItem(VISA_FLOW_FLAG); } catch {}
+
           if (/^https?:\/\//i.test(target)) {
-            if (ALLOW_EXTERNAL_NEXT) {
-              window.location.replace(target);
-            } else {
-              navigate("/", { replace: true });
-            }
+            window.location.replace(target);
           } else {
             navigate(target, { replace: true });
           }
@@ -301,12 +330,10 @@ export default function Login({ onLogin }) {
           if (data2 && data2.user) {
             const target = resolveNext();
             sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            try { sessionStorage.removeItem(VISA_FLOW_FLAG); } catch {}
+
             if (/^https?:\/\//i.test(target)) {
-              if (ALLOW_EXTERNAL_NEXT) {
-                window.location.replace(target);
-              } else {
-                navigate("/", { replace: true });
-              }
+              window.location.replace(target);
             } else {
               navigate(target, { replace: true });
             }
@@ -358,12 +385,6 @@ export default function Login({ onLogin }) {
   }
 
   /* ===== Mobile OTP (Manual Login + Timer) ===== */
-  useEffect(() => {
-    let interval;
-    if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
-
   async function handleSendMobileOtp(e) {
     e.preventDefault();
     if (!mobile) return setError("Enter mobile number");
@@ -708,7 +729,7 @@ export default function Login({ onLogin }) {
           sessionStorage.setItem("hv_user", JSON.stringify(updated));
           setShowMobileModal(false);
           onLogin?.(updated);
-          // do not assume session; finishLogin will confirm then redirect
+          // finishLogin will confirm session and redirect via gated resolver
           finishLogin();
         }}
       />
