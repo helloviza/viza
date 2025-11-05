@@ -1,122 +1,168 @@
 // src/pages/VisaHandoff.jsx
-import React, { useEffect, useCallback, useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const API_BASE =
-  typeof window !== "undefined" && /localhost|127\.0\.0\.1/.test(window.location.hostname)
-    ? "http://localhost:8080"
-    : "https://api.helloviza.com";
+const VISA_INTENT_KEY = "HV:VISA_INTENT_TS";
+const LOGIN_REDIRECT_KEY = "postLoginRedirect";
+const INTENT_TTL_MS = 5 * 60 * 1000;
 
-const VISA_HOST = "https://visa.helloviza.com";
-const VISA_PATH = "/qr-visa"; // or "/" if you prefer root
+function resolveApiBase() {
+  const fromEnv = process.env.REACT_APP_API_BASE;
+  if (fromEnv) return fromEnv;
 
-// Short-lived flag keys
-const VISA_FLOW_FLAG = "HV:VISA_FLOW";
-const VISA_FLOW_TS   = "HV:VISA_FLOW_TS";
-const FLAG_TTL_MS    = 2 * 60 * 1000; // 2 minutes
+  // Avoid using global `location` directly (ESLint no-restricted-globals)
+  const host =
+    typeof window !== "undefined" && window.location
+      ? window.location.hostname
+      : "";
+
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+  return isLocal ? "http://localhost:8080" : "https://api.helloviza.com";
+}
+
+const API_BASE = resolveApiBase();
 
 export default function VisaHandoff() {
-  const location = useLocation();
+  const navigate = useNavigate();
+  const routerLoc = useLocation();
+  const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(true);
 
-  // Build absolute visa URL (logged-in only)
-  const buildVisaUrl = useCallback(() => {
-    const target = new URL(VISA_PATH, VISA_HOST);
-    const incoming = new URLSearchParams(location.search || "");
-    if (!incoming.has("autostart")) incoming.set("autostart", "1");
-    for (const [k, v] of incoming.entries()) target.searchParams.set(k, v);
-    return target.toString();
-  }, [location.search]);
-
-  // Internal login with internal next back to this handoff
-  const buildInternalLoginUrl = useCallback(() => {
-    // Always go back to /go/visa after login (internal path only)
-    const next = "/go/visa" + (location.search || "");
-    const u = new URL(typeof window !== "undefined" ? "/login" : "/login", window.location.origin);
-    u.searchParams.set("next", next);
-    return u.toString();
-  }, [location.search]);
-
-  // Helpers to manage a short-lived “visa flow” flag
-  const setVisaFlag = () => {
+  const hasFreshIntent = useMemo(() => {
     try {
-      sessionStorage.setItem(VISA_FLOW_FLAG, "1");
-      sessionStorage.setItem(VISA_FLOW_TS, String(Date.now()));
-    } catch {}
-  };
-  const clearVisaFlag = () => {
-    try {
-      sessionStorage.removeItem(VISA_FLOW_FLAG);
-      sessionStorage.removeItem(VISA_FLOW_TS);
-    } catch {}
-  };
-  const flagIsFresh = () => {
-    try {
-      const ts = Number(sessionStorage.getItem(VISA_FLOW_TS) || 0);
-      return ts && (Date.now() - ts) < FLAG_TTL_MS;
-    } catch { return false; }
-  };
+      const ts = Number(sessionStorage.getItem(VISA_INTENT_KEY));
+      return ts && Date.now() - ts <= INTENT_TTL_MS;
+    } catch {
+      return false;
+    }
+    // re-evaluate when route key changes (back/forward)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routerLoc.key]);
 
+  // Read session
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
-        const data = await res.json().catch(() => ({}));
-
-        if (cancelled) return;
-
-        if (res.ok && data?.user) {
-          // Logged in → clear flag (we're about to finish) and go to visa
-          clearVisaFlag();
-          const url = buildVisaUrl();
-          window.location.replace(url);
-        } else {
-          // Not logged in → set short-lived flag and go to internal login with internal next
-          setVisaFlag();
-          const loginUrl = buildInternalLoginUrl();
-          window.location.replace(loginUrl);
+        const r = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+        if (!cancelled && r.ok) {
+          const d = await r.json().catch(() => ({}));
+          setUser(d?.user || null);
         }
-      } catch {
-        // On error, still funnel to login internally
-        setVisaFlag();
-        const loginUrl = buildInternalLoginUrl();
-        window.location.replace(loginUrl);
-      } finally {
-        if (!cancelled) setChecking(false);
-      }
+      } catch {}
+      if (!cancelled) setChecking(false);
     })();
+    return () => { cancelled = true; };
+  }, []);
 
-    // Safety: expire stale flags if user lingers here
-    const timer = setInterval(() => {
-      if (!flagIsFresh()) clearVisaFlag();
-    }, 15000);
+  // Optional auto-handoff: only if logged in AND fresh intent
+  useEffect(() => {
+    if (checking) return;
 
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [buildVisaUrl, buildInternalLoginUrl]);
+    if (!user) {
+      navigate(`/login?next=/go/visa`, { replace: true });
+      return;
+    }
+
+    if (hasFreshIntent) {
+      try { sessionStorage.removeItem(VISA_INTENT_KEY); } catch {}
+      // hard redirect (no ?autostart)
+      window.location.href = "https://visa.helloviza.com";
+    }
+  }, [checking, user, hasFreshIntent, navigate]);
+
+  const clearIntent = useCallback(() => {
+    try { sessionStorage.removeItem(VISA_INTENT_KEY); } catch {}
+    try {
+      sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+      localStorage.removeItem(LOGIN_REDIRECT_KEY);
+    } catch {}
+    navigate("/go/visa", { replace: true });
+  }, [navigate]);
+
+  const continueManually = useCallback(() => {
+    try { sessionStorage.removeItem(VISA_INTENT_KEY); } catch {}
+    window.location.href = "https://visa.helloviza.com";
+  }, []);
+
+  if (checking) {
+    return (
+      <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", color: "#00477f" }}>
+        Checking session…
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
+        <div style={{ textAlign: "center", color: "#00477f" }}>
+          <h2>Go for Visa</h2>
+          <p>You need to log in to continue.</p>
+          <button
+            onClick={() => navigate("/login?next=/go/visa")}
+            style={btn("#00477f", "#fff")}
+          >
+            Log in to continue
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={s.wrap}>
-      <h2>{checking ? "Checking your session…" : "Opening doors to new horizons—your next adventure awaits on our Visa booking page!"}</h2>
-      <p>Rolling out the red carpet for your journey—just a moment as we arrange your travel details.</p>
+    <div style={{ minHeight: "70vh", display: "grid", placeItems: "center" }}>
+      <div style={card}>
+        <h1 style={{ color: "#083b6e", marginTop: 0 }}>Go for Visa</h1>
+        <p style={{ color: "#0e4b84" }}>You're logged in.</p>
+        <p style={pill}>Auto-handoff is {hasFreshIntent ? "enabled" : "disabled"}.</p>
+        <div style={{ display: "flex", gap: 16, marginTop: 18, flexWrap: "wrap" }}>
+          <button onClick={continueManually} style={bigBtn("#0e477f", "#fff")}>
+            Continue to Visa
+          </button>
+          <button onClick={() => navigate("/")} style={bigBtn("#d06549", "#fff")}>
+            Back to Home
+          </button>
+        </div>
+        {!hasFreshIntent && (
+          <div style={{ marginTop: 16 }}>
+            <button onClick={clearIntent} style={linkBtn}>
+              Clear Visa Intent
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-const s = {
-  wrap: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "80vh",
-    fontFamily: "'Barlow Condensed', Arial, sans-serif",
-    color: "#00477f",
-    textAlign: "center",
-    padding: "1rem",
-  },
+/* ===== styles ===== */
+const card = {
+  width: "min(920px, 92vw)",
+  background: "#fff",
+  borderRadius: 18,
+  padding: "28px 28px 32px",
+  boxShadow: "0 18px 40px rgba(0,0,0,.10)",
+  textAlign: "center",
+};
+const pill = {
+  display: "inline-block",
+  marginTop: 6,
+  padding: "8px 12px",
+  borderRadius: 999,
+  background: "#edf4ff",
+  color: "#1b5fb4",
+  fontWeight: 700,
+};
+const btn = (bg, fg) => ({
+  background: bg, color: fg, border: "none", borderRadius: 8, padding: ".7rem 1.1rem",
+  fontWeight: 800, cursor: "pointer"
+});
+const bigBtn = (bg, fg) => ({
+  background: bg, color: fg, border: "none", borderRadius: 12, padding: "1.1rem 1.6rem",
+  fontWeight: 900, fontSize: "1.15rem", cursor: "pointer"
+});
+const linkBtn = {
+  background: "transparent", border: "none", color: "#b54a40",
+  textDecoration: "underline", cursor: "pointer", fontWeight: 800
 };
