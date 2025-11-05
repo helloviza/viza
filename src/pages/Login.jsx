@@ -5,10 +5,9 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import loginBg from "../assets/login-bg.jpg";
 
-/* ===== constants ===== */
+/* ====== constants ====== */
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
-const VISA_FLOW_FLAG = "HV:VISA_FLOW"; // set by GoForVisa.jsx only
 
 const HOST = typeof window !== "undefined" ? window.location.hostname : "";
 const IS_LOCAL = HOST === "localhost" || HOST === "127.0.0.1";
@@ -17,33 +16,46 @@ export const API_BASE =
   process.env.REACT_APP_API_BASE ||
   (IS_LOCAL ? "http://localhost:8080" : "https://api.helloviza.com");
 
-/* feature flags (env) */
+// ---- Feature Flags (env-driven) ----
 const ENABLE_GOOGLE = (process.env.REACT_APP_ENABLE_GOOGLE_OAUTH ?? "true") === "true";
 const ENABLE_MOBILE = (process.env.REACT_APP_ENABLE_MOBILE_LOGIN ?? "true") === "true";
 const ENABLE_EMAIL  = (process.env.REACT_APP_ENABLE_EMAIL_LOGIN ?? "true") === "true";
 
-/* helpers */
-function isVisaUrl(u = "") {
-  return /^https:\/\/visa\.helloviza\.com(\/|$)/i.test(u);
-}
-function getSavedNext() {
-  try { return sessionStorage.getItem(LOGIN_REDIRECT_KEY) || ""; } catch { return ""; }
-}
-function setSavedNext(val) {
-  try { sessionStorage.setItem(LOGIN_REDIRECT_KEY, val); } catch {}
-}
-function clearSavedNext() {
-  try { sessionStorage.removeItem(LOGIN_REDIRECT_KEY); } catch {}
-}
-function visaFlagOn() {
-  try { return sessionStorage.getItem(VISA_FLOW_FLAG) === "1"; } catch { return false; }
-}
-function clearVisaFlag() {
-  try { sessionStorage.removeItem(VISA_FLOW_FLAG); } catch {}
+/* ====== Safe next resolver (INTERNAL ONLY) ======
+   We no longer accept any external URLs in `next`.
+   Only absolute-paths ("/...") are honored; otherwise fallback "/".
+*/
+function pickPostLoginTarget(searchOrSaved) {
+  const fallback = "/";
+  const rawSearch =
+    typeof searchOrSaved === "string" && searchOrSaved.includes("=")
+      ? searchOrSaved
+      : (typeof window !== "undefined" ? window.location.search : "");
+  let raw = null;
+  try {
+    const p = new URLSearchParams(rawSearch);
+    raw = p.get("next");
+  } catch {
+    raw = null;
+  }
+  if (!raw || typeof raw !== "string") {
+    if (typeof searchOrSaved === "string" && searchOrSaved.trim()) {
+      raw = searchOrSaved.trim();
+    } else {
+      return fallback;
+    }
+  }
+  let next = "";
+  try { next = decodeURIComponent(raw); } catch { next = raw; }
+
+  // INTERNAL paths only
+  if (typeof next === "string" && next.startsWith("/")) return next || "/";
+
+  return fallback;
 }
 
 /* ===== small modal for mobile verification (Google users without mobile) ===== */
-function MobileVerificationModal({ show, onClose, onVerified }) {
+function MobileVerificationModal({ show, onClose, onVerified, API_BASE }) {
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -109,28 +121,14 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
         {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
         {!otpSent ? (
           <>
-            <input
-              type="tel"
-              placeholder="Enter mobile number"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              maxLength={10}
-              style={M.input}
-            />
+            <input type="tel" placeholder="Enter mobile number" value={mobile} onChange={(e) => setMobile(e.target.value)} maxLength={10} style={M.input} />
             <button onClick={sendOtp} style={M.button} disabled={loading}>
               {loading ? "Sending..." : "Send OTP"}
             </button>
           </>
         ) : (
           <>
-            <input
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              maxLength={6}
-              style={M.input}
-            />
+            <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} style={M.input} />
             <button onClick={verifyOtp} style={M.button} disabled={loading}>
               {loading ? "Verifying..." : "Verify & Continue"}
             </button>
@@ -150,35 +148,27 @@ const M = {
   cancel: { marginTop: "1rem", background: "transparent", color: "#d06549", border: "none", cursor: "pointer" },
 };
 
-/* ===== main component ===== */
+/* ===== MAIN COMPONENT ===== */
 export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    country: "",
-    confirmPassword: "",
-    agree: false,
-  });
+  const [form, setForm] = useState({ email: "", password: "", firstName: "", lastName: "", country: "", confirmPassword: "", agree: false });
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // mobile login
+  // Mobile login states
   const [mobile, setMobile] = useState("");
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
   const [mobileOtp, setMobileOtp] = useState("");
   const [timer, setTimer] = useState(0);
 
-  // google missing mobile
+  // Google users without mobile
   const [showMobileModal, setShowMobileModal] = useState(false);
   const [pendingUser, setPendingUser] = useState(null);
 
-  // session
+  // Session guard
   const [checkingSession, setCheckingSession] = useState(true);
 
   const navigate = useNavigate();
@@ -190,52 +180,24 @@ export default function Login({ onLogin }) {
     setForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
   }
 
-  /* wipe stale external visa redirect unless we are actively in a visa flow */
-  useEffect(() => {
-    const sp = new URLSearchParams(location.search);
-    const nextInUrl = sp.get("next") || "";
-    const inVisaFlow = visaFlagOn();
-    if (!inVisaFlow || !isVisaUrl(nextInUrl)) {
-      const saved = getSavedNext();
-      if (isVisaUrl(saved)) clearSavedNext();
-      clearVisaFlag();
-    }
-  }, [location.search]);
-
-  /* persist ?next= only if it's internal OR we are in visa flow (flag set) */
+  // Persist ?next= early (internal paths only)
   useEffect(() => {
     const n = params.get("next");
-    if (!n) return;
-    if (n.startsWith("/") || visaFlagOn()) setSavedNext(n);
+    if (n && n.startsWith("/")) sessionStorage.setItem(LOGIN_REDIRECT_KEY, n);
   }, [params]);
 
   useEffect(() => {
     const sp = new URLSearchParams(location.search);
     const candidate = sp.get("from") || sp.get("next");
-    if (!candidate) return;
-    if (candidate.startsWith("/") || visaFlagOn()) setSavedNext(candidate);
+    if (candidate && candidate.startsWith("/")) sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
   }, [location.search]);
 
-  /* resolve next safely */
   const resolveNext = useCallback(() => {
-    const saved = getSavedNext();
-    const raw = saved || location.search;
-
-    let next = "/";
-    try {
-      const p = new URLSearchParams(typeof raw === "string" && raw.includes("=") ? raw : "");
-      const n = p.get("next");
-      if (n) next = decodeURIComponent(n);
-    } catch {}
-
-    if (next.startsWith("/")) return next;
-
-    if (visaFlagOn() && isVisaUrl(next)) return next;
-
-    return "/";
+    const saved = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
+    return pickPostLoginTarget(saved || location.search);
   }, [location.search]);
 
-  /* if already logged in → redirect via gated resolver */
+  // If already logged in → redirect (internal only)
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -245,32 +207,25 @@ export default function Login({ onLogin }) {
           const data = await res.json().catch(() => ({}));
           if (data && data.user) {
             const target = resolveNext();
-            clearSavedNext();
-            clearVisaFlag();
-
-            if (/^https?:\/\//i.test(target)) {
-              window.location.replace(target);
-              return;
-            } else {
-              navigate(target, { replace: true });
-              return;
-            }
+            sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            navigate(target, { replace: true });
+            return;
           }
         }
-      } catch {}
+      } catch (_) {}
       if (!cancelled) setCheckingSession(false);
     })();
     return () => { cancelled = true; };
   }, [navigate, resolveNext]);
 
-  /* mobile resend countdown */
+  // timer for resend
   useEffect(() => {
     let interval;
     if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     return () => clearInterval(interval);
   }, [timer]);
 
-  /* after login → recheck session and redirect via gated resolver */
+  // After login → confirm session → redirect (internal only)
   const finishLogin = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
@@ -278,38 +233,27 @@ export default function Login({ onLogin }) {
         const data = await res.json().catch(() => ({}));
         if (data && data.user) {
           const target = resolveNext();
-          clearSavedNext();
-          clearVisaFlag();
-
-          if (/^https?:\/\//i.test(target)) {
-            window.location.replace(target);
-          } else {
-            navigate(target, { replace: true });
-          }
+          sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+          navigate(target, { replace: true });
           return;
         }
       }
+      // retry once
       setTimeout(async () => {
         const res2 = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
         if (res2.ok) {
           const data2 = await res2.json().catch(() => ({}));
           if (data2 && data2.user) {
             const target = resolveNext();
-            clearSavedNext();
-            clearVisaFlag();
-
-            if (/^https?:\/\//i.test(target)) {
-              window.location.replace(target);
-            } else {
-              navigate(target, { replace: true });
-            }
+            sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            navigate(target, { replace: true });
           }
         }
       }, 300);
-    } catch {}
+    } catch (_) {}
   }, [navigate, resolveNext]);
 
-  /* email OTP (signup) */
+  /* ===== Email OTP (Signup) ===== */
   async function sendOtp() {
     if (!form.email) return setError("Enter your email");
     setLoading(true);
@@ -350,7 +294,7 @@ export default function Login({ onLogin }) {
     }
   }
 
-  /* mobile OTP login */
+  /* ===== Mobile OTP (Manual Login + Timer) ===== */
   async function handleSendMobileOtp(e) {
     e.preventDefault();
     if (!mobile) return setError("Enter mobile number");
@@ -438,7 +382,7 @@ export default function Login({ onLogin }) {
     }
   }
 
-  /* email login / signup submit */
+  /* ===== Email Login / Signup ===== */
   async function handleSubmit(e) {
     e.preventDefault();
     if (mode === "signup" && !otpVerified) return setError("Please verify your email first");
@@ -468,7 +412,7 @@ export default function Login({ onLogin }) {
     }
   }
 
-  /* google auth */
+  /* ===== Google Auth ===== */
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       const idToken = credentialResponse?.credential;
@@ -511,27 +455,22 @@ export default function Login({ onLogin }) {
 
   const handleGoogleFailure = () => setError("Google login failed, please try again.");
 
-  /* tabs */
+  // Tabs
   const tabDefs = React.useMemo(() => {
     const arr = [];
     if (ENABLE_EMAIL) {
       arr.push({ key: "login", label: "Log in" });
       arr.push({ key: "signup", label: "Sign Up" });
     }
-    if (ENABLE_MOBILE) {
-      arr.push({ key: "mobile", label: "Mobile Login" });
-    }
+    if (ENABLE_MOBILE) arr.push({ key: "mobile", label: "Mobile Login" });
     return arr;
   }, []);
 
   useEffect(() => {
     const allowed = tabDefs.map(t => t.key);
-    if (!allowed.includes(mode) && allowed.length) {
-      setMode(allowed[0]);
-    }
+    if (!allowed.includes(mode) && allowed.length) setMode(allowed[0]);
   }, [mode, tabDefs]);
 
-  /* UI */
   if (checkingSession) {
     return (
       <div style={{ display: "grid", placeItems: "center", minHeight: "60vh", color: "#fff", fontFamily: baseFont }}>
@@ -547,25 +486,21 @@ export default function Login({ onLogin }) {
       <div className="login-form-area" style={S.formArea}>
         <div className="login-tabs" style={S.tabs}>
           {tabDefs.map((t) => (
-            <div
-              key={t.key}
-              onClick={() => { setMode(t.key); setError(""); }}
-              style={{ ...S.tabWrap, ...(mode === t.key ? S.activeTabWrap : {}) }}
-            >
-              <span style={{ ...S.tab, ...(mode === t.key ? S.activeTab : {}) }}>
-                • {t.label}
-              </span>
+            <div key={t.key} onClick={() => { setMode(t.key); setError(""); }} style={{ ...S.tabWrap, ...(mode === t.key ? S.activeTabWrap : {}) }}>
+              <span style={{ ...S.tab, ...(mode === t.key ? S.activeTab : {}) }}>• {t.label}</span>
               <div style={{ ...S.underline, ...(mode === t.key ? S.activeUnderline : {}) }} />
             </div>
           ))}
         </div>
 
+        {/* Google */}
         {ENABLE_GOOGLE && mode !== "mobile" && (
           <div style={{ marginBottom: 20, textAlign: "center" }}>
             <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} useOneTap={false} />
           </div>
         )}
 
+        {/* Email login / signup */}
         {ENABLE_EMAIL && mode !== "mobile" && (
           <form onSubmit={handleSubmit} style={S.form}>
             {error && <div style={S.error}>{error}</div>}
@@ -636,47 +571,22 @@ export default function Login({ onLogin }) {
           </form>
         )}
 
+        {/* Mobile login */}
         {ENABLE_MOBILE && mode === "mobile" && (
           <form onSubmit={mobileOtpSent ? handleVerifyMobileOtp : handleSendMobileOtp} style={S.form}>
             {error && <div style={S.error}>{error}</div>}
-            <input
-              type="tel"
-              placeholder="Enter mobile number"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              maxLength={10}
-              style={S.input}
-              required
-            />
+            <input type="tel" placeholder="Enter mobile number" value={mobile} onChange={(e) => setMobile(e.target.value)} maxLength={10} style={S.input} required />
 
             {mobileOtpSent ? (
               <>
-                <input
-                  type="text"
-                  placeholder="Enter OTP"
-                  value={mobileOtp}
-                  onChange={(e) => setMobileOtp(e.target.value)}
-                  maxLength={6}
-                  style={S.input}
-                  required
-                />
-                <button type="submit" style={S.submitBtn}>
-                  {loading ? "Verifying..." : "Verify & Login"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleResendMobileOtp}
-                  disabled={timer > 0 || loading}
-                  style={{ ...S.otpBtn, backgroundColor: timer > 0 ? "#888" : "#d06549", marginTop: "10px" }}
-                >
+                <input type="text" placeholder="Enter OTP" value={mobileOtp} onChange={(e) => setMobileOtp(e.target.value)} maxLength={6} style={S.input} required />
+                <button type="submit" style={S.submitBtn}>{loading ? "Verifying..." : "Verify & Login"}</button>
+                <button type="button" onClick={handleResendMobileOtp} disabled={timer > 0 || loading} style={{ ...S.otpBtn, backgroundColor: timer > 0 ? "#888" : "#d06549", marginTop: "10px" }}>
                   {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
                 </button>
               </>
             ) : (
-              <button type="submit" style={S.otpBtn}>
-                {loading ? "Sending..." : "Send OTP"}
-              </button>
+              <button type="submit" style={S.otpBtn}>{loading ? "Sending..." : "Send OTP"}</button>
             )}
           </form>
         )}
@@ -691,14 +601,16 @@ export default function Login({ onLogin }) {
           sessionStorage.setItem("hv_user", JSON.stringify(updated));
           setShowMobileModal(false);
           onLogin?.(updated);
+          // After adding mobile → finish
           finishLogin();
         }}
+        API_BASE={API_BASE}
       />
     </div>
   );
 }
 
-/* styles */
+/* ===== styles ===== */
 const responsiveCSS = `
 @media (max-width:600px){
   .login-outer{flex-direction:column!important;min-height:100vh!important;}

@@ -2,96 +2,107 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-/**
- * Force absolute hosts for handoff (both dev & prod).
- * If you ever need to change domains, do it here.
- */
 const API_BASE =
   typeof window !== "undefined" && /localhost|127\.0\.0\.1/.test(window.location.hostname)
     ? "http://localhost:8080"
     : "https://api.helloviza.com";
 
-// Always use absolute public hosts for login and visa
-const WWW_HOST  = "https://www.helloviza.com";
 const VISA_HOST = "https://visa.helloviza.com";
-const VISA_PATH = "/qr-visa"; // change to "/" if you want root
+const VISA_PATH = "/qr-visa"; // or "/" if you prefer root
+
+// Short-lived flag keys
+const VISA_FLOW_FLAG = "HV:VISA_FLOW";
+const VISA_FLOW_TS   = "HV:VISA_FLOW_TS";
+const FLAG_TTL_MS    = 2 * 60 * 1000; // 2 minutes
 
 export default function VisaHandoff() {
   const location = useLocation();
   const [checking, setChecking] = useState(true);
 
-  // Build absolute visa URL: https://visa.helloviza.com/qr-visa?autostart=1&...
+  // Build absolute visa URL (logged-in only)
   const buildVisaUrl = useCallback(() => {
     const target = new URL(VISA_PATH, VISA_HOST);
-    const src = new URLSearchParams(location.search || "");
-    // Ensure autostart=1; keep all incoming query params (to/start/end/etc.)
-    if (!src.has("autostart")) src.set("autostart", "1");
-    for (const [k, v] of src.entries()) target.searchParams.set(k, v);
+    const incoming = new URLSearchParams(location.search || "");
+    if (!incoming.has("autostart")) incoming.set("autostart", "1");
+    for (const [k, v] of incoming.entries()) target.searchParams.set(k, v);
     return target.toString();
   }, [location.search]);
 
-  // Build absolute login URL on www with ?next=<ABSOLUTE VISA URL>
-  const buildLoginUrl = useCallback(() => {
-    const nextAbs = buildVisaUrl(); // already absolute
-    const u = new URL("/login", WWW_HOST);
-    u.searchParams.set("next", nextAbs);
+  // Internal login with internal next back to this handoff
+  const buildInternalLoginUrl = useCallback(() => {
+    // Always go back to /go/visa after login (internal path only)
+    const next = "/go/visa" + (location.search || "");
+    const u = new URL(typeof window !== "undefined" ? "/login" : "/login", window.location.origin);
+    u.searchParams.set("next", next);
     return u.toString();
-  }, [buildVisaUrl]);
+  }, [location.search]);
+
+  // Helpers to manage a short-lived “visa flow” flag
+  const setVisaFlag = () => {
+    try {
+      sessionStorage.setItem(VISA_FLOW_FLAG, "1");
+      sessionStorage.setItem(VISA_FLOW_TS, String(Date.now()));
+    } catch {}
+  };
+  const clearVisaFlag = () => {
+    try {
+      sessionStorage.removeItem(VISA_FLOW_FLAG);
+      sessionStorage.removeItem(VISA_FLOW_TS);
+    } catch {}
+  };
+  const flagIsFresh = () => {
+    try {
+      const ts = Number(sessionStorage.getItem(VISA_FLOW_TS) || 0);
+      return ts && (Date.now() - ts) < FLAG_TTL_MS;
+    } catch { return false; }
+  };
 
   useEffect(() => {
-    // purge any stale client flags
-    try {
-      localStorage.removeItem("hv_user");
-      sessionStorage.removeItem("hv_user");
-    } catch {}
-
     let cancelled = false;
 
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/session`, {
-          credentials: "include",
-        });
+        const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
         const data = await res.json().catch(() => ({}));
 
         if (cancelled) return;
 
         if (res.ok && data?.user) {
-          // ✅ Logged in → go straight to visa subdomain (absolute)
-          const target = buildVisaUrl();
-
-          // Paranoid guard — do not allow localhost here
-          if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(target)) {
-            console.error("Blocked localhost redirect:", target);
-            // Force absolute visa host again (shouldn't be needed)
-            const forced = new URL(VISA_PATH, VISA_HOST).toString();
-            window.location.replace(forced);
-            return;
-          }
-
-          window.location.replace(target);
+          // Logged in → clear flag (we're about to finish) and go to visa
+          clearVisaFlag();
+          const url = buildVisaUrl();
+          window.location.replace(url);
         } else {
-          // ❌ Not logged in → go to absolute www login with ?next=<absolute visa url>
-          window.location.replace(buildLoginUrl());
+          // Not logged in → set short-lived flag and go to internal login with internal next
+          setVisaFlag();
+          const loginUrl = buildInternalLoginUrl();
+          window.location.replace(loginUrl);
         }
       } catch {
-        if (!cancelled) {
-          window.location.replace(buildLoginUrl());
-        }
+        // On error, still funnel to login internally
+        setVisaFlag();
+        const loginUrl = buildInternalLoginUrl();
+        window.location.replace(loginUrl);
       } finally {
         if (!cancelled) setChecking(false);
       }
     })();
 
+    // Safety: expire stale flags if user lingers here
+    const timer = setInterval(() => {
+      if (!flagIsFresh()) clearVisaFlag();
+    }, 15000);
+
     return () => {
       cancelled = true;
+      clearInterval(timer);
     };
-  }, [buildVisaUrl, buildLoginUrl]);
+  }, [buildVisaUrl, buildInternalLoginUrl]);
 
   return (
     <div style={s.wrap}>
-      <h2>{checking ? "Checking your session…" : "Redirecting…"}</h2>
-      <p>Please wait.</p>
+      <h2>{checking ? "Checking your session…" : "Opening doors to new horizons—your next adventure awaits on our Visa booking page!"}</h2>
+      <p>Rolling out the red carpet for your journey—just a moment as we arrange your travel details.</p>
     </div>
   );
 }
