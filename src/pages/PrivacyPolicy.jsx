@@ -1,166 +1,242 @@
 import React from "react";
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
+/** ------------------------------------------------------------------
+ *  Privacy Policy – Helloviza.com
+ *  Drop-in replacement with compact spacing (no text changes)
+ *  ------------------------------------------------------------------ */
+
+// 1) Your required intro block FIRST (exact text)
+const introBlock = `Last Updated: 05.11.2025
+Helloviza Private Limited (“Helloviza,” “we,” “our,” or “us”) is committed to protecting your privacy and handling your personal data responsibly, in compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act), the Information Technology Act, 2000 & IT Rules 2021, and other applicable data protection laws (including GDPR where relevant).`;
+
+// 2) Your sections (exact text)
 const sections = [
   {
     title: "1. Information We Collect",
     content: `
 a) Personal Information Provided by You:
-- Name, gender, date of birth, nationality, and other identification data
-- Contact details: address, telephone/mobile number, email address
-- Passport information and government-issued ID numbers
-- Visa application details, travel itinerary, travel history, travel dates
-- Payment and transaction information (processed securely via third-party payment gateways)
-- Supporting documents: scanned IDs, photos, letters, proof of funds, etc.
-- Details of your queries or communications with us (email, chat, calls)
-- Any information voluntarily provided by you through forms, chatbots, or support channels
+Name, gender, date of birth, nationality, and other identification data
+
+
+Contact details: address, telephone/mobile number, email address
+
+
+Passport details and government-issued ID numbers
+
+
+Visa application details, travel itinerary, travel history, travel dates
+
+
+Payment and transaction information (processed securely via third-party payment gateways)
+
+
+Supporting documents: scanned IDs, photos, letters, proof of funds, etc.
+
+
+Details of your queries or communications with us (email, chat, calls)
+
+
+Any information voluntarily provided through forms, chatbots, or support channels
+
 
 b) Information Collected Automatically:
-- Device and browser information, operating system, IP address, language, and access times
-- Log data and analytics (pages visited, time spent, clicks, referring websites)
-- Cookies, pixel tags, and similar technologies to personalize your experience and analyze usage
+Device and browser information, operating system, IP address, language, and access times
+
+
+Log data and analytics (pages visited, time spent, clicks, referring websites)
+
+
+Cookies, pixel tags, and similar technologies to personalize your experience and analyze usage
+
 
 c) Information from Third Parties:
-- Payment processors, travel or insurance partners, verification services
-- Social media platforms, if you choose to link or sign in via third-party accounts
-    `
+Payment processors, travel or insurance partners, verification services
+
+
+Social media platforms, if you choose to link or sign in via third-party accounts
+    `,
   },
   {
     title: "2. Purpose of Collecting Your Information",
     content: `
-We collect, use, and process your information for the following lawful purposes:
-- To process visa and travel applications on your behalf, including submitting your details to embassies, consulates, and government authorities
-- To verify your identity and eligibility for travel/visa services
-- To communicate with you, including responding to queries, application status updates, and customer support
-- To process payments, refunds, and maintain financial records
-- To improve, analyze, and enhance our services, website/app performance, and customer experience
-- For marketing and promotional communications (with your consent; you may opt-out at any time)
-- For legal compliance, regulatory obligations, dispute resolution, and enforcing our Terms of Service
-    `
+We collect and process your personal data for the following lawful purposes:
+To process visa and travel applications, including submitting your details to embassies, consulates, and government authorities
+
+
+To verify your identity and eligibility for travel/visa services
+
+
+To communicate with you, including responding to queries, application status updates, and customer support
+
+
+To process payments, refunds, and maintain financial records
+
+
+To improve, analyze, and enhance our services, website/app performance, and customer experience
+
+
+To send marketing or promotional communications (only with your prior consent; you may opt-out at any time)
+
+
+To comply with legal/regulatory obligations, resolve disputes, and enforce our Terms of Service
+    `,
   },
   {
     title: "3. Lawful Basis for Processing",
     content: `
-We process your information on the following legal bases, as applicable:
-- Performance of a contract (e.g., processing your visa/travel request)
-- Compliance with legal or regulatory obligations
-- Legitimate interests (e.g., fraud prevention, improving services)
-- With your consent (e.g., marketing)
-    `
+We process your information based on:
+Performance of a contract (e.g., processing your visa/travel request)
+
+
+Compliance with law (e.g., IT Rules 2021, DPDP Act 2023, tax/regulatory filings)
+
+
+Legitimate interests (e.g., fraud prevention, improving services)
+
+
+Consent (e.g., marketing, processing sensitive personal data such as passport, visa history, financial proofs)
+Sensitive Personal Data Notice: Passport, visa records, financial documents, and similar sensitive data will only be processed with your explicit consent or where required by applicable law.
+    `,
   },
   {
     title: "4. Cookies and Tracking Technologies",
     content: `
 Helloviza.com uses cookies, web beacons, and similar technologies to:
-- Recognize you and personalize your experience
-- Remember your preferences and settings
-- Analyze usage, traffic, and user engagement
-- Deliver relevant advertisements (where applicable)
+Recognize you and personalize your experience
 
-You can control cookies through your browser settings, but disabling cookies may impact certain features of the site.
-    `
+
+Remember your preferences and settings
+
+
+Analyze usage, traffic, and user engagement
+
+
+Deliver relevant advertisements (where applicable)
+
+
+You can control cookies via browser settings. Where required by law (e.g., EU/UK), we will obtain your consent before placing non-essential cookies, but disabling cookies may impact certain features of the site.
+    `,
   },
   {
     title: "5. Sharing and Disclosure of Your Information",
     content: `
 Helloviza.com may share your data only as necessary and in accordance with this Policy:
-- With government and embassy authorities: For visa/travel processing
-- With service providers and partners: For payment processing, customer support, hosting, analytics, delivery/courier, insurance, or verification
-- With affiliates and group companies: To offer you additional value-added services (with proper safeguards)
-- For legal reasons: To comply with laws, respond to government requests, or protect our rights and the rights of others
-- In business transfers: If Helloviza.com is involved in a merger, acquisition, restructuring, or asset sale, your information may be transferred
+Government and embassy authorities: For visa/travel processing
 
-We never sell your personal information to third parties.
-    `
+
+Service providers and partners: For payment processing, customer support, hosting, analytics, delivery/courier, insurance, or verification
+
+
+Affiliates/group companies: To offer you value-added services (with safeguards)
+
+
+Legal obligations: To comply with laws, government requests, or protect rights
+
+
+Business transfers: In mergers, acquisitions, restructuring, or asset sales
+
+
+We do not sell your personal data to third parties.
+    `,
   },
   {
     title: "6. Data Security and Retention",
     content: `
-- We implement appropriate administrative, technical, and physical security measures to safeguard your data, including encryption, access controls, and secure servers.
-- Your personal information is retained only as long as necessary for the purpose for which it was collected, or as required by law or contractual obligation.
-- In the event of a data breach affecting your information, we will notify you and relevant authorities as required by law.
-    `
+Security measures: encryption, secure servers, firewalls, and restricted access controls
+
+
+Retention: We retain your personal data for as long as required to fulfill the purpose of collection, or up to 7 years, unless a longer period is required by law
+
+
+Data breaches: In the event of a data breach, you and relevant authorities will be notified as per law
+    `,
   },
   {
-    title: "7. Your Rights and Choices",
+    title: "7. Your Rights & Choices",
     content: `
-Depending on applicable law and your jurisdiction, you may have the right to:
-- Access, correct, update, or delete your personal information
-- Withdraw consent to processing, where processing is based on consent
-- Object to or restrict certain types of processing
-- Request data portability
-- Opt out of marketing communications at any time
+As per the DPDP Act 2023 and applicable laws, you may:
+Access, correct, update, or delete your personal information
 
-To exercise your rights, email us at: privacy@helloviza.com. We may need to verify your identity before fulfilling your request.
-    `
+
+Withdraw consent (where processing is based on consent)
+
+
+Object to or restrict processing in certain cases
+
+
+Request data portability (where technically feasible)
+
+
+Opt out of marketing communications at any time
+
+
+Requests can be sent to: privacy@helloviza.com. We may verify your identity before fulfilling your request.
+    `,
   },
   {
     title: "8. Children's Privacy",
     content: `
-Helloviza.com does not knowingly collect or process personal data from children under the age of 18. If you believe a child has provided us with personal information, please contact us so that we can remove the data.
-    `
+Our services are not intended for individuals under 18 years of age. If a minor has shared personal data, please contact us for removal.
+    `,
   },
   {
     title: "9. International Data Transfers",
     content: `
-Your information may be processed and stored in countries other than your own, where data protection laws may differ. We will ensure that adequate safeguards are in place, consistent with this Privacy Policy and applicable law.
-    `
+Your information may be processed outside your country. We ensure safeguards consistent with this Privacy Policy and applicable laws. For EU/UK users, we rely on Standard Contractual Clauses or equivalent mechanisms.
+    `,
   },
   {
-    title: "10. Grievances and Complaints (as per Indian IT Rules 2021)",
+    title: "10. Grievances & Complaints (IT Rules 2021)",
     content: `
-If you have any complaints or concerns about how your personal information is handled by Helloviza.com, please contact our Grievance Officer:
-
-Grievance Officer  
-Helloviza Private Limited  
-[Your Registered Address Here]  
-Email: grievance@helloviza.com
-
+If you have complaints about our handling of your data, please contact:
+Grievance Officer
+ Helloviza Private Limited
+ [Registered Address]
+ Email: grievance@helloviza.com
 As per Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, the Grievance Officer will acknowledge your complaint within 24 hours and resolve it within 15 days of receipt, or sooner if required by law.
 
 To help us process your complaint, please provide:
-- Identification of the information provided by you
-- Clear statement as to whether the information is personal or sensitive personal information
-- Your address, telephone number, or email address
-- A statement that you have a good-faith belief that the information has been processed incorrectly or disclosed without authorization, as the case may be
-- A statement, under penalty of perjury, that the information in the notice is accurate and that the information belongs to you
 
-If you are aggrieved by a decision of the Grievance Officer, you may appeal to the Grievance Appellate Committee within 30 days of receiving our response.
-    `
+Identification of the information provided by you
+Clear statement as to whether the information is personal or sensitive personal information
+Your address, telephone number, or email address
+A statement that you have a good-faith belief that the information has been processed incorrectly or disclosed without authorization, as the case may be
+A statement, under penalty of perjury, that the information in the notice is accurate and that the information belongs to you
+
+Appeals may be made to the Grievance Appellate Committee within 30 days of our response
+    `,
   },
   {
     title: "11. External Links",
     content: `
-Our website may contain links to third-party sites or services not operated or controlled by Helloviza.com. This Privacy Policy does not apply to those third-party sites. Please review their policies before submitting any personal information.
-    `
+Our site may contain links to third-party sites or services not operated by Helloviza.com, This Privacy Policy does not apply to those third-party sites. Please review their policies before submitting your data.
+    `,
   },
   {
     title: "12. Updates to this Policy",
     content: `
-We may revise this Privacy Policy from time to time. Updated policies will be posted on Helloviza.com with a new “last updated” date. Continued use of our services after such updates constitutes your acceptance.
-    `
+We may update this policy periodically. The updated version will be posted with a revised “last updated” date. Continued use of our services constitutes acceptance.
+    `,
   },
   {
     title: "13. Contact Us",
     content: `
-For any privacy-related questions, concerns, or requests, please contact:
-
-Helloviza Private Limited  
-[Your Registered Address Here]  
-Email: privacy@helloviza.com
-    `
-  }
+For privacy-related queries:
+Helloviza Private Limited
+ [Registered Address]
+ 📧 privacy@helloviza.com 
+    `,
+  },
 ];
 
-
-// Assume `sections` is already defined as an array of {title, content} objects
-
-// Paste your existing sections array here!
+// 3) Helper: collapse multiple blank lines to a single newline for compact rendering
+const compact = (s) => s.replace(/\n{2,}/g, "\n");
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Responsive mobile-only style */}
+      {/* Responsive mobile tweaks */}
       <style>{`
         @media (max-width: 600px) {
           .hv-pp-wrap {
@@ -172,26 +248,12 @@ export default function PrivacyPolicy() {
             margin-left: 0 !important;
             margin-right: 0 !important;
           }
-          .hv-pp-title {
-            font-size: 2.1rem !important;
-            padding-top: 0.7rem !important;
-          }
-          .hv-pp-date {
-            font-size: 1.18rem !important;
-            margin-bottom: 20px !important;
-          }
-          .hv-pp-section h2 {
-            font-size: 1.07rem !important;
-            margin-bottom: 9px !important;
-            margin-top: 22px !important;
-          }
-          .hv-pp-section pre {
-            font-size: 0.98rem !important;
-            line-height: 1.57 !important;
-            white-space: pre-wrap !important;
-          }
+          .hv-pp-title { font-size: 2.1rem !important; padding-top: 0.7rem !important; }
+          .hv-pp-section h2 { font-size: 1.07rem !important; margin-bottom: 9px !important; margin-top: 22px !important; }
+          .hv-pp-section pre { font-size: 0.98rem !important; line-height: 1.45 !important; white-space: pre-wrap !important; }
         }
       `}</style>
+
       <div
         className="hv-pp-wrap max-w-3xl mx-auto bg-white rounded-2xl shadow-xl"
         style={{
@@ -201,35 +263,40 @@ export default function PrivacyPolicy() {
           marginRight: "60px",
           color: "#1a237e",
           fontFamily: baseFont,
-          padding: "56px 48px 56px 48px"
+          padding: "56px 48px 56px 48px",
         }}
       >
+        {/* Title */}
         <h1
           className="hv-pp-title"
           style={{
             color: "#003366",
             fontFamily: baseFont,
-            fontSize: "3.5rem",
+            fontSize: "3.0rem",
             fontWeight: 800,
             marginBottom: "18px",
             lineHeight: 1.12,
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
-          Privacy Policy
+          Privacy Policy – Helloviza.com
         </h1>
-        <p
-          className="hv-pp-date"
+
+        {/* EXACT intro block FIRST */}
+        <pre
           style={{
             fontFamily: baseFont,
-            color: "#2634b7",
-            fontSize: "2rem",
-            marginBottom: "40px",
-            textAlign: "center"
+            color: "#00477f",
+            fontSize: "1.02rem",
+            lineHeight: 1.45,
+            marginBottom: "18px",
+            whiteSpace: "pre-wrap",
           }}
         >
-          Last updated: 31 July 2025
-        </p>
+          {compact(introBlock)}
+        </pre>
+
+        {/* Sections */}
         <div>
           {sections.map((section, idx) => (
             <section
@@ -237,8 +304,8 @@ export default function PrivacyPolicy() {
               className="hv-pp-section"
               style={{
                 borderBottom: idx !== sections.length - 1 ? "1px solid #e0e7ef" : "none",
-                paddingBottom: idx !== sections.length - 1 ? "36px" : "0",
-                marginBottom: "32px"
+                paddingBottom: idx !== sections.length - 1 ? "28px" : "0",
+                marginBottom: "24px",
               }}
             >
               <h2
@@ -246,44 +313,43 @@ export default function PrivacyPolicy() {
                   color: "#d06549",
                   fontFamily: baseFont,
                   fontWeight: 700,
-                  fontSize: "2rem",
-                  marginBottom: "12px"
+                  fontSize: "1.5rem",
+                  marginBottom: "10px",
                 }}
               >
                 {section.title}
               </h2>
+
               <pre
                 style={{
                   color: "#00477f",
-                  fontSize: "1.2rem",
-                  lineHeight: "1.7",
+                  fontSize: "1.02rem",
+                  lineHeight: 1.45,
                   fontFamily: baseFont,
-                  marginBottom: "8px",
+                  marginBottom: "6px",
                   background: "none",
                   border: "none",
                   padding: 0,
-                  whiteSpace: "pre-wrap"
+                  whiteSpace: "pre-wrap",
                 }}
               >
-                {section.content}
+                {compact(section.content)}
               </pre>
             </section>
           ))}
         </div>
+
+        {/* Footer note */}
         <div
           style={{
             fontFamily: baseFont,
-            marginTop: "50px",
+            marginTop: "36px",
             fontSize: "1rem",
             color: "#888",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
-          By using Helloviza.com, you acknowledge that you have read, understood, and agree to this Privacy Policy.<br /><br />
-          For privacy questions or requests:{" "}
-          <a href="mailto:privacy@helloviza.com" className="text-blue-700 underline">
-            privacy@helloviza.com
-          </a>
+          By using Helloviza.com, you acknowledge that you have read, understood, and agree to this Privacy Policy.
         </div>
       </div>
     </div>

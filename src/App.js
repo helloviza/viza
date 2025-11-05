@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useRef, useLayoutEffect } from "react";
-import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 /* ==== Core Components ==== */
 import Header from "./components/Header";
@@ -45,106 +45,10 @@ import VisaHandoff from "./pages/VisaHandoff";
 /* ==== Auth Context ==== */
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-/* ==== Helpers for post-login redirect (cross-domain safe) ==== */
-const LOGIN_REDIRECT_KEY = "postLoginRedirect";
-const VISA_HOST = "https://visa.helloviza.com";
-const WWW_HOST = "https://www.helloviza.com";
-const DEFAULT_VISA = `${VISA_HOST}/qr-visa?autostart=1`;
-
-function isAllowedAbsolute(u) {
-  try {
-    const url = new URL(u);
-    return url.origin === VISA_HOST || url.origin === WWW_HOST;
-  } catch {
-    return false;
-  }
-}
-
-/** Build ABSOLUTE https://visa.../qr-visa with preserved query & autostart=1 */
-function buildVisaQrFrom(urlish) {
-  try {
-    const base = new URL("/qr-visa", VISA_HOST);
-    const src = new URL(urlish, VISA_HOST); // tolerate relative input
-    const sp = new URLSearchParams(src.search);
-    if (!sp.has("autostart")) sp.set("autostart", "1");
-    base.search = sp.toString();
-    return base.toString();
-  } catch {
-    return DEFAULT_VISA;
-  }
-}
-
-/** Stash ?next (or ?from) EARLY without stripping absolute hosts */
-function stashRedirectFromQuery(search) {
-  const sp = new URLSearchParams(search);
-  const candidate = sp.get("next") || sp.get("from");
-  if (!candidate) return;
-
-  if (isAllowedAbsolute(candidate) || candidate.startsWith("/")) {
-    sessionStorage.setItem(LOGIN_REDIRECT_KEY, candidate);
-  } else {
-    // Unknown origins → normalize to safe visa QR
-    sessionStorage.setItem(LOGIN_REDIRECT_KEY, buildVisaQrFrom(candidate));
-  }
-}
-
-/** Resolve and clear saved redirect. Returns ABSOLUTE for cross-domain, else relative (rare). */
-function popRedirectOrHome() {
-  const saved = sessionStorage.getItem(LOGIN_REDIRECT_KEY);
-  sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
-
-  if (!saved) return DEFAULT_VISA;
-
-  // Absolute allowed → keep absolute
-  if (isAllowedAbsolute(saved)) return saved;
-
-  // Legacy local paths → normalize to visa QR (preserving query if present)
-  if (
-    saved.startsWith("/go/visa") ||
-    saved.startsWith("/go-for-visa") ||
-    saved.startsWith("/qr-visa") ||
-    saved.startsWith("/")
-  ) {
-    return buildVisaQrFrom(saved);
-  }
-
-  // Fallback
-  return DEFAULT_VISA;
-}
-
-/* ==== Protected Route Wrapper ==== */
+/* ==== Protected Route Wrapper (simple) ==== */
 function RequireAuth({ user, children }) {
   if (!user) return <Navigate to="/login" replace />;
   return children;
-}
-
-/* ==== Login Route Guard ==== */
-/* If user is already authenticated and visits /login,
-   immediately redirect to saved ?next= (absolute visa URL) or safe default. */
-function LoginRoute({ onLogin }) {
-  const { user, loading } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // stash ?next= as soon as we hit /login (preserves absolute)
-  React.useEffect(() => {
-    stashRedirectFromQuery(location.search);
-  }, [location.search]);
-
-  React.useEffect(() => {
-    if (loading) return;
-    if (user) {
-      const target = popRedirectOrHome();
-      if (/^https?:\/\//i.test(target)) {
-        // Cross-domain bounce: avoid back-loop
-        window.location.replace(target);
-      } else {
-        navigate(target, { replace: true });
-      }
-    }
-  }, [user, loading, navigate]);
-
-  return <Login onLogin={onLogin} />;
 }
 
 /* ==== Application Shell ==== */
@@ -232,7 +136,7 @@ The Helloviza Community 💖`}
         />
 
         {/* ===== Auth ===== */}
-        <Route path="/login" element={<LoginRoute onLogin={handleLogin} />} />
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/reset-password-confirm" element={<ResetPasswordConfirm />} />
         <Route path="/verify-email" element={<EmailOTPVerify />} />
@@ -311,29 +215,24 @@ The Helloviza Community 💖`}
         <Route path="/go-for-visa" element={<Navigate to="/go/visa" replace />} />
 
         {/* ===== Static Pages ===== */}
-        <Route
-          path="/contact"
-          element={
-            <>
-              <ContactSection />
-              <BackgroundBreakSection />
-            </>
-          }
-        />
+        <Route path="/contact" element={<ContactSection />} />
+        <Route path="/careers" element={<Careers />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/careers" element={<Careers />} />
         <Route path="/about" element={<AboutUs />} />
-        <Route path="/trackyourvisaapplication" element={<TrackVisaApplication />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      <ScrollToHeroButton />
+      <BackgroundBreakSection />
       <VisaFooterBlock />
+      <ScrollToHeroButton />
     </>
   );
 }
 
-/* ==== Root Export ==== */
+/* ==== Root with AuthProvider ==== */
 export default function App() {
   return (
     <AuthProvider>
