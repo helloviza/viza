@@ -6,6 +6,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import App from "./App";
 import "./index.css";
 
+// ⬇️ country bootstrap
+import { initViewerCountry } from "./utils/geo";
+
 /* ------------------------------------------------------------------
    ⚙️ Config
    - Keep Google Client ID overridable via env; fallback to known ID.
@@ -38,3 +41,6 @@ root.render(
     </BrowserRouter>
   </GoogleOAuthProvider>
 );
+
+// ⬇️ run once on boot (non-blocking)
+initViewerCountry();
