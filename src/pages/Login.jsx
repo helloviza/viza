@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation } from "react-i18next";
 import loginBg from "../assets/login-bg.jpg";
 
 /* =================== constants =================== */
@@ -21,9 +22,12 @@ export const API_BASE =
   (IS_LOCAL ? "http://localhost:8080" : "https://api.helloviza.com");
 
 // Feature Flags (env-driven)
-const ENABLE_GOOGLE = (process.env.REACT_APP_ENABLE_GOOGLE_OAUTH ?? "true") === "true";
-const ENABLE_MOBILE = (process.env.REACT_APP_ENABLE_MOBILE_LOGIN ?? "true") === "true";
-const ENABLE_EMAIL  = (process.env.REACT_APP_ENABLE_EMAIL_LOGIN ?? "true") === "true";
+const ENABLE_GOOGLE =
+  (process.env.REACT_APP_ENABLE_GOOGLE_OAUTH ?? "true") === "true";
+const ENABLE_MOBILE =
+  (process.env.REACT_APP_ENABLE_MOBILE_LOGIN ?? "true") === "true";
+const ENABLE_EMAIL =
+  (process.env.REACT_APP_ENABLE_EMAIL_LOGIN ?? "true") === "true";
 
 /* =================== helpers =================== */
 const isAbsoluteUrl = (v) => typeof v === "string" && /^https?:\/\//i.test(v);
@@ -34,7 +38,9 @@ function normalizeInternalPath(pathLike) {
   try {
     const url = new URL(pathLike, "https://x.example");
     if (url.searchParams.has("autostart")) url.searchParams.delete("autostart");
-    const clean = url.pathname + (url.searchParams.toString() ? `?${url.searchParams.toString()}` : "");
+    const clean =
+      url.pathname +
+      (url.searchParams.toString() ? `?${url.searchParams.toString()}` : "");
     return clean || "/";
   } catch {
     return null;
@@ -78,7 +84,10 @@ function scrubLoginUrl(location, navigate) {
 
   if (changed) {
     const search = params.toString();
-    navigate({ pathname: "/login", search: search ? `?${search}` : "" }, { replace: true });
+    navigate(
+      { pathname: "/login", search: search ? `?${search}` : "" },
+      { replace: true }
+    );
     return true;
   }
   return false;
@@ -111,6 +120,7 @@ function finalizeTarget(target) {
 
 /* =================== Mobile verification modal =================== */
 function MobileVerificationModal({ show, onClose, onVerified }) {
+  const { t } = useTranslation();
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -120,8 +130,16 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
   if (!show) return null;
 
   async function sendOtp() {
-    if (!mobile) return setError("Please enter your mobile number");
-    setError(""); setLoading(true);
+    if (!mobile) {
+      return setError(
+        t(
+          "login.mobileModal.errors.noMobile",
+          "Please enter your mobile number"
+        )
+      );
+    }
+    setError("");
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/otpMobile/send-otp-mobile`, {
         method: "POST",
@@ -130,18 +148,29 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
         body: JSON.stringify({ mobile }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+      if (!res.ok) {
+        throw new Error(
+          data.error ||
+            t("login.errors.sendOtpFailed", "Failed to send OTP")
+        );
+      }
       setOtpSent(true);
     } catch (err) {
-      setError(err.message || "Failed to send OTP");
+      setError(
+        err.message ||
+          t("login.errors.sendOtpFailed", "Failed to send OTP")
+      );
     } finally {
       setLoading(false);
     }
   }
 
   async function verifyOtp() {
-    if (!otp) return setError("Enter OTP");
-    setError(""); setLoading(true);
+    if (!otp) {
+      return setError(t("login.errors.enterOtp", "Enter OTP"));
+    }
+    setError("");
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/otpMobile/verify-otp-mobile`, {
         method: "POST",
@@ -150,7 +179,15 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
         body: JSON.stringify({ mobile, otp }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "OTP verification failed");
+      if (!res.ok) {
+        throw new Error(
+          data.error ||
+            t(
+              "login.errors.otpVerificationFailed",
+              "OTP verification failed"
+            )
+        );
+      }
 
       await fetch(`${API_BASE}/api/auth/add-mobile`, {
         method: "POST",
@@ -161,7 +198,13 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
 
       onVerified(mobile);
     } catch (err) {
-      setError(err.message || "OTP verification failed");
+      setError(
+        err.message ||
+          t(
+            "login.errors.otpVerificationFailed",
+            "OTP verification failed"
+          )
+      );
     } finally {
       setLoading(false);
     }
@@ -170,42 +213,119 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
   return (
     <div style={M.overlay}>
       <div style={M.box}>
-        <h2 style={{ marginBottom: "1rem", color: "#00477f", fontFamily: baseFont }}>Verify your Mobile</h2>
+        <h2
+          style={{
+            marginBottom: "1rem",
+            color: "#00477f",
+            fontFamily: baseFont,
+          }}
+        >
+          {t("login.mobileModal.title", "Verify your mobile")}
+        </h2>
         {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
         {!otpSent ? (
           <>
-            <input type="tel" placeholder="Enter mobile number" value={mobile} onChange={(e) => setMobile(e.target.value)} maxLength={10} style={M.input} />
+            <input
+              type="tel"
+              placeholder={t(
+                "login.placeholders.mobile",
+                "Enter mobile number"
+              )}
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              maxLength={10}
+              style={M.input}
+            />
             <button onClick={sendOtp} style={M.button} disabled={loading}>
-              {loading ? "Sending..." : "Send OTP"}
+              {loading
+                ? t("login.buttons.sending", "Sending...")
+                : t("login.buttons.sendOtp", "Send OTP")}
             </button>
           </>
         ) : (
           <>
-            <input type="text" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} style={M.input} />
+            <input
+              type="text"
+              placeholder={t("login.placeholders.otp", "Enter OTP")}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              maxLength={6}
+              style={M.input}
+            />
             <button onClick={verifyOtp} style={M.button} disabled={loading}>
-              {loading ? "Verifying..." : "Verify & Continue"}
+              {loading
+                ? t("login.buttons.verifying", "Verifying...")
+                : t(
+                    "login.buttons.verifyAndContinue",
+                    "Verify & Continue"
+                  )}
             </button>
           </>
         )}
-        <button onClick={onClose} style={M.cancel}>Cancel</button>
+        <button onClick={onClose} style={M.cancel}>
+          {t("login.buttons.cancel", "Cancel")}
+        </button>
       </div>
     </div>
   );
 }
 const M = {
-  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 },
-  box: { background: "#fff", padding: "2rem", borderRadius: 10, width: "min(400px,90vw)", textAlign: "center" },
-  input: { width: "100%", padding: ".8rem", marginBottom: "1rem", borderRadius: 6, border: "1px solid #ccc", fontSize: "1rem" },
-  button: { width: "100%", background: "#00477f", color: "#fff", border: "none", borderRadius: 6, padding: ".8rem 1rem", fontWeight: 700, cursor: "pointer" },
-  cancel: { marginTop: "1rem", background: "transparent", color: "#d06549", border: "none", cursor: "pointer" },
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,.6)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+  box: {
+    background: "#fff",
+    padding: "2rem",
+    borderRadius: 10,
+    width: "min(400px,90vw)",
+    textAlign: "center",
+  },
+  input: {
+    width: "100%",
+    padding: ".8rem",
+    marginBottom: "1rem",
+    borderRadius: 6,
+    border: "1px solid #ccc",
+    fontSize: "1rem",
+  },
+  button: {
+    width: "100%",
+    background: "#00477f",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    padding: ".8rem 1rem",
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+  cancel: {
+    marginTop: "1rem",
+    background: "transparent",
+    color: "#d06549",
+    border: "none",
+    cursor: "pointer",
+  },
 };
 
 /* =================== MAIN =================== */
 export default function Login({ onLogin }) {
+  const { t } = useTranslation();
+
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
-    email: "", password: "", firstName: "", lastName: "",
-    country: "", confirmPassword: "", agree: false,
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    country: "",
+    confirmPassword: "",
+    agree: false,
   });
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -256,30 +376,41 @@ export default function Login({ onLogin }) {
     const n = params.get("next");
     const safe = sanitizeNext(n);
     if (safe) {
-      try { sessionStorage.setItem(LOGIN_REDIRECT_KEY, safe); } catch {}
+      try {
+        sessionStorage.setItem(LOGIN_REDIRECT_KEY, safe);
+      } catch {}
     }
   }, [params]);
 
   // Countdown for mobile resend
   useEffect(() => {
     let interval;
-    if (timer > 0) interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    if (timer > 0) {
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    }
     return () => clearInterval(interval);
   }, [timer]);
 
-  const resolveTarget = useCallback(() => finalizeTarget(decidePostLoginTarget(location)), [location]);
+  const resolveTarget = useCallback(
+    () => finalizeTarget(decidePostLoginTarget(location)),
+    [location]
+  );
 
   // If already logged in → redirect using gated resolver
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+        const res = await fetch(`${API_BASE}/api/auth/session`, {
+          credentials: "include",
+        });
         if (!cancelled && res.ok) {
           const data = await res.json().catch(() => ({}));
           if (data && data.user) {
             const target = resolveTarget();
-            try { sessionStorage.removeItem(LOGIN_REDIRECT_KEY); } catch {}
+            try {
+              sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+            } catch {}
             navigate(target, { replace: true });
             return;
           }
@@ -287,25 +418,33 @@ export default function Login({ onLogin }) {
       } catch {}
       if (!cancelled) setCheckingSession(false);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [navigate, resolveTarget]);
 
   // After login, re-check session and then redirect using gated resolver
   const finishLogin = useCallback(async () => {
     const go = async () => {
       const target = resolveTarget();
-      try { sessionStorage.removeItem(LOGIN_REDIRECT_KEY); } catch {}
+      try {
+        sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
+      } catch {}
       navigate(target, { replace: true });
     };
     try {
-      const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+      const res = await fetch(`${API_BASE}/api/auth/session`, {
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data && data.user) return go();
       }
       // retry once quickly
       setTimeout(async () => {
-        const res2 = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
+        const res2 = await fetch(`${API_BASE}/api/auth/session`, {
+          credentials: "include",
+        });
         if (res2.ok) {
           const data2 = await res2.json().catch(() => ({}));
           if (data2 && data2.user) go();
@@ -316,7 +455,9 @@ export default function Login({ onLogin }) {
 
   /* =================== Email OTP (Signup) =================== */
   async function sendOtp() {
-    if (!form.email) return setError("Enter your email");
+    if (!form.email) {
+      return setError(t("login.errors.enterEmail", "Enter your email"));
+    }
     setLoading(true);
     try {
       const r = await fetch(`${API_BASE}/api/send-otp`, {
@@ -326,17 +467,26 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ email: form.email }),
       });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(d.error || "Failed to send OTP");
+      if (!r.ok) {
+        throw new Error(
+          d.error || t("login.errors.sendOtpFailed", "Failed to send OTP")
+        );
+      }
       setOtpSent(true);
     } catch (err) {
-      setError(err.message || "Failed to send OTP");
+      setError(
+        err.message ||
+          t("login.errors.sendOtpFailed", "Failed to send OTP")
+      );
     } finally {
       setLoading(false);
     }
   }
 
   async function verifyOtp() {
-    if (!otp) return setError("Enter OTP");
+    if (!otp) {
+      return setError(t("login.errors.enterOtp", "Enter OTP"));
+    }
     setLoading(true);
     try {
       const r = await fetch(`${API_BASE}/api/verify-otp`, {
@@ -346,10 +496,24 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ email: form.email, otp }),
       });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(d.error || "OTP verification failed");
+      if (!r.ok) {
+        throw new Error(
+          d.error ||
+            t(
+              "login.errors.otpVerificationFailed",
+              "OTP verification failed"
+            )
+        );
+      }
       setOtpVerified(true);
     } catch (err) {
-      setError(err.message || "OTP verification failed");
+      setError(
+        err.message ||
+          t(
+            "login.errors.otpVerificationFailed",
+            "OTP verification failed"
+          )
+      );
     } finally {
       setLoading(false);
     }
@@ -358,10 +522,18 @@ export default function Login({ onLogin }) {
   /* =================== Email Login / Signup =================== */
   async function handleSubmit(e) {
     e.preventDefault();
-    if (mode === "signup" && !otpVerified) return setError("Please verify your email first");
+    if (mode === "signup" && !otpVerified) {
+      return setError(
+        t(
+          "login.errors.verifyEmailFirst",
+          "Please verify your email first"
+        )
+      );
+    }
     setLoading(true);
     try {
-      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const endpoint =
+        mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const r = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -369,7 +541,11 @@ export default function Login({ onLogin }) {
         body: JSON.stringify(form),
       });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(d.error || "Auth failed");
+      if (!r.ok) {
+        throw new Error(
+          d.error || t("login.errors.authFailed", "Auth failed")
+        );
+      }
 
       const userData = d.user;
       localStorage.setItem("helloviza_user", JSON.stringify(userData));
@@ -379,7 +555,9 @@ export default function Login({ onLogin }) {
       onLogin?.(userData);
       await finishLogin();
     } catch (err) {
-      setError(err.message || "Auth failed");
+      setError(
+        err.message || t("login.errors.authFailed", "Auth failed")
+      );
     } finally {
       setLoading(false);
     }
@@ -388,8 +566,11 @@ export default function Login({ onLogin }) {
   /* =================== Mobile OTP Login =================== */
   async function handleSendMobileOtp(e) {
     e.preventDefault();
-    if (!mobile) return setError("Enter mobile number");
-    setError(""); setLoading(true);
+    if (!mobile) {
+      return setError(t("login.errors.enterMobile", "Enter mobile number"));
+    }
+    setError("");
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/otpMobile/send-otp-mobile`, {
         method: "POST",
@@ -398,20 +579,31 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ mobile, type: "login" }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.success === false) throw new Error(data.message || "Failed to send OTP");
+      if (!res.ok || data.success === false) {
+        throw new Error(
+          data.message ||
+            t("login.errors.sendOtpFailed", "Failed to send OTP")
+        );
+      }
       setMobileOtpSent(true);
       setTimer(30);
       setError("");
     } catch (err) {
-      setError(err.message || "Failed to send OTP");
+      setError(
+        err.message ||
+          t("login.errors.sendOtpFailed", "Failed to send OTP")
+      );
     } finally {
       setLoading(false);
     }
   }
   async function handleResendMobileOtp(e) {
     e.preventDefault();
-    if (!mobile) return setError("Enter mobile number");
-    setError(""); setLoading(true);
+    if (!mobile) {
+      return setError(t("login.errors.enterMobile", "Enter mobile number"));
+    }
+    setError("");
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/otpMobile/resend-otp-mobile`, {
         method: "POST",
@@ -420,19 +612,29 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ mobile }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.type !== "success") throw new Error("Failed to resend OTP");
+      if (!res.ok || data.type !== "success") {
+        throw new Error(
+          t("login.errors.resendOtpFailed", "Failed to resend OTP")
+        );
+      }
       setTimer(30);
       setError("");
     } catch (err) {
-      setError(err.message || "Failed to resend OTP");
+      setError(
+        err.message ||
+          t("login.errors.resendOtpFailed", "Failed to resend OTP")
+      );
     } finally {
       setLoading(false);
     }
   }
   async function handleVerifyMobileOtp(e) {
     e.preventDefault();
-    if (!mobileOtp) return setError("Enter OTP");
-    setError(""); setLoading(true);
+    if (!mobileOtp) {
+      return setError(t("login.errors.enterOtp", "Enter OTP"));
+    }
+    setError("");
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/otpMobile/verify-otp-mobile`, {
         method: "POST",
@@ -441,7 +643,11 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ mobile, otp: mobileOtp }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.success === false) throw new Error(data.message || "Invalid OTP");
+      if (!res.ok || data.success === false) {
+        throw new Error(
+          data.message || t("login.errors.invalidOtp", "Invalid OTP")
+        );
+      }
 
       const loginRes = await fetch(`${API_BASE}/api/auth/mobile-login`, {
         method: "POST",
@@ -450,7 +656,12 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ mobile }),
       });
       const loginData = await loginRes.json().catch(() => ({}));
-      if (!loginRes.ok) throw new Error(loginData.error || "Login failed");
+      if (!loginRes.ok) {
+        throw new Error(
+          loginData.error ||
+            t("login.errors.loginFailed", "Login failed")
+        );
+      }
 
       const userData = loginData.user;
       localStorage.setItem("helloviza_user", JSON.stringify(userData));
@@ -460,7 +671,9 @@ export default function Login({ onLogin }) {
       onLogin?.(userData);
       await finishLogin();
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(
+        err.message || t("login.errors.loginFailed", "Login failed")
+      );
     } finally {
       setLoading(false);
     }
@@ -486,9 +699,17 @@ export default function Login({ onLogin }) {
 
       const txt = await r.text();
       const d = txt ? JSON.parse(txt) : {};
-      if (!r.ok) throw new Error(d.error || "Google login failed");
+      if (!r.ok) {
+        throw new Error(
+          d.error ||
+            t("login.errors.googleFailedGeneric", "Google login failed")
+        );
+      }
 
-      const userData = { ...d.user, picture: decoded?.picture || d.user?.picture };
+      const userData = {
+        ...d.user,
+        picture: decoded?.picture || d.user?.picture,
+      };
       localStorage.setItem("helloviza_user", JSON.stringify(userData));
       localStorage.setItem("hv_user", JSON.stringify(userData));
       sessionStorage.setItem("hv_user", JSON.stringify(userData));
@@ -502,25 +723,37 @@ export default function Login({ onLogin }) {
       onLogin?.(userData);
       await finishLogin();
     } catch (err) {
-      setError(err.message || "Google login failed, please try again.");
+      setError(
+        err.message ||
+          t(
+            "login.errors.googleFailedRetry",
+            "Google login failed, please try again."
+          )
+      );
     }
   };
-  const handleGoogleFailure = () => setError("Google login failed, please try again.");
+  const handleGoogleFailure = () =>
+    setError(
+      t(
+        "login.errors.googleFailedRetry",
+        "Google login failed, please try again."
+      )
+    );
 
   /* =================== Tabs =================== */
   const tabDefs = useMemo(() => {
     const arr = [];
     if (ENABLE_EMAIL) {
-      arr.push({ key: "login", label: "Log in" });
-      arr.push({ key: "signup", label: "Sign Up" });
+      arr.push({ key: "login", labelKey: "login.tabs.login" });
+      arr.push({ key: "signup", labelKey: "login.tabs.signup" });
     }
     if (ENABLE_MOBILE) {
-      arr.push({ key: "mobile", label: "Mobile Login" });
+      arr.push({ key: "mobile", labelKey: "login.tabs.mobile" });
     }
     return arr;
   }, []);
   useEffect(() => {
-    const allowed = tabDefs.map(t => t.key);
+    const allowed = tabDefs.map((t) => t.key);
     if (!allowed.includes(mode) && allowed.length) {
       setMode(allowed[0]);
     }
@@ -529,8 +762,16 @@ export default function Login({ onLogin }) {
   /* =================== UI =================== */
   if (checkingSession) {
     return (
-      <div style={{ display: "grid", placeItems: "center", minHeight: "60vh", color: "#fff", fontFamily: baseFont }}>
-        Checking session…
+      <div
+        style={{
+          display: "grid",
+          placeItems: "center",
+          minHeight: "60vh",
+          color: "#fff",
+          fontFamily: baseFont,
+        }}
+      >
+        {t("login.checkingSession", "Checking session…")}
       </div>
     );
   }
@@ -540,30 +781,42 @@ export default function Login({ onLogin }) {
       <style>{responsiveCSS}</style>
 
       {/* Left hero (visible like SS2) */}
-      <div className="login-left-bg" style={{ ...S.leftBg, backgroundImage: `url(${loginBg})` }} />
+      <div
+        className="login-left-bg"
+        style={{ ...S.leftBg, backgroundImage: `url(${loginBg})` }}
+      />
 
       {/* Right form */}
       <div className="login-form-area" style={S.formArea}>
         <div style={S.formInner}>
-
-          {/* Tabs row like SS2 */}
+          {/* Tabs row */}
           <div className="login-tabs" style={S.tabs}>
-            {tabDefs.map((t) => (
+            {tabDefs.map((tab) => (
               <button
-                key={t.key}
-                onClick={() => { setMode(t.key); setError(""); }}
-                style={{ ...S.tabBtn, ...(mode === t.key ? S.tabBtnActive : {}) }}
+                key={tab.key}
+                onClick={() => {
+                  setMode(tab.key);
+                  setError("");
+                }}
+                style={{
+                  ...S.tabBtn,
+                  ...(mode === tab.key ? S.tabBtnActive : {}),
+                }}
               >
-                <span style={S.bullet}>•</span> {t.label}
-                {mode === t.key && <div style={S.underline} />}
+                <span style={S.bullet}>•</span> {t(tab.labelKey)}
+                {mode === tab.key && <div style={S.underline} />}
               </button>
             ))}
           </div>
 
-          {/* Google button positioned cleanly */}
+          {/* Google button */}
           {ENABLE_GOOGLE && mode !== "mobile" && (
             <div style={{ margin: "8px 0 18px", width: "min(560px, 88vw)" }}>
-              <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} useOneTap={false} />
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleFailure}
+                useOneTap={false}
+              />
             </div>
           )}
 
@@ -575,58 +828,150 @@ export default function Login({ onLogin }) {
               {mode === "signup" && (
                 <div style={S.row}>
                   <div style={S.col}>
-                    <label style={S.label}>First Name*</label>
-                    <input name="firstName" style={S.input} value={form.firstName} onChange={handleChange} required />
+                    <label style={S.label}>
+                      {t("login.labels.firstName", "First Name*")}
+                    </label>
+                    <input
+                      name="firstName"
+                      style={S.input}
+                      value={form.firstName}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div style={S.col}>
-                    <label style={S.label}>Last Name*</label>
-                    <input name="lastName" style={S.input} value={form.lastName} onChange={handleChange} required />
+                    <label style={S.label}>
+                      {t("login.labels.lastName", "Last Name*")}
+                    </label>
+                    <input
+                      name="lastName"
+                      style={S.input}
+                      value={form.lastName}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                 </div>
               )}
 
-              {/* Two-column like SS2 */}
+              {/* Email + password */}
               <div style={S.row}>
                 <div style={S.col}>
-                  <label style={S.label}>Email*</label>
-                  <input type="email" name="email" style={S.input} value={form.email} onChange={handleChange} required />
+                  <label style={S.label}>
+                    {t("login.labels.email", "Email*")}
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    style={S.input}
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 <div style={S.col}>
-                  <label style={S.label}>Password</label>
-                  <input type="password" name="password" style={S.input} value={form.password} onChange={handleChange} required />
+                  <label style={S.label}>
+                    {t("login.labels.password", "Password")}
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    style={S.input}
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
               </div>
 
               {mode === "signup" && (
                 <>
                   {!otpSent ? (
-                    <button type="button" onClick={sendOtp} style={S.otpBtn}>
-                      {loading ? "Sending..." : "Send OTP"}
+                    <button
+                      type="button"
+                      onClick={sendOtp}
+                      style={S.otpBtn}
+                    >
+                      {loading
+                        ? t("login.buttons.sending", "Sending...")
+                        : t("login.buttons.sendOtp", "Send OTP")}
                     </button>
                   ) : !otpVerified ? (
                     <div style={S.row}>
                       <div style={S.col}>
-                        <label style={S.label}>Enter OTP</label>
-                        <input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} style={S.input} />
+                        <label style={S.label}>
+                          {t("login.labels.otp", "Enter OTP")}
+                        </label>
+                        <input
+                          placeholder={t(
+                            "login.placeholders.otp",
+                            "Enter OTP"
+                          )}
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          style={S.input}
+                        />
                       </div>
-                      <div style={{ ...S.col, display: "flex", alignItems: "flex-end" }}>
-                        <button type="button" onClick={verifyOtp} style={S.otpBtn}>
-                          {loading ? "Verifying..." : "Verify OTP"}
+                      <div
+                        style={{
+                          ...S.col,
+                          display: "flex",
+                          alignItems: "flex-end",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={verifyOtp}
+                          style={S.otpBtn}
+                        >
+                          {loading
+                            ? t("login.buttons.verifying", "Verifying...")
+                            : t("login.buttons.verifyOtp", "Verify OTP")}
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <p style={{ color: "#bae6a1", fontWeight: 700, margin: "8px 0" }}>Email verified!</p>
+                    <p
+                      style={{
+                        color: "#bae6a1",
+                        fontWeight: 700,
+                        margin: "8px 0",
+                      }}
+                    >
+                      {t(
+                        "login.status.emailVerified",
+                        "Email verified!"
+                      )}
+                    </p>
                   )}
 
                   <div style={S.row}>
                     <div style={S.col}>
-                      <label style={S.label}>Confirm Password</label>
-                      <input type="password" name="confirmPassword" style={S.input} value={form.confirmPassword} onChange={handleChange} required />
+                      <label style={S.label}>
+                        {t(
+                          "login.labels.confirmPassword",
+                          "Confirm Password"
+                        )}
+                      </label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        style={S.input}
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div style={S.col}>
-                      <label style={S.label}>Country</label>
-                      <input name="country" style={S.input} value={form.country} onChange={handleChange} />
+                      <label style={S.label}>
+                        {t("login.labels.country", "Country")}
+                      </label>
+                      <input
+                        name="country"
+                        style={S.input}
+                        value={form.country}
+                        onChange={handleChange}
+                      />
                     </div>
                   </div>
                 </>
@@ -634,7 +979,9 @@ export default function Login({ onLogin }) {
 
               <div style={{ marginTop: 6 }}>
                 <button type="submit" style={S.submitBtn}>
-                  {mode === "login" ? "Log In" : "Sign Up"}
+                  {mode === "login"
+                    ? t("login.buttons.login", "Log In")
+                    : t("login.buttons.signup", "Sign Up")}
                 </button>
               </div>
             </form>
@@ -642,30 +989,82 @@ export default function Login({ onLogin }) {
 
           {/* === MOBILE LOGIN === */}
           {ENABLE_MOBILE && mode === "mobile" && (
-            <form onSubmit={mobileOtpSent ? handleVerifyMobileOtp : handleSendMobileOtp} style={S.form}>
+            <form
+              onSubmit={
+                mobileOtpSent ? handleVerifyMobileOtp : handleSendMobileOtp
+              }
+              style={S.form}
+            >
               {error && <div style={S.error}>{error}</div>}
               <div style={S.rowSingle}>
-                <label style={S.label}>Mobile Number</label>
-                <input type="tel" placeholder="Enter mobile number" value={mobile} onChange={(e) => setMobile(e.target.value)} maxLength={10} style={S.input} required />
+                <label style={S.label}>
+                  {t("login.labels.mobile", "Mobile Number")}
+                </label>
+                <input
+                  type="tel"
+                  placeholder={t(
+                    "login.placeholders.mobile",
+                    "Enter mobile number"
+                  )}
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  maxLength={10}
+                  style={S.input}
+                  required
+                />
               </div>
 
               {mobileOtpSent ? (
                 <>
                   <div style={S.rowSingle}>
-                    <label style={S.label}>Enter OTP</label>
-                    <input type="text" placeholder="Enter OTP" value={mobileOtp} onChange={(e) => setMobileOtp(e.target.value)} maxLength={6} style={S.input} required />
+                    <label style={S.label}>
+                      {t("login.labels.otp", "Enter OTP")}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t(
+                        "login.placeholders.otp",
+                        "Enter OTP"
+                      )}
+                      value={mobileOtp}
+                      onChange={(e) => setMobileOtp(e.target.value)}
+                      maxLength={6}
+                      style={S.input}
+                      required
+                    />
                   </div>
                   <button type="submit" style={S.submitBtn}>
-                    {loading ? "Verifying..." : "Verify & Login"}
+                    {loading
+                      ? t("login.buttons.verifying", "Verifying...")
+                      : t(
+                          "login.buttons.verifyAndLogin",
+                          "Verify & Login"
+                        )}
                   </button>
 
-                  <button type="button" onClick={handleResendMobileOtp} disabled={timer > 0 || loading} style={{ ...S.otpBtn, backgroundColor: timer > 0 ? "#888" : "#d06549", marginTop: "10px" }}>
-                    {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
+                  <button
+                    type="button"
+                    onClick={handleResendMobileOtp}
+                    disabled={timer > 0 || loading}
+                    style={{
+                      ...S.otpBtn,
+                      backgroundColor:
+                        timer > 0 ? "#888" : "#d06549",
+                      marginTop: "10px",
+                    }}
+                  >
+                    {timer > 0
+                      ? t("login.buttons.resendOtpIn", {
+                          seconds: timer,
+                        })
+                      : t("login.buttons.resendOtp", "Resend OTP")}
                   </button>
                 </>
               ) : (
                 <button type="submit" style={S.otpBtn}>
-                  {loading ? "Sending..." : "Send OTP"}
+                  {loading
+                    ? t("login.buttons.sending", "Sending...")
+                    : t("login.buttons.sendOtp", "Send OTP")}
                 </button>
               )}
             </form>
@@ -675,7 +1074,10 @@ export default function Login({ onLogin }) {
           {showMobileModal && (
             <MobileVerificationModal
               show={showMobileModal}
-              onClose={() => { setShowMobileModal(false); setPendingUser(null); }}
+              onClose={() => {
+                setShowMobileModal(false);
+                setPendingUser(null);
+              }}
               onVerified={async () => {
                 setShowMobileModal(false);
                 onLogin?.(pendingUser);
@@ -694,7 +1096,6 @@ const S = {
   outer: {
     minHeight: "100vh",
     display: "grid",
-    // Narrower blue column, wider photo (closer to old feel)
     gridTemplateColumns: "1.35fr 0.8fr",
     background: "linear-gradient(180deg, #00477f 0%, #0a5aa4 100%)",
     fontFamily: baseFont,
@@ -708,16 +1109,13 @@ const S = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    // keep it elegant but not bulky
     padding: "5rem 2rem 3rem",
   },
-  // Tighter content width (old maxWidth ≈ 600)
   formInner: {
     width: "min(640px, 90vw)",
     color: "#fff",
   },
 
-  /* --- Tabs strip: keep compact --- */
   tabs: {
     display: "flex",
     gap: "1.4rem",
@@ -732,7 +1130,7 @@ const S = {
     border: "none",
     color: "#c9def3",
     fontWeight: 800,
-    fontSize: "1.45rem", // was 1.75rem
+    fontSize: "1.45rem",
     cursor: "pointer",
     paddingBottom: 6,
     lineHeight: 1.15,
@@ -751,7 +1149,6 @@ const S = {
   },
   bullet: { marginRight: 8 },
 
-  /* --- Form --- */
   form: {
     width: "min(640px, 90vw)",
     background: "transparent",
@@ -815,13 +1212,10 @@ const S = {
 };
 
 const responsiveCSS = `
-/* Desktop → Tablet */
 @media (max-width: 1080px) {
   .login-outer { grid-template-columns: 1fr; }
   .login-left-bg { display: none; }
 }
-
-/* Mirror old compact spacing on small screens */
 @media (max-width: 600px) {
   .login-outer { min-height: 100vh !important; }
   .login-form-area { padding: 2rem !important; }

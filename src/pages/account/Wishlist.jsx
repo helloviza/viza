@@ -6,6 +6,7 @@ import {
   FaUmbrellaBeach,
   FaGlobe,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import AccountSidebar from "../../components/account/Sidebar";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
@@ -15,23 +16,26 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function Wishlist() {
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // store error *keys* so UI stays translated if language changes
+  const [errorKey, setErrorKey] = useState("");
 
   useEffect(() => {
     async function fetchWishlist() {
       setLoading(true);
+      setErrorKey("");
       try {
         const res = await fetch(`${API_BASE}/api/wishlist`, {
           credentials: "include",
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch wishlist");
+        if (!res.ok) throw new Error(data.error || "fetchFailed");
         setItems(data.items || []);
       } catch (err) {
         console.error("❌ Wishlist Fetch Error:", err);
-        setError("Failed to load wishlist");
+        setErrorKey("fetchFailed");
       } finally {
         setLoading(false);
       }
@@ -40,17 +44,18 @@ export default function Wishlist() {
   }, []);
 
   async function handleRemove(id) {
-    if (!window.confirm("Remove this item from your wishlist?")) return;
+    if (!window.confirm(t("account.wishlist.confirmRemove"))) return;
     try {
       const res = await fetch(`${API_BASE}/api/wishlist/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Delete failed");
+      if (!res.ok) throw new Error(data.error || "removeFailed");
       setItems((prev) => prev.filter((i) => i.id !== id));
     } catch (err) {
-      setError("Failed to remove item");
+      console.error("❌ Wishlist Remove Error:", err);
+      setErrorKey("removeFailed");
     }
   }
 
@@ -76,30 +81,39 @@ export default function Wishlist() {
           <header style={S.headerCard}>
             <FaHeart style={{ fontSize: 42, marginRight: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>My Wishlist</h1>
-              <p style={{ opacity: 0.8 }}>
-                Your saved visas, destinations, and holiday packages
-              </p>
+              <h1 style={S.pageTitle}>{t("account.wishlist.title")}</h1>
+              <p style={{ opacity: 0.8 }}>{t("account.wishlist.subtitle")}</p>
             </div>
           </header>
 
-          {error && <div style={S.error}>{error}</div>}
+          {errorKey && (
+            <div style={S.error}>
+              {t(`account.wishlist.errors.${errorKey}`)}
+            </div>
+          )}
 
           {loading ? (
-            <p style={{ textAlign: "center" }}>Loading wishlist...</p>
+            <p style={{ textAlign: "center" }}>
+              {t("account.wishlist.loading")}
+            </p>
           ) : items.length === 0 ? (
             <div style={S.emptyState}>
               <FaHeart style={{ fontSize: 60, color: "#ccc" }} />
-              <p>You haven’t added anything to your wishlist yet.</p>
+              <p>{t("account.wishlist.empty")}</p>
             </div>
           ) : (
             <div style={S.grid}>
               {items.map((item) => (
                 <div key={item.id} style={S.card}>
                   <div style={S.iconBox}>{iconForType(item.type)}</div>
-                  <h3 style={S.cardTitle}>{item.title || "Untitled"}</h3>
+                  <h3 style={S.cardTitle}>
+                    {item.title || t("account.wishlist.fallbackTitle")}
+                  </h3>
                   <p style={S.cardSubtitle}>
-                    {item.subtitle || item.country || item.category || "—"}
+                    {item.subtitle ||
+                      item.country ||
+                      item.category ||
+                      t("account.wishlist.fallbackSubtitle")}
                   </p>
                   <div style={S.cardFooter}>
                     {item.url && (
@@ -109,12 +123,13 @@ export default function Wishlist() {
                         rel="noreferrer"
                         style={S.linkBtn}
                       >
-                        View
+                        {t("account.wishlist.actions.view")}
                       </a>
                     )}
                     <button
                       onClick={() => handleRemove(item.id)}
                       style={S.deleteBtn}
+                      aria-label={t("account.wishlist.actions.remove")}
                     >
                       <FaTrashAlt />
                     </button>

@@ -1,8 +1,13 @@
-import React from "react";
+// src/components/ScrollTextSection.jsx
+import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
 const ScrollTextSections = () => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
+
   const isMobile =
     typeof window !== "undefined" && window.innerWidth < 650;
 
@@ -12,11 +17,22 @@ const ScrollTextSections = () => {
   const paraSize = isMobile ? "1.05rem" : "1.2rem";
   const minHeight = isMobile ? "56vh" : undefined;
   const contentMaxWidth = isMobile ? "98vw" : "800px";
-  const textAlign = isMobile ? "center" : "left";
+  const sectionTextAlign = isMobile ? "center" : "left";
+  const paragraphAlign = isMobile ? "center" : (isRTL ? "right" : "left");
+
+  // Memoize translated lines so we don't recompute every render
+  const [titleL1, titleL2, body] = useMemo(
+    () => [
+      t("scroll.titleLine1"),
+      t("scroll.titleLine2"),
+      t("scroll.body"),
+    ],
+    [t]
+  );
 
   return (
     <>
-      {/* Section 2 */}
+      {/* Section */}
       <section
         style={{
           display: "flex",
@@ -30,7 +46,7 @@ const ScrollTextSections = () => {
           boxSizing: "border-box",
           padding: sectionPad,
           minHeight,
-          textAlign,
+          textAlign: sectionTextAlign,
           fontFamily: baseFont,
         }}
       >
@@ -43,11 +59,12 @@ const ScrollTextSections = () => {
               lineHeight: 1.12,
               letterSpacing: "-1px",
               fontFamily: baseFont,
-              textAlign:"Center",
+              textAlign: "center", // keep hero heading centered on all sizes
             }}
           >
-            Where the Sky<br />Meets the Earth
+            {titleL1}<br />{titleL2}
           </h2>
+
           <p
             style={{
               lineHeight: 1.56,
@@ -56,10 +73,10 @@ const ScrollTextSections = () => {
               maxWidth: "98vw",
               fontSize: paraSize,
               fontFamily: baseFont,
-              textAlign:"left",
+              textAlign: paragraphAlign,
             }}
           >
-            Travel to places where nature’s beauty and human wonder come together in perfect harmony. Let your curiosity guide you to new heights, where unforgettable experiences and breathtaking destinations await.
+            {body}
           </p>
         </div>
       </section>

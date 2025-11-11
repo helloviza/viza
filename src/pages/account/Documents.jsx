@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaFileUpload, FaFileAlt, FaTrashAlt } from "react-icons/fa";
 import AccountSidebar from "../../components/account/Sidebar";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const API_BASE =
@@ -9,6 +10,7 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function Documents() {
+  const { t, i18n } = useTranslation();
   const [documents, setDocuments] = useState([]);
   const [file, setFile] = useState(null);
   const [type, setType] = useState("passport");
@@ -25,22 +27,22 @@ export default function Documents() {
           credentials: "include",
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load documents");
+        if (!res.ok) throw new Error(data.error || "Failed");
         setDocuments(data.items || []);
       } catch (err) {
         console.error("❌ Documents fetch error:", err);
-        setError("Failed to load your uploaded documents");
+        setError(t("account.documents.errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     }
     fetchDocs();
-  }, []);
+  }, [t]);
 
   // === Handle file upload ===
   async function handleUpload(e) {
     e.preventDefault();
-    if (!file) return setError("Please choose a file first.");
+    if (!file) return setError(t("account.documents.errors.chooseFirst"));
     setError("");
     setSuccess("");
     setLoading(true);
@@ -58,11 +60,11 @@ export default function Documents() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
       setDocuments((prev) => [...prev, data]);
-      setSuccess("✅ File uploaded successfully!");
+      setSuccess(t("account.documents.status.uploadSuccess"));
       setFile(null);
     } catch (err) {
       console.error(err);
-      setError("Upload failed. Please try again.");
+      setError(t("account.documents.errors.uploadFailed"));
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ export default function Documents() {
 
   // === Handle delete ===
   async function handleDelete(id) {
-    if (!window.confirm("Are you sure you want to delete this document?")) return;
+    if (!window.confirm(t("account.documents.confirmDelete"))) return;
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/documents/${id}`, {
@@ -81,23 +83,23 @@ export default function Documents() {
       if (!res.ok) throw new Error(data.error || "Delete failed");
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
-      setError("Delete failed");
+      setError(t("account.documents.errors.deleteFailed"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", direction: i18n.dir(), fontFamily: baseFont }}>
       <AccountSidebar />
       <div style={{ flex: 1, padding: "2rem", marginTop: "80px" }}>
         <div style={S.pageWrapper}>
           <header style={S.headerCard}>
-            <FaFileUpload style={{ fontSize: 40, marginRight: 16 }} />
+            <FaFileUpload style={{ fontSize: 40, marginInlineEnd: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>My Documents</h1>
+              <h1 style={S.pageTitle}>{t("account.documents.title")}</h1>
               <p style={{ opacity: 0.8 }}>
-                Upload and manage your travel / KYC documents
+                {t("account.documents.subtitle")}
               </p>
             </div>
           </header>
@@ -106,24 +108,24 @@ export default function Documents() {
           {success && <div style={S.success}>{success}</div>}
 
           {/* === Upload Form === */}
-          <form onSubmit={handleUpload} style={S.formCard}>
+          <form onSubmit={handleUpload} style={S.formCard} noValidate>
             <div style={S.formRow}>
-              <label style={S.label}>Document Type</label>
+              <label style={S.label}>{t("account.documents.form.docType")}</label>
               <select
                 style={S.select}
                 value={type}
                 onChange={(e) => setType(e.target.value)}
               >
-                <option value="passport">Passport</option>
-                <option value="pan">PAN Card</option>
-                <option value="visa">Visa</option>
-                <option value="aadhar">Aadhar Card</option>
-                <option value="other">Other</option>
+                <option value="passport">{t("account.documents.form.types.passport")}</option>
+                <option value="pan">{t("account.documents.form.types.pan")}</option>
+                <option value="visa">{t("account.documents.form.types.visa")}</option>
+                <option value="aadhar">{t("account.documents.form.types.aadhar")}</option>
+                <option value="other">{t("account.documents.form.types.other")}</option>
               </select>
             </div>
 
             <div style={S.formRow}>
-              <label style={S.label}>Choose File</label>
+              <label style={S.label}>{t("account.documents.form.chooseFile")}</label>
               <input
                 style={S.fileInput}
                 type="file"
@@ -133,25 +135,27 @@ export default function Documents() {
             </div>
 
             <button type="submit" style={S.uploadBtn} disabled={loading}>
-              {loading ? "Uploading..." : "Upload Document"}
+              {loading
+                ? t("account.documents.form.uploading")
+                : t("account.documents.form.uploadBtn")}
             </button>
           </form>
 
           {/* === Documents Table === */}
           <div style={S.tableCard}>
-            <h2 style={S.subTitle}>Uploaded Files</h2>
+            <h2 style={S.subTitle}>{t("account.documents.table.title")}</h2>
             {documents.length === 0 ? (
               <p style={{ textAlign: "center", color: "#666" }}>
-                No documents uploaded yet.
+                {t("account.documents.table.empty")}
               </p>
             ) : (
               <table style={S.table}>
                 <thead>
                   <tr style={S.thRow}>
-                    <th style={S.th}>Type</th>
-                    <th style={S.th}>File</th>
-                    <th style={S.th}>Uploaded On</th>
-                    <th style={S.th}>Actions</th>
+                    <th style={S.th}>{t("account.documents.table.headers.type")}</th>
+                    <th style={S.th}>{t("account.documents.table.headers.file")}</th>
+                    <th style={S.th}>{t("account.documents.table.headers.uploadedOn")}</th>
+                    <th style={S.th}>{t("account.documents.table.headers.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -165,12 +169,12 @@ export default function Documents() {
                           rel="noreferrer"
                           style={S.fileLink}
                         >
-                          <FaFileAlt style={{ marginRight: 6 }} />
-                          {doc.filename || "View File"}
+                          <FaFileAlt style={{ marginInlineEnd: 6 }} />
+                          {doc.filename || t("account.documents.actions.viewFile")}
                         </a>
                       </td>
                       <td style={S.td}>
-                        {new Date(doc.createdAt).toLocaleDateString("en-IN", {
+                        {new Date(doc.createdAt).toLocaleDateString(i18n.language || "en", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
@@ -180,6 +184,8 @@ export default function Documents() {
                         <button
                           onClick={() => handleDelete(doc.id)}
                           style={S.deleteBtn}
+                          title={t("account.documents.actions.delete")}
+                          aria-label={t("account.documents.actions.delete")}
                         >
                           <FaTrashAlt />
                         </button>

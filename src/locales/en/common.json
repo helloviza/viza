@@ -1,0 +1,958 @@
+{
+  "common": {
+    "applyNow": "Apply Now",
+    "buttons": {
+      "applyNow": "Apply Now",
+      "viewDetails": "View Details",
+      "startApplication": "Start Application",
+      "continue": "Continue",
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "upload": "Upload",
+      "download": "Download",
+      "addToWishlist": "Add to Wishlist",
+      "removeFromWishlist": "Remove from Wishlist",
+      "contactSupport": "Contact Support",
+      "bookAppointment": "Book Appointment",
+      "payNow": "Pay Now",
+      "proceedToPayment": "Proceed to Payment",
+      "verifyOTP": "Verify OTP",
+      "resendOTP": "Resend OTP",
+      "changeLanguage": "Change Language",
+      "changeCountry": "Change Country",
+      "select": "Select",
+      "deselect": "Deselect",
+      "search": "Search",
+      "searchVerb": "Search",
+      "filter": "Filter",
+      "clearFilters": "Clear Filters",
+      "viewAll": "View All",
+      "showMore": "Show More",
+      "showLess": "Show Less",
+      "readMore": "Read More",
+      "readLess": "Read Less",
+      "login": "Login",
+      "signup": "Sign Up",
+      "logout": "Logout",
+      "add": "Add",
+      "remove": "Remove",
+      "yes": "Yes",
+      "no": "No",
+      "ok": "OK",
+      "close": "Close",
+      "tryAgain": "Try Again",
+      "retry": "Retry",
+      "confirm": "Confirm",
+      "decline": "Decline",
+      "accept": "Accept",
+      "reject": "Reject",
+      "update": "Update",
+      "change": "Change",
+      "viewChecklist": "View Checklist",
+      "viewRequirements": "View Requirements",
+      "trackApplication": "Track Application",
+      "startOver": "Start Over",
+      "reserveVisa": "Reserve Your Visa"
+    },
+    "visaTypes": {
+      "tourist": "Tourist",
+      "student": "Student",
+      "family": "Family",
+      "business": "Business"
+    },
+    "visaTypeNouns": {
+      "tourist": "Tourism",
+      "student": "Study",
+      "family": "Family",
+      "business": "Business"
+    }
+  },
+  "nav": {
+    "visaServices": "Visa Services",
+    "goForVisa": "Go for Visa",
+    "bookFlight": "Book Flight",
+    "supportContact": "Support / Contact",
+    "login": "Login / Sign Up",
+    "user": "User",
+    "myProfile": "My Profile",
+    "myVisaHistory": "My Visa History",
+    "myWallet": "My Wallet",
+    "myDocuments": "My Documents",
+    "myFutureWishlist": "My Future Wishlist",
+    "logout": "Logout",
+    "languageRegion": "Language & Region"
+  },
+  "home": {
+    "hero": {
+      "titleLine1": "Your Gateway to",
+      "titleLine2": "The World",
+      "subtitle": "Behind every visa lies a world of endless possibilities. Visa Services simplifies your journey, unlocking seamless travel, unforgettable adventures, and hassle-free exploration wherever your dreams take you"
+    },
+    "results": {
+      "title": "Visa Options",
+      "fallbackDestination": "Destination",
+      "fallbackVisa": "Visa",
+      "processing": "Processing:",
+      "validity": "Validity:",
+      "stay": "Stay:",
+      "type": "Type:",
+      "requirements": "Requirements:"
+    },
+    "heroTitle": "Your trusted visa partner",
+    "heroSubtitle": "Fast, reliable, and transparent visa assistance."
+  },
+  "scroll": {
+    "titleLine1": "Where the Sky",
+    "titleLine2": "Meets the Earth",
+    "body": "Travel to places where nature’s beauty and human wonder come together in perfect harmony. Let your curiosity guide you to new heights, where unforgettable experiences and breathtaking destinations await."
+  },
+  "services": {
+    "cards": [
+      {
+        "title": "Tourist Visa",
+        "desc": "Experience seamless travel for holidays and tourism across the globe."
+      },
+      {
+        "title": "Business Visa",
+        "desc": "Accelerate your international business journeys with dedicated support."
+      },
+      {
+        "title": "Student Visa",
+        "desc": "Unlock global education opportunities with our expert visa guidance."
+      },
+      {
+        "title": "Family Visa",
+        "desc": "Bring your loved ones closer—smooth family visa processing for all destinations."
+      }
+    ],
+    "why": {
+      "title": "Why Choose Helloviza?",
+      "line1": "Your trusted partner for global visas. Fast, reliable, and always by your side.",
+      "signoff": "Team Helloviza"
+    }
+  },
+  "explore": {
+    "blurb": "Embark on a seamless journey to the world’s most exclusive destinations. From hidden valleys to pristine coastlines, our bespoke visa services unlock extraordinary escapes, crafted with elegance to inspire your next adventure.",
+    "heading": {
+      "before": "Explore",
+      "italic": "Worlds",
+      "after": "Beyond Imagination"
+    },
+    "dragHint": "DRAG TO NAVIGATE"
+  },
+  "visaCountryGrid": {
+    "title": "Popular Visa Destinations",
+    "applyToSeePrice": "₹ Apply to see price"
+  },
+  "countries": {
+    "UAE": "UAE",
+    "Thailand": "Thailand",
+    "Malaysia": "Malaysia",
+    "Singapore": "Singapore",
+    "Argentina": "Argentina",
+    "Armenia": "Armenia",
+    "Azerbaijan": "Azerbaijan",
+    "Bahrain": "Bahrain",
+    "Benin": "Benin",
+    "Colombia": "Colombia",
+    "CoteDIvoire": "Cote D' Ivoire",
+    "Djibouti": "Djibouti",
+    "Georgia": "Georgia",
+    "Kazakhstan": "Kazakhstan",
+    "KyrgyzstanRepublic": "Kyrgyzstan Republic",
+    "Lesotho": "Lesotho",
+    "Moldova": "Moldova",
+    "NewZealand": "New Zealand",
+    "Oman": "Oman",
+    "PapuaNewGuinea": "Papua New Guinea",
+    "RussianFederation": "Russian Federation",
+    "SouthKorea": "South Korea",
+    "Taiwan": "Taiwan",
+    "Turkey": "Turkey",
+    "Uganda": "Uganda",
+    "Uzbekistan": "Uzbekistan",
+    "Zambia": "Zambia",
+    "Barbados": "Barbados",
+    "Bhutan": "Bhutan",
+    "Dominica": "Dominica",
+    "Grenada": "Grenada",
+    "Haiti": "Haiti",
+    "HongKong": "Hong Kong",
+    "Maldives": "Maldives",
+    "Mauritius": "Mauritius",
+    "Montserrat": "Montserrat",
+    "Nepal": "Nepal",
+    "NiueIsland": "Niue Island",
+    "SaintVincentGrenadines": "Saint Vincent & the Grenadines",
+    "Samoa": "Samoa",
+    "Senegal": "Senegal",
+    "Serbia": "Serbia",
+    "TrinidadTobago": "Trinidad & Tobago",
+    "Angola": "Angola",
+    "Bolivia": "Bolivia",
+    "CaboVerde": "Cabo Verde",
+    "CameroonUnionRepublic": "Cameroon Union Republic",
+    "CookIslands": "Cook Islands",
+    "Fiji": "Fiji",
+    "GuineaBissau": "Guinea Bissau",
+    "Indonesia": "Indonesia",
+    "Iran": "Iran",
+    "Jamaica": "Jamaica",
+    "Jordan": "Jordan",
+    "Kiribati": "Kiribati",
+    "Laos": "Laos",
+    "Madagascar": "Madagascar",
+    "Mauritania": "Mauritania",
+    "Nigeria": "Nigeria",
+    "Qatar": "Qatar",
+    "RepublicOfMarshallIslands": "Republic of Marshall Islands",
+    "ReunionIsland": "Reunion Island",
+    "Rwanda": "Rwanda",
+    "Seychelles": "Seychelles",
+    "Somalia": "Somalia",
+    "Tunisia": "Tunisia",
+    "Tuvalu": "Tuvalu",
+    "Vanuatu": "Vanuatu",
+    "Zimbabwe": "Zimbabwe",
+    "Kenya": "Kenya",
+    "Myanmar": "Myanmar",
+    "SaintLucia": "Saint Lucia",
+    "SriLanka": "Sri Lanka",
+    "Suriname": "Suriname",
+    "Tajikistan": "Tajikistan",
+    "Tanzania": "Tanzania",
+    "Vietnam": "Vietnam",
+    "Ethiopia": "Ethiopia",
+    "Cambodia": "Cambodia"
+  },
+  "stats": {
+    "visasOnTime": {
+      "big": "99.2%",
+      "heading": "Visas On Time",
+      "sub": "Visa delivered before\ntravel date"
+    },
+    "processed": {
+      "big": "500k+",
+      "heading": "Processed",
+      "sub": "Processed for travelers worldwide"
+    },
+    "rating": {
+      "big": "4.81★",
+      "heading": "Rating",
+      "sub": "Industry’s highest rating for customer\nservice & reliability"
+    }
+  },
+  "footer": {
+    "headings": {
+      "discover": "DISCOVER",
+      "management": "MANAGEMENT",
+      "ourService": "OUR SERVICE",
+      "socialMedia": "SOCIAL MEDIA",
+      "subscribe": "SUBSCRIBE"
+    },
+    "links": {
+      "home": "Home",
+      "blog": "Blog",
+      "contact": "Contact",
+      "about": "About Us",
+      "careers": "Career",
+      "bookFlight": "Book my Flight",
+      "bookHotel": "Book my Hotel",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "facebook": "Facebook"
+    },
+    "aria": {
+      "bookFlight": "Book my Flight on PlumTrips (opens in a new tab)",
+      "bookHotel": "Book my Hotel on PlumTrips (opens in a new tab)",
+      "instagram": "Instagram (opens in a new tab)",
+      "youtube": "YouTube (opens in a new tab)",
+      "facebook": "Facebook (opens in a new tab)"
+    },
+    "subscribe": {
+      "blurb": "Get updates in your inbox.",
+      "placeholder": "Enter your email address",
+      "ariaEmail": "Email address",
+      "button": "Subscribe"
+    },
+    "bottom": {
+      "brand": "Helloviza",
+      "allRights": "All rights reserved",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
+      "newsroom": "Newsroom",
+      "linkText": "Helloviza’s website"
+    }
+  },
+  "searchNeo": {
+    "labels": {
+      "origin": "Where are you starting from?",
+      "destination": "Your destination?",
+      "startDate": "Visa start date",
+      "endDate": "Visa end date",
+      "purpose": "Purpose of visa"
+    },
+    "placeholders": {
+      "date": "dd-mm-yyyy"
+    },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "aria": {
+      "prevMonth": "Prev month",
+      "nextMonth": "Next month",
+      "origin": "Origin",
+      "destination": "Destination",
+      "startDate": "Visa start date",
+      "endDate": "Visa end date"
+    },
+    "chips": {
+      "evisa": "E-VISA",
+      "visa": "VISA"
+    },
+    "subtitleByDate": "Get your visa by {{date}}",
+    "purpose": {
+      "tourist": "Tourist",
+      "business": "Business",
+      "family": "Family",
+      "student": "Student",
+      "transit": "Transit"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "emailHeading": "E–MAIL ADDRESS",
+    "hoursHeading": "WORKING HOURS",
+    "hoursLine": "Monday – Sunday, 9 AM – 8 PM, IST",
+    "formAria": "Contact form",
+    "accountLabel": "Your Account Email or Username*",
+    "accountPlaceholder": "Enter your account email or username",
+    "firstName": "First Name*",
+    "fnPlaceholder": "Enter name",
+    "lastName": "Last Name*",
+    "lnPlaceholder": "Enter last name",
+    "email": "Email Address*",
+    "emailPlaceholder": "Enter e-mail",
+    "subject": "Subject*",
+    "selectSubject": "Select subject",
+    "subjects": {
+      "visaHelp": "Visa Application Assistance",
+      "processingTime": "Processing Time Queries",
+      "destinationReq": "Specific Destination Requirements",
+      "customTravel": "Customized Travel Solutions",
+      "feePayment": "Fee and Payment Information",
+      "unableLogin": "Unable to Login",
+      "failedSignup": "Failed to do Signup",
+      "consultation": "Consultation Requests",
+      "partnership": "Partnership Requirement",
+      "feedback": "Feedback"
+    },
+    "mobile": "Mobile Number*",
+    "mobilePlaceholder": "Enter mobile number",
+    "extraEmail": "Email ID*",
+    "extraEmailPlaceholder": "Enter email id",
+    "message": "Message*",
+    "msgPlaceholder": "Enter message",
+    "submitCta": "Submit Your Query",
+    "submitting": "Submitting...",
+    "status": {
+      "success": "✅ Your query has been submitted!",
+      "genericFail": "❌ Something went wrong.",
+      "serverDown": "❌ Could not connect to server. Please try again later.",
+      "badMobile": "❌ Enter a valid mobile number (10–15 digits).",
+      "botBlocked": "❌ Submission blocked."
+    },
+    "hpLabel": "Company"
+  },
+  "account": {
+    "documents": {
+      "title": "My Documents",
+      "subtitle": "Upload and manage your travel / KYC documents",
+      "confirmDelete": "Are you sure you want to delete this document?",
+      "status": {
+        "uploadSuccess": "✅ File uploaded successfully!"
+      },
+      "errors": {
+        "fetchFailed": "Failed to load your uploaded documents",
+        "chooseFirst": "Please choose a file first.",
+        "uploadFailed": "Upload failed. Please try again.",
+        "deleteFailed": "Delete failed"
+      },
+      "form": {
+        "docType": "Document Type",
+        "chooseFile": "Choose File",
+        "uploading": "Uploading...",
+        "uploadBtn": "Upload Document",
+        "types": {
+          "passport": "Passport",
+          "pan": "PAN Card",
+          "visa": "Visa",
+          "aadhar": "Aadhar Card",
+          "other": "Other"
+        }
+      },
+      "table": {
+        "title": "Uploaded Files",
+        "empty": "No documents uploaded yet.",
+        "headers": {
+          "type": "Type",
+          "file": "File",
+          "uploadedOn": "Uploaded On",
+          "actions": "Actions"
+        }
+      },
+      "actions": {
+        "viewFile": "View File",
+        "delete": "Delete"
+      }
+    },
+    "profile": {
+      "loading": "Loading profile...",
+      "sessionWarning": "Your session might have expired. Please log in again.",
+      "header": {
+        "fallbackFirstName": "Your",
+        "fallbackLastName": "Name",
+        "fallbackEmail": "your.email@example.com",
+        "fallbackMobile": "+91 00000 00000"
+      },
+      "tabs": {
+        "profile": "Profile Info",
+        "documents": "Documents",
+        "preferences": "Preferences"
+      },
+      "messages": {
+        "saveSuccess": "✅ Profile saved successfully!",
+        "saveError": "Failed to save profile",
+        "fetchError": "Failed to fetch profile"
+      },
+      "form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "mobile": "Mobile",
+        "dob": "Date of Birth",
+        "nationality": "Nationality",
+        "anniversary": "Anniversary",
+        "city": "City",
+        "state": "State",
+        "passportNo": "Passport Number",
+        "passportExpiry": "Passport Expiry Date",
+        "issuingCountry": "Issuing Country",
+        "panCard": "PAN Card Number",
+        "domesticPlan": "Domestic Plan",
+        "internationalPlan": "International Plan"
+      },
+      "maritalStatus": {
+        "label": "Marital Status",
+        "placeholder": "Select marital status",
+        "options": {
+          "single": "Single",
+          "married": "Married",
+          "divorced": "Divorced",
+          "widowed": "Widowed",
+          "other": "Other"
+        }
+      },
+      "buttons": {
+        "save": "Save Changes",
+        "saving": "Saving…"
+      }
+    },
+    "referrals": {
+      "title": "Referrals & Rewards",
+      "subtitle": "Invite your friends to Helloviza and earn travel credits when they join!",
+      "loading": "Loading referral details...",
+      "errors": {
+        "fetchFailed": "Failed to load referral data."
+      },
+      "messages": {
+        "linkCopied": "Referral link copied!",
+        "copyFailed": "Copy failed, please copy manually."
+      },
+      "card": {
+        "heading": "Your Referral Code",
+        "fallbackCode": "XXXXXX",
+        "copyCta": "Copy Link"
+      },
+      "share": {
+        "whatsapp": "WhatsApp",
+        "email": "Email",
+        "direct": "Share Link",
+        "text": "Join Helloviza with my referral code {{code}}! Use this link to sign up: {{link}}",
+        "emailSubject": "Join Helloviza"
+      },
+      "stats": {
+        "totalInvites": "Total Invites",
+        "successful": "Successful Referrals",
+        "credits": "Referral Credits",
+        "creditsDisplay": "₹ {{amount}}"
+      }
+    },
+    "savedApplications": {
+      "title": "Saved Applications",
+      "subtitle": "Manage and continue your saved visa or travel applications",
+      "loading": "Loading saved applications...",
+      "empty": "No saved applications found.",
+      "confirmDelete": "Remove this saved application?",
+      "errors": {
+        "fetchFailed": "Failed to fetch saved applications",
+        "deleteFailed": "Failed to delete application"
+      },
+      "table": {
+        "headers": {
+          "id": "Application ID",
+          "type": "Type",
+          "country": "Country",
+          "status": "Status",
+          "updated": "Last Updated",
+          "action": "Action"
+        },
+        "defaultType": "Visa"
+      },
+      "actions": {
+        "view": "View",
+        "remove": "Remove"
+      },
+      "status": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "default": "In progress"
+      }
+    },
+    "settings": {
+      "title": "Account Settings",
+      "subtitle": "Manage your password, devices, and two-factor authentication preferences",
+      "loading": "Loading settings...",
+      "toast": {
+        "loadFailed": "Failed to load settings",
+        "passwordChanged": "✅ Password changed successfully!",
+        "passwordChangeFailed": "Failed to change password",
+        "twoFAEnabled": "Two-Factor Authentication enabled",
+        "twoFADisabled": "Two-Factor Authentication disabled",
+        "twoFAToggleFailed": "Failed to toggle 2FA",
+        "deviceRemoved": "Device removed successfully",
+        "deviceRemoveFailed": "Failed to remove device",
+        "passwordMismatch": "New passwords do not match"
+      },
+      "password": {
+        "sectionTitle": "Change Password",
+        "current": "Current Password",
+        "new": "New Password",
+        "confirm": "Confirm New Password",
+        "updateBtn": "Update Password",
+        "updating": "Updating..."
+      },
+      "twoFA": {
+        "sectionTitle": "Two-Factor Authentication",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "enableBtn": "Enable 2FA",
+        "disableBtn": "Disable 2FA"
+      },
+      "devices": {
+        "sectionTitle": "Linked Devices",
+        "empty": "No active devices found.",
+        "confirmRemove": "Remove this device from your account?",
+        "headers": {
+          "device": "Device",
+          "ip": "IP",
+          "lastActive": "Last Active",
+          "action": "Action"
+        },
+        "removeBtn": "Remove",
+        "fallbackDevice": "Unknown Device",
+        "fallbackIp": "—"
+      }
+    },
+    "visaHistory": {
+      "title": "Visa Application History",
+      "subtitle": "Track your previous visa requests and statuses",
+      "loading": "Loading visa applications...",
+      "empty": "No visa applications found.",
+      "errors": {
+        "fetchFailed": "Failed to fetch visa history"
+      },
+      "table": {
+        "headers": {
+          "country": "Country",
+          "type": "Visa Type",
+          "appliedOn": "Applied On",
+          "status": "Status",
+          "remarks": "Remarks",
+          "download": "Download"
+        },
+        "defaultType": "Tourist",
+        "downloadLabel": "PDF"
+      },
+      "status": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "default": "N/A"
+      }
+    },
+    "wallet": {
+      "title": "My Wallet",
+      "subtitle": "Track your travel credits, transactions, and referral bonuses",
+      "loading": "Loading wallet details...",
+      "errors": {
+        "fetchFailed": "Failed to load wallet data"
+      },
+      "balance": {
+        "label": "Available Balance",
+        "display": "₹ {{amount}}",
+        "note": "You can redeem your wallet credits for visa, flight, or holiday bookings."
+      },
+      "transactions": {
+        "title": "Recent Transactions",
+        "empty": "No transactions yet.",
+        "headers": {
+          "type": "Type",
+          "amount": "Amount",
+          "remarks": "Remarks",
+          "date": "Date"
+        },
+        "amountDisplay": "₹ {{amount}}"
+      },
+      "types": {
+        "credit": "Credit",
+        "debit": "Debit",
+        "referral": "Referral"
+      }
+    },
+    "wishlist": {
+      "title": "My Wishlist",
+      "subtitle": "Your saved visas, destinations, and holiday packages",
+      "loading": "Loading wishlist...",
+      "empty": "You haven’t added anything to your wishlist yet.",
+      "confirmRemove": "Remove this item from your wishlist?",
+      "errors": {
+        "fetchFailed": "Failed to load wishlist",
+        "removeFailed": "Failed to remove item"
+      },
+      "actions": {
+        "view": "View",
+        "remove": "Remove"
+      },
+      "fallbackTitle": "Untitled",
+      "fallbackSubtitle": "—"
+    }
+  },
+  "about": {
+    "hero": {
+      "badge": "MODULE · Visa Experience Layer",
+      "titleLine1": "Visa journeys designed by humans,",
+      "titleHighlight": "simplified",
+      "titleLine2": "for every kind of traveller.",
+      "subtitle": "Helloviza is a visa and travel support layer built for real life. Business, family, study or a quick getaway — we focus on clarity, timelines and calm, not paperwork panic.",
+      "chips": {
+        "visaOs": "Visa-first travel operating layer",
+        "humanExperts": "Human support + structured process",
+        "travelConfidence": "Decisions made with confidence"
+      },
+      "panel": {
+        "labelLeft": "MODULE · Live visa support",
+        "labelRight": "ACTIVE",
+        "title": "Where does Helloviza fit?",
+        "body": "Think of us as a calm control room for your visa journey. We translate embassy requirements into simple checklists, keep you posted on progress and help you react quickly when plans shift."
+      },
+      "metrics": {
+        "onTime": {
+          "big": "99.2%",
+          "label": "visas delivered before travel date*"
+        },
+        "travelers": {
+          "big": "10k+",
+          "label": "travellers guided across journeys"
+        },
+        "countries": {
+          "big": "40+",
+          "label": "countries and routes supported"
+        }
+      }
+    },
+    "images": {
+      "handAlt": "Animated hand illustration",
+      "globeAlt": "Illustration of global travel routes",
+      "circleAlt": "Circular travel illustration"
+    },
+    "visionMission": {
+      "moduleLabelLeft": "MODULE · Vision / Mission",
+      "moduleLabelRight": "SYSTEM LAYER // PURPOSE"
+    },
+    "vision": {
+      "titleTag": "VISION",
+      "title": "A visa layer that feels human, not bureaucratic.",
+      "body1": "Our vision is to make cross-border travel feel intuitive, transparent and safe — no matter which consulate, route or reason you are travelling for.",
+      "body2": "We imagine a world where travellers understand what is happening with their application at every step, and never feel alone in the process."
+    },
+    "mission": {
+      "titleTag": "MISSION",
+      "title": "Remove friction from every visa journey.",
+      "body1": "Helloviza’s mission is to turn confusing forms, scattered documents and shifting rules into a guided, step-by-step experience.",
+      "body2": "From discovery to stamping and beyond, we align people, processes and technology around what actually matters: timelines, safety and peace of mind."
+    },
+    "origin": {
+      "moduleLabelLeft": "MODULE · Origin Story",
+      "moduleLabelRight": "SYSTEM LOG // CONTEXT",
+      "title": "Why Helloviza exists",
+      "body1": "Helloviza grew out of years of helping friends, families and partners navigate visas the hard way — inconsistent information, last-minute document scrambles and nervous checks for status updates.",
+      "bullets": [
+        "forms that change from one consulate to another.",
+        "checklists buried inside PDFs and email threads.",
+        "unclear status updates and surprise document asks.",
+        "travellers discovering rules only at the airport counter."
+      ],
+      "body2": "We built Helloviza to be the opposite of that: a single place where the requirements are clear, your documents live together and a real human can step in when it feels overwhelming."
+    },
+    "howWeHelp": {
+      "kicker": "HOW HELLOVIZA HELPS",
+      "body": "Instead of one-off answers, we build a repeatable, structured layer around every visa journey.",
+      "cards": {
+        "guidedVisa": {
+          "title": "Guided visa discovery",
+          "body": "Understand which visa fits your purpose of travel, timelines and basic requirements — in plain language."
+        },
+        "documentLayer": {
+          "title": "Structured document layer",
+          "body": "Upload, name and track documents in one place so nothing is lost between drives, emails and chats."
+        },
+        "statusClarity": {
+          "title": "Status & milestone clarity",
+          "body": "Know where your application stands, what is pending and what comes next — without decoding jargon."
+        },
+        "globalAssist": {
+          "title": "Global-ready support",
+          "body": "Across embassies, time zones and changing rules, our team helps you react quickly when plans or policies shift."
+        }
+      }
+    },
+    "global": {
+      "moduleLabelLeft": "MODULE · Global Layer",
+      "moduleLabelRight": "FOOTPRINT // PARTNERS",
+      "title": "Built in India, connected to the world.",
+      "body": "Helloviza works with a distributed network of partners, consulate liaisons and travel teams so you are never far from help. Whether your trip starts in Mumbai, Dubai or beyond, we design each journey with global realities in mind."
+    },
+    "principles": {
+      "moduleLabelLeft": "MODULE · Guardrails",
+      "moduleLabelRight": "GOVERNANCE // PRINCIPLES",
+      "title": "Principles we don’t compromise on",
+      "body": "A visa is more than a stamp — it carries time, money, emotions and plans. These principles shape how we design flows, policies and support at Helloviza.",
+      "items": {
+        "clarityFirst": {
+          "title": "Clarity before complexity",
+          "body": "We simplify the process, not the facts. You always see requirements, trade-offs and timelines clearly."
+        },
+        "humanInLoop": {
+          "title": "Human in the loop",
+          "body": "Technology organises and tracks. Humans listen, guide and help you choose what’s right for your situation."
+        },
+        "respectTimeMoney": {
+          "title": "Respect for time & money",
+          "body": "We treat every application as if it were our own — careful with costs, realistic with routes and dates."
+        },
+        "honestExpectations": {
+          "title": "Honest expectations",
+          "body": "If a plan is risky, timelines are tight or documentation feels weak, we say it as it is — early."
+        },
+        "inclusiveSupport": {
+          "title": "Inclusive support",
+          "body": "First-time travellers and frequent flyers both deserve calm, clear support tailored to their comfort level."
+        },
+        "longTermView": {
+          "title": "Built for repeat journeys",
+          "body": "We design for lifelong travellers, not one-time transactions. Trust compounds with every trip."
+        }
+      }
+    },
+    "cta": {
+      "title": "Open the door to your next journey.",
+      "body": "Whether you are exploring your first solo trip, a family vacation or a business route you’ll use every quarter, Helloviza can sit quietly behind the scenes and keep your visa journey on track."
+    }
+  },
+  "careers": {
+    "hero": {
+      "badge": "CAREERS",
+      "titleLine1": "You're Brilliant.",
+      "titleLine2": "We're Hiring.",
+      "subtitle": "We’re looking for ambitious, energetic and helpful people who want to build delightful digital travel products that empower users globally."
+    },
+    "images": {
+      "team1Alt": "Helloviza team photo 1",
+      "team2Alt": "Helloviza team photo 2"
+    },
+    "perks": {
+      "label": "PERKS",
+      "title": "Why work at Helloviza?",
+      "cards": [
+        {
+          "icon": "🌏",
+          "title": "Remote work options",
+          "desc": "Work from anywhere with flexible hours."
+        },
+        {
+          "icon": "👨‍👩‍👧‍👦",
+          "title": "Family-friendly culture",
+          "desc": "Inclusive policies for work-life balance."
+        },
+        {
+          "icon": "💻",
+          "title": "Latest equipment",
+          "desc": "Get top-of-the-line tech for your role."
+        },
+        {
+          "icon": "🌴",
+          "title": "Generous leave",
+          "desc": "Paid time off, public holidays, and personal days."
+        },
+        {
+          "icon": "📈",
+          "title": "Growth & Learning",
+          "desc": "Upskill budgets, career mentoring, and internal mobility."
+        },
+        {
+          "icon": "🏆",
+          "title": "Competitive pay",
+          "desc": "Great compensation & annual bonus."
+        },
+        {
+          "icon": "🩺",
+          "title": "Health Benefits",
+          "desc": "Medical, dental & wellness support."
+        },
+        {
+          "icon": "🎉",
+          "title": "Fun company offsites",
+          "desc": "Annual meetups in exciting locations."
+        }
+      ]
+    },
+    "jobs": {
+      "label": "JOBS",
+      "title": "Current Openings",
+      "subtitle": "Join our rapidly growing team and build the future of digital travel!",
+      "items": [
+        {
+          "title": "Full Stack Developer",
+          "location": "Remote / Bangalore",
+          "linkLabel": "View role"
+        },
+        {
+          "title": "Customer Success Manager",
+          "location": "Remote / Delhi",
+          "linkLabel": "View role"
+        },
+        {
+          "title": "Digital Marketing Specialist",
+          "location": "Remote / Mumbai",
+          "linkLabel": "View role"
+        }
+      ],
+      "noRolesNote": "Don’t see a perfect role? Send us your profile and a short note on what you’d like to work on."
+    },
+    "cta": {
+      "title": "The ease of a travel expert.\nThe power of transparency.",
+      "points": [
+        "24x7 Customer Support",
+        "100% Digital Process",
+        "Explore Global Destinations",
+        "Trusted by Thousands"
+      ],
+      "button": "Request A Demo"
+    }
+  },
+  "login": {
+    "checkingSession": "Checking session…",
+    "tabs": {
+      "login": "Log in",
+      "signup": "Sign Up",
+      "mobile": "Mobile Login"
+    },
+    "email": {
+      "labels": {
+        "firstName": "First Name*",
+        "lastName": "Last Name*",
+        "email": "Email*",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "country": "Country"
+      },
+      "buttons": {
+        "sendOtp": "Send OTP",
+        "sendingOtp": "Sending...",
+        "verifyOtp": "Verify OTP",
+        "verifyingOtp": "Verifying...",
+        "submitLogin": "Log In",
+        "submitSignup": "Sign Up"
+      },
+      "messages": {
+        "otpLabel": "Enter OTP",
+        "otpPlaceholder": "Enter OTP",
+        "emailVerified": "Email verified!"
+      }
+    },
+    "mobile": {
+      "labels": {
+        "mobile": "Mobile Number",
+        "otp": "Enter OTP"
+      },
+      "placeholders": {
+        "mobile": "Enter mobile number",
+        "otp": "Enter OTP"
+      },
+      "buttons": {
+        "sendOtp": "Send OTP",
+        "sendingOtp": "Sending...",
+        "verifyLogin": "Verify & Login",
+        "verifying": "Verifying...",
+        "resendOtp": "Resend OTP",
+        "resendIn": "Resend OTP in {{seconds}}s"
+      }
+    },
+    "modal": {
+      "title": "Verify your Mobile",
+      "errors": {
+        "missingMobile": "Please enter your mobile number",
+        "missingOtp": "Enter OTP",
+        "sendFailed": "Failed to send OTP",
+        "verifyFailed": "OTP verification failed"
+      },
+      "placeholders": {
+        "mobile": "Enter mobile number",
+        "otp": "Enter OTP"
+      },
+      "buttons": {
+        "send": "Send OTP",
+        "sending": "Sending...",
+        "verify": "Verify & Continue",
+        "verifying": "Verifying...",
+        "cancel": "Cancel"
+      }
+    },
+    "errors": {
+      "emailRequired": "Enter your email",
+      "authFailed": "Auth failed",
+      "loginFailed": "Login failed",
+      "googleFailed": "Google login failed, please try again.",
+      "otpRequired": "Enter OTP",
+      "otpFailed": "OTP verification failed",
+      "verifyEmailFirst": "Please verify your email first",
+      "mobileRequired": "Enter mobile number",
+      "sendOtpFailed": "Failed to send OTP",
+      "resendOtpFailed": "Failed to resend OTP",
+      "invalidOtp": "Invalid OTP"
+    }
+  }
+}

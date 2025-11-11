@@ -1,34 +1,40 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
-const stats = [
-  {
-    bg: "#ffffff",
-    color: "#1b1b1b",
-    big: "99.2%",
-    heading: "Visas On Time",
-    sub: "Visa delivered before\ntravel date",
-  },
-  {
-    bg: "#d06549",
-    color: "#fff",
-    big: "5L+",
-    heading: "Processed",
-    sub: "Processed for travelers worldwide",
-  },
-  {
-    bg: "#00477f",
-    color: "#fff",
-    big: "4.81★",
-    heading: "Rating",
-    sub: "Industry’s highest rating for customer\nservice & reliability",
-  },
-];
-
 const VisaStatusSection = () => {
-  // Responsive: Use window width to tweak layout inline (optional, you could use CSS too)
-  const isMobile = window.innerWidth <= 650;
+  const { t } = useTranslation("common");
+
+  // Responsive: Use window width to tweak layout inline
+  const isMobile = typeof window !== "undefined" ? window.innerWidth <= 650 : false;
+
+  // Read all text from i18n with safe defaults (so nothing shows as keys)
+  const stats = [
+    {
+      bg: "#ffffff",
+      color: "#1b1b1b",
+      big: t("stats.visasOnTime.big", { defaultValue: "99.2%" }),
+      heading: t("stats.visasOnTime.heading", { defaultValue: "Visas On Time" }),
+      sub: t("stats.visasOnTime.sub", { defaultValue: "Visa delivered before\ntravel date" }),
+    },
+    {
+      bg: "#d06549",
+      color: "#fff",
+      big: t("stats.processed.big", { defaultValue: "500k+" }),
+      heading: t("stats.processed.heading", { defaultValue: "Processed" }),
+      sub: t("stats.processed.sub", { defaultValue: "Processed for travelers worldwide" }),
+    },
+    {
+      bg: "#00477f",
+      color: "#fff",
+      big: t("stats.rating.big", { defaultValue: "4.81★" }),
+      heading: t("stats.rating.heading", { defaultValue: "Rating" }),
+      sub: t("stats.rating.sub", {
+        defaultValue: "Industry’s highest rating for customer\nservice & reliability",
+      }),
+    },
+  ];
 
   return (
     <section style={mystyle.section}>
@@ -55,9 +61,11 @@ const VisaStatusSection = () => {
             <div style={mystyle.bigText}>{stat.big}</div>
             <div style={mystyle.headingText}>{stat.heading}</div>
             <div style={mystyle.subText}>
-              {stat.sub.split("\n").map((line, i) => (
-                <div key={i}>{line}</div>
-              ))}
+              {String(stat.sub)
+                .split("\n")
+                .map((line, i) => (
+                  <div key={i}>{line}</div>
+                ))}
             </div>
           </div>
         ))}

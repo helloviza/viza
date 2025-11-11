@@ -1,9 +1,13 @@
+// src/pages/Home.jsx
 import React, { useEffect, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../styles/Home.css";
-import bgImg from "../assets/hero-bg.jpg"; // kept as a fallback only
+import bgImg from "../assets/hero-bg.jpg"; // fallback static bg
 import VisaSearchNeo from "../components/VisaSearchNeo";
 
 function ResultsList({ items = [] }) {
+  const { t } = useTranslation();
+
   if (!items || items.length === 0) return null;
   return (
     <section style={{ maxWidth: 1120, margin: "24px auto", padding: "0 24px" }}>
@@ -14,18 +18,21 @@ function ResultsList({ items = [] }) {
           fontSize: "1.4rem",
           marginBottom: 12,
           fontWeight: 800,
+          textAlign: "start",
         }}
       >
-        Visa Options
+        {t("home.results.title")}
       </h3>
-      <div
-        style={{
-          display: "grid",
-          gap: 12,
-          gridTemplateColumns: "1fr",
-        }}
-      >
-        {items.map((v, idx) => (
+
+      <div style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr" }}>
+        {items.map((v, idx) => {
+          const title =
+            v.route ??
+            `${v.country || t("home.results.fallbackDestination")} — ${
+              v.type || v.visaType || t("home.results.fallbackVisa")
+            }`;
+
+        return (
           <div
             key={v.id || `${v.country || v.route}-${idx}`}
             style={{
@@ -51,28 +58,26 @@ function ResultsList({ items = [] }) {
                   fontWeight: 800,
                   fontSize: "1.15rem",
                   color: "#0f172a",
+                  textAlign: "start",
                 }}
               >
-                {v.route
-                  ? v.route
-                  : `${v.country || "Destination"} — ${
-                      v.type || v.visaType || "Visa"
-                    }`}
+                {title}
               </div>
+
               <div
                 style={{
                   fontFamily: "'Barlow Condensed', Arial, sans-serif",
                   fontWeight: 800,
                   fontSize: "1.05rem",
                   color: "#00477f",
+                  textAlign: "end",
                 }}
               >
-                {v.currency === "INR" || !v.currency ? "₹" : v.currency}{" "}
-                {v.fees ||
-                  (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") ||
-                  "—"}
+                {(v.currency === "INR" || !v.currency ? "₹" : v.currency) + " "}
+                {v.fees || (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") || "—"}
               </div>
             </div>
+
             <div
               style={{
                 display: "flex",
@@ -83,62 +88,64 @@ function ResultsList({ items = [] }) {
                 fontFamily: "'Barlow Condensed', Arial, sans-serif",
               }}
             >
-              {v.processing_time && <span>Processing: {v.processing_time}</span>}
-              {v.processing && !v.processing_time && (
-                <span>Processing: {v.processing}</span>
+              {v.processing_time && (
+                <span>{t("home.results.processing")} {v.processing_time}</span>
               )}
-              {v.validity && <span>Validity: {v.validity}</span>}
-              {v.stay && <span>Stay: {v.stay}</span>}
-              {v.type && !v.visaType && <span>Type: {v.type}</span>}
-              {v.visaType && <span>Type: {v.visaType}</span>}
+              {v.processing && !v.processing_time && (
+                <span>{t("home.results.processing")} {v.processing}</span>
+              )}
+              {v.validity && <span>{t("home.results.validity")} {v.validity}</span>}
+              {v.stay && <span>{t("home.results.stay")} {v.stay}</span>}
+              {v.type && !v.visaType && <span>{t("home.results.type")} {v.type}</span>}
+              {v.visaType && <span>{t("home.results.type")} {v.visaType}</span>}
             </div>
+
             {Array.isArray(v.requirements) && v.requirements.length > 0 && (
               <div
                 style={{
                   marginTop: 8,
                   color: "#64748b",
                   fontFamily: "'Barlow Condensed', Arial, sans-serif",
+                  textAlign: "start",
                 }}
               >
-                Requirements: {v.requirements.join(", ")}
+                {t("home.results.requirements")} {v.requirements.join(", ")}
               </div>
             )}
           </div>
-        ))}
+        );})}
       </div>
     </section>
   );
 }
 
 const Home = () => {
+  const { t } = useTranslation();
   const [showBg, setShowBg] = useState(true);
   const [results, setResults] = useState([]);
   const bgRef = useRef(null);
 
   useEffect(() => {
-    const sectionHeight =
-      typeof window !== "undefined" ? window.innerHeight : 700;
+    const sectionHeight = typeof window !== "undefined" ? window.innerHeight : 700;
     const onScroll = () => setShowBg(window.scrollY < sectionHeight * 2 - 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-// Set static background image (no animation)
-useEffect(() => {
-  const el = bgRef.current;
-  if (!el) return;
-
-  el.style.backgroundImage = `url(${bgImg})`;
-  el.style.backgroundSize = "cover";
-  el.style.backgroundPosition = "center";
-  el.style.backgroundRepeat = "no-repeat";
-}, []);
-
+  // Static background image (no animation)
+  useEffect(() => {
+    const el = bgRef.current;
+    if (!el) return;
+    el.style.backgroundImage = `url(${bgImg})`;
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+    el.style.backgroundRepeat = "no-repeat";
+  }, []);
 
   return (
     <>
       <div className="hero-wrapper" id="hero">
-        {/* Background layer (now a Three.js canvas container) */}
+        {/* Background layer */}
         <div
           ref={bgRef}
           className="hero-bg"
@@ -158,17 +165,16 @@ useEffect(() => {
 
         {/* Foreground content */}
         <div className="hero-content">
-          <div className="text-block">
-            <h1>
-              Your Gateway to
+          <div className="text-block" style={{ textAlign: "start" }}>
+            <h1 style={{ lineHeight: 1.05 }}>
+              {/* Split lines so Arabic reflows naturally with dir=rtl */}
+              <span>{t("home.hero.titleLine1")}</span>
               <br />
-              The World
+              <span>{t("home.hero.titleLine2")}</span>
             </h1>
-            <p>
-              Behind every visa lies a world of endless possibilities. Visa
-              Services simplifies your journey, unlocking seamless travel,
-              unforgettable adventures, and hassle-free exploration wherever
-              your dreams take you
+
+            <p style={{ marginTop: 10 }}>
+              {t("home.hero.subtitle")}
             </p>
           </div>
 

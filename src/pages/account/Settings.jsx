@@ -8,6 +8,7 @@ import {
   FaTimesCircle,
   FaTrashAlt,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import AccountSidebar from "../../components/account/Sidebar";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
@@ -17,6 +18,7 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function Settings() {
+  const { t, i18n } = useTranslation("common");
   const [form, setForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -26,6 +28,8 @@ export default function Settings() {
   const [twoFA, setTwoFA] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const locale = i18n.language === "ar" ? "ar-EG" : "en-IN";
 
   // Load devices and 2FA status
   useEffect(() => {
@@ -42,19 +46,19 @@ export default function Settings() {
         setTwoFA(data.twoFAEnabled || false);
       } catch (err) {
         console.error("⚠ Settings fetch error:", err);
-        setMessage("Failed to load settings");
+        setMessage(t("account.settings.toast.loadFailed"));
       } finally {
         setLoading(false);
       }
     }
     fetchSettings();
-  }, []);
+  }, [t]);
 
   // Handle password change
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (form.newPassword !== form.confirmPassword) {
-      setMessage("New passwords do not match");
+      setMessage(t("account.settings.toast.passwordMismatch"));
       return;
     }
     setLoading(true);
@@ -67,11 +71,11 @@ export default function Settings() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update password");
-      setMessage("✅ Password changed successfully!");
+      setMessage(t("account.settings.toast.passwordChanged"));
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
       console.error("❌ Change password error:", err);
-      setMessage("Failed to change password");
+      setMessage(t("account.settings.toast.passwordChangeFailed"));
     } finally {
       setLoading(false);
     }
@@ -89,16 +93,20 @@ export default function Settings() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to toggle 2FA");
       setTwoFA(data.enabled);
-      setMessage(`Two-Factor Authentication ${data.enabled ? "enabled" : "disabled"}`);
+      setMessage(
+        data.enabled
+          ? t("account.settings.toast.twoFAEnabled")
+          : t("account.settings.toast.twoFADisabled")
+      );
     } catch (err) {
       console.error("❌ 2FA toggle error:", err);
-      setMessage("Failed to toggle 2FA");
+      setMessage(t("account.settings.toast.twoFAToggleFailed"));
     }
   };
 
   // Remove device
   const handleRemoveDevice = async (id) => {
-    if (!window.confirm("Remove this device from your account?")) return;
+    if (!window.confirm(t("account.settings.devices.confirmRemove"))) return;
     try {
       const res = await fetch(`${API_BASE}/api/settings/device/${id}`, {
         method: "DELETE",
@@ -107,10 +115,10 @@ export default function Settings() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to remove device");
       setDevices((prev) => prev.filter((d) => d.id !== id));
-      setMessage("Device removed successfully");
+      setMessage(t("account.settings.toast.deviceRemoved"));
     } catch (err) {
       console.error("❌ Device remove error:", err);
-      setMessage("Failed to remove device");
+      setMessage(t("account.settings.toast.deviceRemoveFailed"));
     }
   };
 
@@ -122,27 +130,25 @@ export default function Settings() {
           <header style={S.headerCard}>
             <FaCog style={{ fontSize: 42, marginRight: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>Account Settings</h1>
-              <p style={{ opacity: 0.8 }}>
-                Manage your password, devices, and two-factor authentication preferences
-              </p>
+              <h1 style={S.pageTitle}>{t("account.settings.title")}</h1>
+              <p style={{ opacity: 0.8 }}>{t("account.settings.subtitle")}</p>
             </div>
           </header>
 
           {message && <div style={S.toast}>{message}</div>}
 
           {loading ? (
-            <p style={{ textAlign: "center" }}>Loading settings...</p>
+            <p style={{ textAlign: "center" }}>{t("account.settings.loading")}</p>
           ) : (
             <>
               {/* === Change Password === */}
               <section style={S.card}>
                 <h2 style={S.sectionTitle}>
-                  <FaLock style={S.icon} /> Change Password
+                  <FaLock style={S.icon} /> {t("account.settings.password.sectionTitle")}
                 </h2>
                 <form onSubmit={handlePasswordChange} style={S.form}>
                   <label style={S.label}>
-                    Current Password
+                    {t("account.settings.password.current")}
                     <input
                       type="password"
                       name="currentPassword"
@@ -155,7 +161,7 @@ export default function Settings() {
                     />
                   </label>
                   <label style={S.label}>
-                    New Password
+                    {t("account.settings.password.new")}
                     <input
                       type="password"
                       name="newPassword"
@@ -168,7 +174,7 @@ export default function Settings() {
                     />
                   </label>
                   <label style={S.label}>
-                    Confirm New Password
+                    {t("account.settings.password.confirm")}
                     <input
                       type="password"
                       name="confirmPassword"
@@ -181,7 +187,9 @@ export default function Settings() {
                     />
                   </label>
                   <button type="submit" style={S.saveBtn}>
-                    {loading ? "Updating..." : "Update Password"}
+                    {loading
+                      ? t("account.settings.password.updating")
+                      : t("account.settings.password.updateBtn")}
                   </button>
                 </form>
               </section>
@@ -189,22 +197,24 @@ export default function Settings() {
               {/* === Two-Factor Authentication === */}
               <section style={S.card}>
                 <h2 style={S.sectionTitle}>
-                  <FaKey style={S.icon} /> Two-Factor Authentication
+                  <FaKey style={S.icon} /> {t("account.settings.twoFA.sectionTitle")}
                 </h2>
                 <div style={S.twoFABox}>
                   {twoFA ? (
                     <>
                       <FaCheckCircle style={{ color: "#2ecc71", fontSize: 24 }} />
-                      <span>Enabled</span>
+                      <span>{t("account.settings.twoFA.enabled")}</span>
                     </>
                   ) : (
                     <>
                       <FaTimesCircle style={{ color: "#e74c3c", fontSize: 24 }} />
-                      <span>Disabled</span>
+                      <span>{t("account.settings.twoFA.disabled")}</span>
                     </>
                   )}
                   <button onClick={handleToggle2FA} style={S.toggleBtn}>
-                    {twoFA ? "Disable" : "Enable"} 2FA
+                    {twoFA
+                      ? t("account.settings.twoFA.disableBtn")
+                      : t("account.settings.twoFA.enableBtn")}
                   </button>
                 </div>
               </section>
@@ -212,40 +222,49 @@ export default function Settings() {
               {/* === Linked Devices === */}
               <section style={S.card}>
                 <h2 style={S.sectionTitle}>
-                  <FaMobileAlt style={S.icon} /> Linked Devices
+                  <FaMobileAlt style={S.icon} />{" "}
+                  {t("account.settings.devices.sectionTitle")}
                 </h2>
                 {devices.length === 0 ? (
-                  <p style={{ color: "#666" }}>No active devices found.</p>
+                  <p style={{ color: "#666" }}>
+                    {t("account.settings.devices.empty")}
+                  </p>
                 ) : (
                   <table style={S.table}>
                     <thead>
                       <tr>
-                        <th>Device</th>
-                        <th>IP</th>
-                        <th>Last Active</th>
-                        <th>Action</th>
+                        <th>{t("account.settings.devices.headers.device")}</th>
+                        <th>{t("account.settings.devices.headers.ip")}</th>
+                        <th>{t("account.settings.devices.headers.lastActive")}</th>
+                        <th>{t("account.settings.devices.headers.action")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {devices.map((d) => (
                         <tr key={d.id}>
-                          <td>{d.deviceName || "Unknown Device"}</td>
-                          <td>{d.ip || "—"}</td>
                           <td>
-                            {new Date(d.lastActive).toLocaleString("en-IN", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {d.deviceName ||
+                              t("account.settings.devices.fallbackDevice")}
+                          </td>
+                          <td>{d.ip || t("account.settings.devices.fallbackIp")}</td>
+                          <td>
+                            {d.lastActive
+                              ? new Date(d.lastActive).toLocaleString(locale, {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "—"}
                           </td>
                           <td>
                             <button
                               onClick={() => handleRemoveDevice(d.id)}
                               style={S.deleteBtn}
                             >
-                              <FaTrashAlt /> Remove
+                              <FaTrashAlt />{" "}
+                              {t("account.settings.devices.removeBtn")}
                             </button>
                           </td>
                         </tr>

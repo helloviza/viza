@@ -9,6 +9,7 @@ import {
   FaWallet,
 } from "react-icons/fa";
 import AccountSidebar from "../../components/account/Sidebar";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 const API_BASE =
@@ -17,6 +18,8 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function Referrals() {
+  const { t } = useTranslation("common");
+
   const [referralCode, setReferralCode] = useState("");
   const [referralLink, setReferralLink] = useState("");
   const [stats, setStats] = useState({ totalInvites: 0, successful: 0, credits: 0 });
@@ -31,8 +34,10 @@ export default function Referrals() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load referrals");
 
-        setReferralCode(data.code || "");
-        setReferralLink(data.link || `${window.location.origin}/signup?ref=${data.code}`);
+        const code = data.code || "";
+        setReferralCode(code);
+        setReferralLink(data.link || `${window.location.origin}/signup?ref=${code}`);
+
         setStats({
           totalInvites: data.totalInvites || 0,
           successful: data.successful || 0,
@@ -40,31 +45,40 @@ export default function Referrals() {
         });
       } catch (err) {
         console.error("❌ Referral fetch error:", err);
-        setMessage("Failed to load referral data.");
+        setMessage(t("account.referrals.errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     }
     fetchReferralData();
-  }, []);
+  }, [t]);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(referralLink);
-      setMessage("Referral link copied!");
+      setMessage(t("account.referrals.messages.linkCopied"));
       setTimeout(() => setMessage(""), 2000);
     } catch {
-      setMessage("Copy failed, please copy manually.");
+      setMessage(t("account.referrals.messages.copyFailed"));
     }
   };
 
   const handleShare = (platform) => {
-    const text = `Join HelloViza with my referral code ${referralCode}! Use this link to sign up: ${referralLink}`;
-    if (platform === "whatsapp")
+    const text = t("account.referrals.share.text", {
+      code: referralCode,
+      link: referralLink,
+    });
+    const subject = t("account.referrals.share.emailSubject");
+
+    if (platform === "whatsapp") {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-    else if (platform === "email")
-      window.open(`mailto:?subject=Join HelloViza&body=${encodeURIComponent(text)}`);
-    else window.open(referralLink, "_blank");
+    } else if (platform === "email") {
+      window.open(
+        `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`
+      );
+    } else {
+      window.open(referralLink, "_blank");
+    }
   };
 
   return (
@@ -75,37 +89,41 @@ export default function Referrals() {
           <header style={S.headerCard}>
             <FaGift style={{ fontSize: 42, marginRight: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>Referrals & Rewards</h1>
-              <p style={{ opacity: 0.8 }}>
-                Invite your friends to HelloViza and earn travel credits when they join!
-              </p>
+              <h1 style={S.pageTitle}>{t("account.referrals.title")}</h1>
+              <p style={{ opacity: 0.8 }}>{t("account.referrals.subtitle")}</p>
             </div>
           </header>
 
           {loading ? (
-            <p style={{ textAlign: "center" }}>Loading referral details...</p>
+            <p style={{ textAlign: "center" }}>
+              {t("account.referrals.loading")}
+            </p>
           ) : (
             <>
               <div style={S.referralCard}>
                 <FaLink style={S.linkIcon} />
-                <h2 style={S.referralTitle}>Your Referral Code</h2>
+                <h2 style={S.referralTitle}>{t("account.referrals.card.heading")}</h2>
+
                 <div style={S.referralBox}>
-                  <span style={S.referralCode}>{referralCode || "XXXXXX"}</span>
+                  <span style={S.referralCode}>
+                    {referralCode || t("account.referrals.card.fallbackCode")}
+                  </span>
                   <button onClick={handleCopy} style={S.copyBtn}>
-                    <FaCopy /> Copy Link
+                    <FaCopy /> {t("account.referrals.card.copyCta")}
                   </button>
                 </div>
+
                 <p style={S.linkText}>{referralLink}</p>
 
                 <div style={S.shareButtons}>
                   <button onClick={() => handleShare("whatsapp")} style={S.waBtn}>
-                    <FaWhatsapp /> WhatsApp
+                    <FaWhatsapp /> {t("account.referrals.share.whatsapp")}
                   </button>
                   <button onClick={() => handleShare("email")} style={S.emailBtn}>
-                    <FaEnvelope /> Email
+                    <FaEnvelope /> {t("account.referrals.share.email")}
                   </button>
                   <button onClick={() => handleShare("direct")} style={S.linkBtn}>
-                    <FaUserPlus /> Share Link
+                    <FaUserPlus /> {t("account.referrals.share.direct")}
                   </button>
                 </div>
 
@@ -116,17 +134,27 @@ export default function Referrals() {
                 <div style={S.statCard}>
                   <FaUserPlus style={S.statIcon} />
                   <h3 style={S.statValue}>{stats.totalInvites}</h3>
-                  <p style={S.statLabel}>Total Invites</p>
+                  <p style={S.statLabel}>
+                    {t("account.referrals.stats.totalInvites")}
+                  </p>
                 </div>
                 <div style={S.statCard}>
                   <FaGift style={S.statIcon} />
                   <h3 style={S.statValue}>{stats.successful}</h3>
-                  <p style={S.statLabel}>Successful Referrals</p>
+                  <p style={S.statLabel}>
+                    {t("account.referrals.stats.successful")}
+                  </p>
                 </div>
                 <div style={S.statCard}>
                   <FaWallet style={S.statIcon} />
-                  <h3 style={S.statValue}>₹ {stats.credits.toFixed(2)}</h3>
-                  <p style={S.statLabel}>Referral Credits</p>
+                  <h3 style={S.statValue}>
+                    {t("account.referrals.stats.creditsDisplay", {
+                      amount: stats.credits.toFixed(2),
+                    })}
+                  </h3>
+                  <p style={S.statLabel}>
+                    {t("account.referrals.stats.credits")}
+                  </p>
                 </div>
               </div>
             </>

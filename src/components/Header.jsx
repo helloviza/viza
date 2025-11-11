@@ -1,22 +1,37 @@
 // src/components/Header.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import logo from "../assets/helloviza-logo.png";
 import flightIcon from "../assets/flight-icon.png";
+import { getCookie } from "../utils/geo";
+import { normalizeLang, applyHtmlLangDir, pushDL } from "../utils/lang";
 
 /* =====================================
-   Inline SVG icons (size normalized)
+   Small inline SVG icons
 ===================================== */
 const IconWrap = ({ children }) => <span className="menuItem">{children}</span>;
 
-const GlobeIcon = () => (
-  <svg style={NAV_ICON} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+const GlobeIcon = ({ size = 18 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
     <circle cx="12" cy="12" r="9" />
     <path d="M3 12h18" />
     <path d="M12 3a12 12 0 0 1 0 18" />
     <path d="M12 3a12 12 0 0 0 0 18" />
   </svg>
 );
+
+const NAV_ICON = { width: 22, height: 22, flex: "0 0 auto", color: "currentColor" };
 
 const PassportIcon = () => (
   <svg style={NAV_ICON} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -49,7 +64,7 @@ const UserIcon = () => (
 );
 
 /* =====================================
-   Typographic system for header items
+   Typography (header)
 ===================================== */
 const BASE_FONT = "'Barlow Condensed', Arial, sans-serif";
 
@@ -58,8 +73,8 @@ const NAV_ITEM = {
   alignItems: "center",
   gap: "10px",
   fontFamily: BASE_FONT,
-  fontWeight: 900,            // keep BOLD
-  fontSize: "14px",           // single source of truth
+  fontWeight: 900,
+  fontSize: "14px",
   lineHeight: "1.15",
   letterSpacing: "0.02em",
   color: "#d06549",
@@ -81,13 +96,6 @@ const NAV_LABEL = {
   letterSpacing: "0.02em",
 };
 
-const NAV_ICON = {
-  width: 26,
-  height: 26,
-  flex: "0 0 auto",
-  color: "currentColor",
-};
-
 /* ===== Helpers ===== */
 function getCachedUser() {
   try {
@@ -97,7 +105,6 @@ function getCachedUser() {
     return null;
   }
 }
-
 function pickDisplayName(u) {
   if (!u) return "";
   const p = u.profile || {};
@@ -112,22 +119,48 @@ function pickDisplayName(u) {
   return "";
 }
 
-/* ===== Keys ===== */
 const VISA_INTENT_KEY = "HV:VISA_INTENT_TS";
 const LOGIN_REDIRECT_KEY = "postLoginRedirect";
 
-/* =================================================== */
+/* ===== Modal: Language & Region (EN/AR only) ===== */
+const LANG_OPTIONS = [
+  { code: "en", label: "English", subtitle: "English" },
+  { code: "ar", label: "العربية", subtitle: "Arabic" },
+];
+
+// Trim/extend as needed. First is the generic fallback.
+const REGION_OPTIONS = [
+  { code: "ZZ", name: "Unknown / Global" },
+  { code: "AE", name: "United Arab Emirates" },
+  { code: "SA", name: "Saudi Arabia" },
+  { code: "QA", name: "Qatar" },
+  { code: "KW", name: "Kuwait" },
+  { code: "BH", name: "Bahrain" },
+  { code: "OM", name: "Oman" },
+  { code: "US", name: "United States" },
+  { code: "GB", name: "United Kingdom" },
+];
+
 export default function Header({ onFlightClick, user, onLogout }) {
+  const { i18n, t } = useTranslation();
+
   const [visible, setVisible] = useState(true);
   const [inHero, setInHero] = useState(true);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [effectiveUser, setEffectiveUser] = useState(() => user || getCachedUser());
+  const [viewerCountry, setViewerCountry] = useState(() => (getCookie("viewerCountry") || "ZZ").toUpperCase());
+
+  // modal
+  const [showLangModal, setShowLangModal] = useState(false);
+  const [draftLang, setDraftLang] = useState(() => normalizeLang(i18n.language));
+  const [draftRegion, setDraftRegion] = useState(() => (getCookie("viewerCountry") || "ZZ").toUpperCase());
 
   const location = useLocation();
   const navigate = useNavigate();
   const hoveringHeaderRef = useRef(false);
 
+  // user sync
   useEffect(() => {
     const sync = () => setEffectiveUser(user || getCachedUser());
     sync();
@@ -136,11 +169,20 @@ export default function Header({ onFlightClick, user, onLogout }) {
     return () => window.removeEventListener("storage", onStorage);
   }, [user]);
 
+  // keep viewerCountry fresh if cookie changes
+  useEffect(() => {
+    const id = setInterval(() => {
+      const c = (getCookie("viewerCountry") || "ZZ").toUpperCase();
+      setViewerCountry((prev) => (prev !== c ? c : prev));
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  // show/hide on scroll
   useEffect(() => {
     const HERO_HEIGHT = window.innerHeight;
     let timeout;
     let lastScrollY = window.scrollY;
-
     const handleUserActivity = () => {
       const y = window.scrollY;
       const delta = Math.abs(y - lastScrollY);
@@ -168,11 +210,9 @@ export default function Header({ onFlightClick, user, onLogout }) {
         setVisible(true);
       }
     };
-
     window.addEventListener("scroll", handleUserActivity, { passive: true });
     window.addEventListener("mousemove", handleUserActivity);
     handleUserActivity();
-
     return () => {
       clearTimeout(timeout);
       window.removeEventListener("scroll", handleUserActivity);
@@ -180,9 +220,12 @@ export default function Header({ onFlightClick, user, onLogout }) {
     };
   }, [dropdownOpen, showMobileNav]);
 
+  // ensure html lang/dir tracks i18n
+  useEffect(() => applyHtmlLangDir(i18n.language), [i18n.language]);
+
   const linkColor = inHero ? "#d06549" : "#000000";
 
-  /* ===== Navigation handlers ===== */
+  /* ===== Nav handlers ===== */
   const handleVisaServicesClick = useCallback(() => {
     setShowMobileNav(false);
     if (location.pathname !== "/") {
@@ -199,39 +242,52 @@ export default function Header({ onFlightClick, user, onLogout }) {
 
   const handleGoForVisaClick = useCallback(() => {
     setShowMobileNav(false);
-
     if (effectiveUser) {
-      // Logged in → direct handoff
       window.location.href = "https://visa.helloviza.com";
       return;
     }
-    // Not logged in → mark intent and go to login
-    try {
-      sessionStorage.setItem(VISA_INTENT_KEY, String(Date.now()));
-    } catch {}
+    try { sessionStorage.setItem(VISA_INTENT_KEY, String(Date.now())); } catch {}
     navigate("/login?next=/go/visa");
   }, [navigate, effectiveUser]);
 
   const handleLogoutClick = useCallback(() => {
     setDropdownOpen(false);
     setShowMobileNav(false);
-
     try {
       sessionStorage.removeItem(LOGIN_REDIRECT_KEY);
       localStorage.removeItem(LOGIN_REDIRECT_KEY);
-
       sessionStorage.removeItem(VISA_INTENT_KEY);
       localStorage.removeItem(VISA_INTENT_KEY);
-
       sessionStorage.removeItem("hv_user");
       localStorage.removeItem("hv_user");
       localStorage.removeItem("helloviza_user");
       localStorage.removeItem("hv_token");
     } catch {}
-
     onLogout?.();
     navigate("/");
   }, [navigate, onLogout]);
+
+  /* ===== Language modal actions ===== */
+  const openLangModal = () => {
+    setDraftLang(normalizeLang(i18n.language));
+    setDraftRegion((getCookie("viewerCountry") || "ZZ").toUpperCase());
+    setShowLangModal(true);
+  };
+
+  const applyLangModal = async () => {
+    const prev = normalizeLang(i18n.language);
+    if (draftLang !== prev) {
+      await i18n.changeLanguage(draftLang);
+      applyHtmlLangDir(draftLang);
+      try { localStorage.setItem("i18nextLng", draftLang); } catch {}
+      pushDL("language_manual_set", {
+        language_code: draftLang,
+        previous_language: prev,
+        viewer_country: draftRegion,
+      });
+    }
+    setShowLangModal(false);
+  };
 
   const glassStyle = inHero
     ? { background: "rgba(255,255,255,.75)", borderColor: "rgba(255,255,255,.35)", boxShadow: "0 18px 38px rgba(0,0,0,.18)" }
@@ -262,25 +318,40 @@ export default function Header({ onFlightClick, user, onLogout }) {
 
             {/* Desktop Navigation */}
             <nav className="desktop-nav" style={styles.nav}>
-              <button style={{ ...NAV_ITEM, color: linkColor }} onClick={handleVisaServicesClick} aria-label="Visa Services">
-                <IconWrap><GlobeIcon /></IconWrap>
-                <span style={NAV_LABEL}>Visa Services</span>
+              <button style={{ ...NAV_ITEM, color: linkColor }} onClick={handleVisaServicesClick} aria-label={t("nav.visaServices")}>
+                <IconWrap><GlobeIcon size={20} /></IconWrap>
+                <span style={NAV_LABEL}>{t("nav.visaServices")}</span>
               </button>
 
-              <button style={{ ...NAV_ITEM, color: linkColor }} onClick={handleGoForVisaClick} aria-label="Go for Visa">
+              <button style={{ ...NAV_ITEM, color: linkColor }} onClick={handleGoForVisaClick} aria-label={t("nav.goForVisa")}>
                 <IconWrap><PassportIcon /></IconWrap>
-                <span style={NAV_LABEL}>Go for Visa</span>
+                <span style={NAV_LABEL}>{t("nav.goForVisa")}</span>
               </button>
 
-              <a href="https://www.plumtrips.com" style={{ ...NAV_ITEM, color: linkColor }} target="_blank" rel="noopener noreferrer" aria-label="Book Flight">
+              <a href="https://www.plumtrips.com" style={{ ...NAV_ITEM, color: linkColor }} target="_blank" rel="noopener noreferrer" aria-label={t("nav.bookFlight")}>
                 <IconWrap><PlaneIcon /></IconWrap>
-                <span style={NAV_LABEL}>Book Flight</span>
+                <span style={NAV_LABEL}>{t("nav.bookFlight")}</span>
               </a>
 
-              <Link to="/contact" style={{ ...NAV_ITEM, color: linkColor }} aria-label="Support / Contact">
+              <Link to="/contact" style={{ ...NAV_ITEM, color: linkColor }} aria-label={t("nav.supportContact")}>
                 <IconWrap><HeadsetIcon /></IconWrap>
-                <span style={NAV_LABEL}>Support / Contact</span>
+                <span style={NAV_LABEL}>{t("nav.supportContact")}</span>
               </Link>
+
+              {/* Tiny Globe button → opens modal */}
+              <button
+                type="button"
+                onClick={openLangModal}
+                aria-label={t("nav.languageRegion")}
+                style={{
+                  ...styles.globeBtn,
+                  color: "#1b5b84",
+                  borderColor: "#d06549",
+                }}
+                title={t("nav.languageRegion")}
+              >
+                <GlobeIcon size={16} />
+              </button>
 
               {/* User Menu */}
               {effectiveUser ? (
@@ -296,32 +367,32 @@ export default function Header({ onFlightClick, user, onLogout }) {
                       <div style={{ ...NAV_ITEM, color: linkColor }}>
                         <div style={{
                           backgroundColor: "#d06549", color: "#fff", borderRadius: "50%",
-                          width: 32, height: 32, display: "flex", justifyContent: "center",
-                          alignItems: "center", fontWeight: 900, fontSize: 16,
+                          width: 30, height: 30, display: "flex", justifyContent: "center",
+                          alignItems: "center", fontWeight: 900, fontSize: 15,
                         }}>
                           {initial}
                         </div>
-                        <span style={NAV_LABEL}>{displayName || "User"} ▼</span>
+                        <span style={NAV_LABEL}>{displayName || t("nav.user")} ▼</span>
                       </div>
                     );
                   })()}
 
                   {dropdownOpen && (
                     <div style={styles.dropdownMenu}>
-                      <Link to="/account/profile" style={styles.dropdownItem}>My Profile</Link>
-                      <Link to="/account/visa-history" style={styles.dropdownItem}>My Visa History</Link>
-                      <Link to="/account/wallet" style={styles.dropdownItem}>My Wallet</Link>
-                      <Link to="/account/documents" style={styles.dropdownItem}>My Documents</Link>
-                      <Link to="/account/wishlist" style={styles.dropdownItem}>My Future Wishlist</Link>
+                      <Link to="/account/profile" style={styles.dropdownItem}>{t("nav.myProfile")}</Link>
+                      <Link to="/account/visa-history" style={styles.dropdownItem}>{t("nav.myVisaHistory")}</Link>
+                      <Link to="/account/wallet" style={styles.dropdownItem}>{t("nav.myWallet")}</Link>
+                      <Link to="/account/documents" style={styles.dropdownItem}>{t("nav.myDocuments")}</Link>
+                      <Link to="/account/wishlist" style={styles.dropdownItem}>{t("nav.myFutureWishlist")}</Link>
                       <hr style={{ margin: 0, borderColor: "rgba(0,0,0,0.1)" }} />
-                      <button onClick={handleLogoutClick} style={styles.dropdownLogout}>Logout</button>
+                      <button onClick={handleLogoutClick} style={styles.dropdownLogout}>{t("nav.logout")}</button>
                     </div>
                   )}
                 </div>
               ) : (
-                <Link to="/login" style={{ ...NAV_ITEM, color: linkColor }} aria-label="Login / Sign Up">
+                <Link to="/login" style={{ ...NAV_ITEM, color: linkColor }} aria-label={t("nav.login")}>
                   <IconWrap><UserIcon /></IconWrap>
-                  <span style={NAV_LABEL}>Login / Sign Up</span>
+                  <span style={NAV_LABEL}>{t("nav.login")}</span>
                 </Link>
               )}
             </nav>
@@ -345,32 +416,102 @@ export default function Header({ onFlightClick, user, onLogout }) {
             <button className="close-btn" onClick={() => setShowMobileNav(false)} aria-label="Close menu">×</button>
 
             <button onClick={handleVisaServicesClick} className="mobile-link-btn">
-              <IconWrap><GlobeIcon /></IconWrap> Visa Services
+              <IconWrap><GlobeIcon size={20} /></IconWrap> {t("nav.visaServices")}
             </button>
             <button onClick={handleGoForVisaClick} className="mobile-link-btn">
-              <IconWrap><PassportIcon /></IconWrap> Go for Visa
+              <IconWrap><PassportIcon /></IconWrap> {t("nav.goForVisa")}
             </button>
             <a href="https://www.plumtrips.com" target="_blank" rel="noopener noreferrer" className="mobile-link-btn">
-              <IconWrap><PlaneIcon /></IconWrap> Book Flight
+              <IconWrap><PlaneIcon /></IconWrap> {t("nav.bookFlight")}
             </a>
             <Link to="/contact" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">
-              <IconWrap><HeadsetIcon /></IconWrap> Support / Contact
+              <IconWrap><HeadsetIcon /></IconWrap> {t("nav.supportContact")}
             </Link>
 
-            {effectiveUser ? (
-              <>
-                <Link to="/account/profile" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">My Profile</Link>
-                <Link to="/account/visa-history" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">My Visa History</Link>
-                <Link to="/account/wallet" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">My Wallet</Link>
-                <Link to="/account/documents" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">My Documents</Link>
-                <Link to="/account/wishlist" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">My Future Wishlist</Link>
-                <button className="logout-btn" onClick={handleLogoutClick}>Logout</button>
-              </>
-            ) : (
-              <Link to="/login" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">
-                <IconWrap><UserIcon /></IconWrap> Login / Sign Up
-              </Link>
-            )}
+            {/* Mobile entry to open modal */}
+            <button className="mobile-link-btn" onClick={openLangModal}>
+              <IconWrap><GlobeIcon size={18} /></IconWrap> {t("nav.languageRegion")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Language & Region Modal (EN/AR only) */}
+      {showLangModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="langRegionTitle"
+          className="lr-overlay"
+          onClick={() => setShowLangModal(false)}
+        >
+          <div
+            className="lr-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="lr-header">
+              <h3 id="langRegionTitle">Language and region</h3>
+              <button className="lr-close" aria-label="Close" onClick={() => setShowLangModal(false)}>×</button>
+            </div>
+
+            {/* Suggested */}
+            <div className="lr-section">
+              <div className="lr-label">Suggested languages</div>
+              <div className="lr-suggest-grid">
+                {LANG_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.code}
+                    className={`lr-chip ${draftLang === opt.code ? "active" : ""}`}
+                    onClick={() => setDraftLang(opt.code)}
+                  >
+                    <div className="lr-chip-main">{opt.label}</div>
+                    <div className="lr-chip-sub">{opt.subtitle}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Choose */}
+            <div className="lr-section">
+              <div className="lr-label">Choose a language and region</div>
+
+              <div className="lr-form">
+                <div className="lr-field">
+                  <div className="lr-field-label">Language</div>
+                  <select
+                    className="lr-select"
+                    value={draftLang}
+                    onChange={(e) => setDraftLang(e.target.value)}
+                  >
+                    {LANG_OPTIONS.map((o) => (
+                      <option key={o.code} value={o.code}>
+                        {o.label} ({o.subtitle})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="lr-field">
+                  <div className="lr-field-label">Country</div>
+                  <select
+                    className="lr-select"
+                    value={draftRegion}
+                    onChange={(e) => setDraftRegion(e.target.value.toUpperCase())}
+                  >
+                    {REGION_OPTIONS.map((r) => (
+                      <option key={r.code} value={r.code}>
+                        {r.code} — {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="lr-footer">
+              <button className="lr-btn ghost" onClick={() => setShowLangModal(false)}>Cancel</button>
+              <button className="lr-btn primary" onClick={applyLangModal}>Save</button>
+            </div>
           </div>
         </div>
       )}
@@ -406,6 +547,63 @@ export default function Header({ onFlightClick, user, onLogout }) {
         }
         .logout-btn{color:#d06549;}
         @keyframes slideInRight{from{transform:translateX(80%);}to{transform:translateX(0);}}
+
+        /* Tiny globe button */
+        .globe-btn-reset{all:unset}
+      `}</style>
+
+      {/* Modal styles */}
+      <style>{`
+        .lr-overlay{
+          position:fixed;inset:0;background:rgba(0,0,0,.35);
+          display:flex;align-items:center;justify-content:center;z-index:1400;
+        }
+        .lr-dialog{
+          width:min(880px,94vw); background:#fff; border-radius:16px;
+          box-shadow:0 24px 60px rgba(0,0,0,.25); padding:18px 20px 14px;
+          font-family: ${BASE_FONT};
+        }
+        .lr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+        .lr-header h3{margin:0;color:#1b5b84;font-weight:700;letter-spacing:.02em}
+        .lr-close{background:none;border:none;font-size:28px;cursor:pointer;color:#4b4b4b;line-height:1}
+        .lr-section{margin-top:16px}
+        .lr-label{color:#1b5b84;font-weight:600;font-size:16px;margin:6px 0 10px}
+        .lr-suggest-grid{
+          display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;
+        }
+        .lr-chip{
+          background:#fff;border:1px solid #d06549;color:#1b5b84;border-radius:12px;
+          padding:10px 12px;text-align:left;cursor:pointer;
+          transition:box-shadow .15s ease, background .15s ease;
+          font-weight:400;
+        }
+        .lr-chip.active{background:#f7fbff; box-shadow:0 8px 18px rgba(0,0,0,.06);}
+        .lr-chip-main{font-size:16px;line-height:1.2}
+        .lr-chip-sub{font-size:12px;opacity:.8;margin-top:2px}
+
+        .lr-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+        @media(max-width:640px){ .lr-form{grid-template-columns:1fr;} }
+
+        /* Labels normal (400) as requested */
+        .lr-field-label{color:#1b5b84;font-weight:400;margin-bottom:6px}
+
+        .lr-select{
+          width:100%;font-size:15px;border:1px solid #d06549;border-radius:12px;
+          padding:10px 12px;color:#1b5b84;font-weight:400;background:#fff;
+          appearance:none; background-image: linear-gradient(45deg, transparent 50%, #d06549 50%),
+                           linear-gradient(135deg, #d06549 50%, transparent 50%),
+                           linear-gradient(to right, transparent, transparent);
+          background-position: calc(100% - 22px) calc(1em + 2px), calc(100% - 16px) calc(1em + 2px), 100% 0;
+          background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
+          background-repeat: no-repeat;
+        }
+        .lr-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+        .lr-btn{
+          border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer;border:1px solid transparent;
+          font-weight:600
+        }
+        .lr-btn.primary{background:#00477f;color:#fff;border-color:#00477f}
+        .lr-btn.ghost{background:#fff;color:#00477f;border-color:#00477f}
       `}</style>
     </>
   );
@@ -416,16 +614,30 @@ const styles = {
   flightIconWrapper: {
     position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)",
     zIndex: 1001, background: "#00477f", borderBottomLeftRadius: 12, borderBottomRightRadius: 12,
-    padding: "0.5rem 1rem"
+    padding: "0.36rem 0.8rem"
   },
-  flightIcon: { height: 24, width: 24, cursor: "pointer" },
+  flightIcon: { height: 22, width: 22, cursor: "pointer" },
   header: {
     position: "fixed", top: ".2rem", left: 0, right: 0, display: "flex",
     justifyContent: "center", alignItems: "center", color: "#000", zIndex: 1000, width: "100%"
   },
   logoLink: { display: "flex", alignItems: "center", textDecoration: "none", marginRight: "1rem" },
   logo: { height: 56, objectFit: "contain" },
-  nav: { display: "flex", gap: "2rem", alignItems: "center" },
+  nav: { display: "flex", gap: "1.1rem", alignItems: "center" },
+
+  /* tiny circular globe trigger */
+  globeBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 32,
+    height: 32,
+    borderRadius: "50%",
+    border: "1px solid",
+    background: "#f2f4f7",
+    fontWeight: 400,
+    cursor: "pointer",
+  },
 
   dropdownMenu: {
     position: "absolute", top: "100%", right: 0, background: "#fff", borderRadius: 10, padding: 10,

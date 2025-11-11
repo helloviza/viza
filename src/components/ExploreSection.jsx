@@ -1,98 +1,113 @@
+// src/components/ExploreSection.jsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
-const ExploreSection = () => (
-  <section
-    style={{
-      width: "100vw",
-      background: "#f6f6f6",
-      fontFamily: baseFont,
-      display: "flex",
-      flexWrap: "wrap",
-      alignItems: "flex-end", // Hug content to the bottom, but not stretch to full viewport!
-      position: "relative",
-      padding: "2.8vw 0", // Top+bottom padding only
-      margin: 0,
-      borderBottom: "5px solid #000",
-      minHeight: 0, // NOT 48vh
-    }}
-  >
-    {/* Info block: left aligned */}
-    <div
+const ExploreSection = () => {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
+
+  return (
+    <section
       style={{
-        flex: "0 0 38vw",
-        minWidth: "330px",
-        maxWidth: "580px",
+        width: "100vw",
+        background: "#f6f6f6",
+        fontFamily: baseFont,
         display: "flex",
-        alignItems: "center",
-        paddingLeft: "3.8vw",
-        paddingRight: "1vw",
-        height: "100%",
+        flexWrap: "wrap",
+        alignItems: "flex-end",
+        position: "relative",
+        padding: "2.8vw 0",
+        margin: 0,
+        borderBottom: "5px solid #000",
+        minHeight: 0,
       }}
+      dir={isRTL ? "rtl" : "ltr"}
     >
+      {/* Info block */}
       <div
         style={{
-          fontSize: "1rem",
-          fontWeight: 400,
-          color: "#d06549",
-          lineHeight: 1.14,
-          letterSpacing: "0.01em",
+          flex: "0 0 38vw",
+          minWidth: "330px",
+          maxWidth: "580px",
+          display: "flex",
+          alignItems: "center",
+          // flip paddings for RTL
+          paddingLeft: isRTL ? "1vw" : "3.8vw",
+          paddingRight: isRTL ? "3.8vw" : "1vw",
+          height: "100%",
         }}
       >
-        Embark on a seamless journey to the world’s most exclusive destinations. From hidden valleys to pristine coastlines, our bespoke visa services unlock extraordinary escapes, crafted with elegance to inspire your next adventure.
+        <div
+          style={{
+            fontSize: "1rem",
+            fontWeight: 400,
+            color: "#d06549",
+            lineHeight: 1.14,
+            letterSpacing: "0.01em",
+            textAlign: isRTL ? "right" : "left",
+          }}
+        >
+          {t("explore.blurb")}
+        </div>
       </div>
-    </div>
 
-    {/* Heading block: right aligned */}
-    <div
-      style={{
-        flex: "1 1 62vw",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        height: "100%",
-        paddingLeft: "3vw",
-        position: "relative",
-      }}
-    >
-      <h1
+      {/* Heading block */}
+      <div
         style={{
-          fontSize: "4vw",
-          fontWeight: 700,
-          margin: 0,
-          lineHeight: 0.98,
-          color: "#00477f",
-          letterSpacing: "-1px",
-          textAlign: "left",
-          wordBreak: "break-word",
+          flex: "1 1 62vw",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: isRTL ? "flex-end" : "flex-start",
+          height: "100%",
+          // main side padding mirrored for RTL
+          paddingLeft: isRTL ? 0 : "3vw",
+          paddingRight: isRTL ? "3vw" : 0,
+          position: "relative",
         }}
       >
-        Explore <span style={{ fontStyle: "italic" }}>Worlds</span>
-        <br />
-        Beyond Imagination
-      </h1>
-    </div>
+        <h1
+          style={{
+            fontSize: "4vw",
+            fontWeight: 700,
+            margin: 0,
+            lineHeight: 0.98,
+            color: "#00477f",
+            letterSpacing: "-1px",
+            textAlign: isRTL ? "right" : "left",
+            wordBreak: "break-word",
+          }}
+        >
+          {/* keep the italic word inline so Arabic can choose to style or not */}
+          {t("explore.heading.before")}{" "}
+          <span style={{ fontStyle: "italic" }}>{t("explore.heading.italic")}</span>
+          <br />
+          {t("explore.heading.after")}
+        </h1>
+      </div>
 
-    {/* Drag to Navigate */}
-    <div
-      style={{
-        position: "absolute",
-        right: "3vw",
-        bottom: "3vw",
-        fontFamily: baseFont,
-        color: "#999",
-        fontSize: ".75rem",
-        fontWeight: 700,
-        letterSpacing: "0.07em",
-        textTransform: "uppercase",
-        zIndex: 10,
-      }}
-    >
-      DRAG TO NAVIGATE
-    </div>
-  </section>
-);
+      {/* Drag to Navigate (mirrored in RTL) */}
+      <div
+        style={{
+          position: "absolute",
+          right: isRTL ? "auto" : "3vw",
+          left: isRTL ? "3vw" : "auto",
+          bottom: "3vw",
+          fontFamily: baseFont,
+          color: "#999",
+          fontSize: ".75rem",
+          fontWeight: 700,
+          letterSpacing: "0.07em",
+          textTransform: "uppercase",
+          zIndex: 10,
+        }}
+      >
+        {t("explore.dragHint")}
+      </div>
+    </section>
+  );
+};
 
 export default ExploreSection;

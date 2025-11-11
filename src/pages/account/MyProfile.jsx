@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import AccountSidebar from "../../components/account/Sidebar";
 import { api, API } from "../../utils/api";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
@@ -21,26 +22,39 @@ const baseFont = "'Barlow Condensed', Arial, sans-serif";
 ------------------------------------------ */
 const InputField = React.memo(({ label, icon: Icon, ...props }) => (
   <label style={styles.inputLabel}>
-    {Icon && <Icon style={styles.icon} />}
-    <span style={styles.labelText}>{label}</span>
+    {label && (
+      <span style={styles.labelText}>
+        {Icon && <Icon style={styles.icon} />}
+        {label}
+      </span>
+    )}
     <input style={styles.input} {...props} />
   </label>
 ));
 
-const SelectField = React.memo(({ label, options, icon: Icon, ...props }) => (
-  <label style={styles.inputLabel}>
-    {Icon && <Icon style={styles.icon} />}
-    <span style={styles.labelText}>{label}</span>
-    <select style={styles.input} {...props}>
-      <option value="">{`Select ${label.toLowerCase()}`}</option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
-    </select>
-  </label>
-));
+const SelectField = React.memo(
+  ({ label, options, icon: Icon, placeholder, ...props }) => {
+    const { t } = useTranslation("common");
+    return (
+      <label style={styles.inputLabel}>
+        {label && (
+          <span style={styles.labelText}>
+            {Icon && <Icon style={styles.icon} />}
+            {label}
+          </span>
+        )}
+        <select style={styles.input} {...props}>
+          <option value="">{placeholder || ""}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.labelKey ? t(opt.labelKey) : opt.label || opt.value}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
+);
 
 /* -----------------------------------------
    Helpers
@@ -87,6 +101,8 @@ function sanitizeForSave(form) {
    Main
 ------------------------------------------ */
 export default function MyProfile() {
+  const { t, i18n } = useTranslation("common");
+
   const [activeTab, setActiveTab] = useState("profile");
   const [form, setForm] = useState({
     firstName: "",
@@ -127,12 +143,12 @@ export default function MyProfile() {
       const cached = { ...data, profile: { ...(data.profile || {}), ...next } };
       localStorage.setItem("hv_user", JSON.stringify(cached));
       window.dispatchEvent(new StorageEvent("storage", { key: "hv_user" }));
-    } catch (e) {
-      setError(e.message || "Failed to fetch profile");
+    } catch (_e) {
+      setError(t("account.profile.messages.fetchError"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // ---- check session gently (explains why refresh may send you to Login)
   useEffect(() => {
@@ -141,10 +157,10 @@ export default function MyProfile() {
         setSessionError("");
         await api.get("/api/auth/me");
       } catch (_e) {
-        setSessionError("Your session might have expired. Please log in again.");
+        setSessionError(t("account.profile.sessionWarning"));
       }
     })();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchProfile();
@@ -179,9 +195,9 @@ export default function MyProfile() {
         await fetchProfile();
       }
 
-      setSuccess("✅ Profile saved successfully!");
-    } catch (e) {
-      setError(e.message || "Failed to save profile");
+      setSuccess(t("account.profile.messages.saveSuccess"));
+    } catch (_e) {
+      setError(t("account.profile.messages.saveError"));
     } finally {
       setSaving(false);
     }
@@ -194,33 +210,51 @@ export default function MyProfile() {
     return <div style={styles.avatarFallback}>{initial}</div>;
   };
 
+  const maritalStatusOptions = [
+    { value: "single", labelKey: "account.profile.maritalStatus.options.single" },
+    { value: "married", labelKey: "account.profile.maritalStatus.options.married" },
+    { value: "divorced", labelKey: "account.profile.maritalStatus.options.divorced" },
+    { value: "widowed", labelKey: "account.profile.maritalStatus.options.widowed" },
+    { value: "other", labelKey: "account.profile.maritalStatus.options.other" },
+  ];
+
   if (loading)
-    return <div style={{ textAlign: "center", marginTop: 40 }}>Loading profile...</div>;
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: 40,
+          fontFamily: baseFont,
+          direction: i18n.dir(),
+        }}
+      >
+        {t("account.profile.loading")}
+      </div>
+    );
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", direction: i18n.dir() }}>
       <AccountSidebar />
       <div style={{ flex: 1, padding: "2rem", marginTop: "80px" }}>
         <div style={styles.pageWrapper}>
           {/* Session warning (non-blocking) */}
-          {sessionError && (
-            <div style={styles.sessionWarn}>{sessionError}</div>
-          )}
+          {sessionError && <div style={styles.sessionWarn}>{sessionError}</div>}
 
           {/* Header */}
           <header style={styles.headerCard}>
             {renderAvatar()}
             <div>
               <h1 style={styles.pageTitle}>
-                {form.firstName || "Your"} {form.lastName || "Name"}
+                {form.firstName || t("account.profile.header.fallbackFirstName")}{" "}
+                {form.lastName || t("account.profile.header.fallbackLastName")}
               </h1>
               <p style={styles.subText}>
-                <FaEnvelope style={{ marginRight: 8 }} />
-                {form.email || "your.email@example.com"}
+                <FaEnvelope style={{ marginInlineEnd: 8 }} />
+                {form.email || t("account.profile.header.fallbackEmail")}
               </p>
               <p style={styles.subText}>
-                <FaPhone style={{ marginRight: 8 }} />
-                {form.mobile || "+91 00000 00000"}
+                <FaPhone style={{ marginInlineEnd: 8 }} />
+                {form.mobile || t("account.profile.header.fallbackMobile")}
               </p>
             </div>
           </header>
@@ -234,7 +268,8 @@ export default function MyProfile() {
               }}
               onClick={() => setActiveTab("profile")}
             >
-              <FaUserFriends style={styles.tabIcon} /> Profile Info
+              <FaUserFriends style={styles.tabIcon} />{" "}
+              {t("account.profile.tabs.profile")}
             </button>
             <button
               style={{
@@ -243,7 +278,8 @@ export default function MyProfile() {
               }}
               onClick={() => setActiveTab("documents")}
             >
-              <FaPassport style={styles.tabIcon} /> Documents
+              <FaPassport style={styles.tabIcon} />{" "}
+              {t("account.profile.tabs.documents")}
             </button>
             <button
               style={{
@@ -252,50 +288,152 @@ export default function MyProfile() {
               }}
               onClick={() => setActiveTab("preferences")}
             >
-              <FaShieldAlt style={styles.tabIcon} /> Preferences
+              <FaShieldAlt style={styles.tabIcon} />{" "}
+              {t("account.profile.tabs.preferences")}
             </button>
           </nav>
 
           {/* Form */}
           <form onSubmit={handleSave} style={styles.form}>
-            {error && <div style={{ color: "red", marginBottom: 20 }}>{error}</div>}
+            {error && (
+              <div style={{ color: "red", marginBottom: 20, fontWeight: 600 }}>
+                {error}
+              </div>
+            )}
             {success && (
-              <div style={{ color: "green", marginBottom: 20 }}>{success}</div>
+              <div style={{ color: "green", marginBottom: 20, fontWeight: 600 }}>
+                {success}
+              </div>
             )}
 
             {activeTab === "profile" && (
               <div style={styles.grid}>
-                <InputField label="First Name" icon={FaUser} name="firstName" value={form.firstName} onChange={handleChange} />
-                <InputField label="Last Name"  icon={FaUser} name="lastName"  value={form.lastName}  onChange={handleChange} />
-                <InputField label="Email"      icon={FaEnvelope} name="email" value={form.email} onChange={handleChange} />
-                <InputField label="Mobile"     icon={FaPhone} name="mobile" value={form.mobile} onChange={handleChange} />
-                <InputField label="Date of Birth" icon={FaBirthdayCake} type="date" name="dob" value={form.dob} onChange={handleChange} />
-                <InputField label="Nationality" icon={FaFlag} name="nationality" value={form.nationality} onChange={handleChange} />
-                <SelectField  label="Marital Status" options={["Single","Married","Divorced","Widowed","Other"]} name="maritalStatus" value={form.maritalStatus} onChange={handleChange} />
-                <InputField label="Anniversary" type="date" name="anniversary" value={form.anniversary} onChange={handleChange} />
-                <InputField label="City"  name="city"  value={form.city}  onChange={handleChange} />
-                <InputField label="State" name="state" value={form.state} onChange={handleChange} />
+                <InputField
+                  label={t("account.profile.form.firstName")}
+                  icon={FaUser}
+                  name="firstName"
+                  value={form.firstName}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.lastName")}
+                  icon={FaUser}
+                  name="lastName"
+                  value={form.lastName}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.email")}
+                  icon={FaEnvelope}
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.mobile")}
+                  icon={FaPhone}
+                  name="mobile"
+                  value={form.mobile}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.dob")}
+                  icon={FaBirthdayCake}
+                  type="date"
+                  name="dob"
+                  value={form.dob}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.nationality")}
+                  icon={FaFlag}
+                  name="nationality"
+                  value={form.nationality}
+                  onChange={handleChange}
+                />
+                <SelectField
+                  label={t("account.profile.maritalStatus.label")}
+                  name="maritalStatus"
+                  value={form.maritalStatus}
+                  onChange={handleChange}
+                  options={maritalStatusOptions}
+                  placeholder={t("account.profile.maritalStatus.placeholder")}
+                />
+                <InputField
+                  label={t("account.profile.form.anniversary")}
+                  type="date"
+                  name="anniversary"
+                  value={form.anniversary}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.city")}
+                  name="city"
+                  value={form.city}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.state")}
+                  name="state"
+                  value={form.state}
+                  onChange={handleChange}
+                />
               </div>
             )}
 
             {activeTab === "documents" && (
               <div style={styles.grid}>
-                <InputField label="Passport Number" icon={FaPassport} name="passportNo" value={form.passportNo} onChange={handleChange} />
-                <InputField label="Passport Expiry Date" type="date" name="passportExpiry" value={form.passportExpiry} onChange={handleChange} />
-                <InputField label="Issuing Country" name="issuingCountry" value={form.issuingCountry} onChange={handleChange} />
-                <InputField label="PAN Card Number" icon={FaIdCard} name="panCard" value={form.panCard} onChange={handleChange} />
+                <InputField
+                  label={t("account.profile.form.passportNo")}
+                  icon={FaPassport}
+                  name="passportNo"
+                  value={form.passportNo}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.passportExpiry")}
+                  type="date"
+                  name="passportExpiry"
+                  value={form.passportExpiry}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.issuingCountry")}
+                  name="issuingCountry"
+                  value={form.issuingCountry}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.panCard")}
+                  icon={FaIdCard}
+                  name="panCard"
+                  value={form.panCard}
+                  onChange={handleChange}
+                />
               </div>
             )}
 
             {activeTab === "preferences" && (
               <div style={styles.grid}>
-                <InputField label="Domestic Plan" name="domesticPlan" value={form.domesticPlan} onChange={handleChange} />
-                <InputField label="International Plan" name="internationalPlan" value={form.internationalPlan} onChange={handleChange} />
+                <InputField
+                  label={t("account.profile.form.domesticPlan")}
+                  name="domesticPlan"
+                  value={form.domesticPlan}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label={t("account.profile.form.internationalPlan")}
+                  name="internationalPlan"
+                  value={form.internationalPlan}
+                  onChange={handleChange}
+                />
               </div>
             )}
 
             <button type="submit" style={styles.saveBtn} disabled={saving}>
-              {saving ? "Saving…" : "Save Changes"}
+              {saving
+                ? t("account.profile.buttons.saving")
+                : t("account.profile.buttons.save")}
             </button>
           </form>
         </div>
@@ -365,7 +503,6 @@ const styles = {
     marginTop: 0,
     display: "flex",
     alignItems: "center",
-    gap: 8,
   },
   tabs: {
     display: "flex",

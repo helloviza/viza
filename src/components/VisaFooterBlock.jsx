@@ -1,12 +1,16 @@
 // client/src/components/VisaFooterBlock.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
 /** Responsive helper with resize listener (footer-only) */
 function useScreenSize() {
-  const get = () => (typeof window === "undefined" ? { mobile: false, width: 1200 } : { mobile: window.innerWidth < 700, width: window.innerWidth });
+  const get = () =>
+    typeof window === "undefined"
+      ? { mobile: false, width: 1200 }
+      : { mobile: window.innerWidth < 700, width: window.innerWidth };
   const [s, setS] = useState(get);
   useEffect(() => {
     const onR = () => setS(get());
@@ -17,6 +21,7 @@ function useScreenSize() {
 }
 
 const VisaFooterBlock = () => {
+  const { t } = useTranslation("common");
   const { mobile } = useScreenSize();
 
   const footerRowDir = mobile ? "column" : "row";
@@ -106,88 +111,90 @@ const VisaFooterBlock = () => {
         >
           {/* DISCOVER */}
           <div style={colWrapStyle(colAlign, colStack, mobile)}>
-            <div style={colHeaderStyle(mobile)}>DISCOVER</div>
-            <Link to="/" style={footerLinkStyle}>Home</Link>
-            <Link to="/blog" style={footerLinkStyle}>Blog</Link>
-            <Link to="/contact" style={footerLinkStyle}>Contact</Link>
+            <div style={colHeaderStyle(mobile)}>{t("footer.headings.discover", { defaultValue: "DISCOVER" })}</div>
+            <Link to="/" style={footerLinkStyle}>{t("footer.links.home", { defaultValue: "Home" })}</Link>
+            <Link to="/blog" style={footerLinkStyle}>{t("footer.links.blog", { defaultValue: "Blog" })}</Link>
+            <Link to="/contact" style={footerLinkStyle}>{t("footer.links.contact", { defaultValue: "Contact" })}</Link>
           </div>
 
           {/* MANAGEMENT */}
           <div style={colWrapStyle(colAlign, colStack, mobile)}>
-            <div style={colHeaderStyle(mobile)}>MANAGEMENT</div>
-            <Link to="/about" style={footerLinkStyle}>About Us</Link>
-            <Link to="/careers" style={footerLinkStyle}>Career</Link>
+            <div style={colHeaderStyle(mobile)}>{t("footer.headings.management", { defaultValue: "MANAGEMENT" })}</div>
+            <Link to="/about" style={footerLinkStyle}>{t("footer.links.about", { defaultValue: "About Us" })}</Link>
+            <Link to="/careers" style={footerLinkStyle}>{t("footer.links.careers", { defaultValue: "Career" })}</Link>
           </div>
 
           {/* OUR SERVICE */}
           <div style={colWrapStyle(colAlign, colStack, mobile)}>
-            <div style={colHeaderStyle(mobile)}>OUR SERVICE</div>
+            <div style={colHeaderStyle(mobile)}>{t("footer.headings.ourService", { defaultValue: "OUR SERVICE" })}</div>
             <a
               href="https://www.plumtrips.com"
               style={footerLinkStyle}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Book my Flight on PlumTrips (opens in a new tab)"
+              aria-label={t("footer.aria.bookFlight", { defaultValue: "Book my Flight on PlumTrips (opens in a new tab)" })}
             >
-              Book my Flight
+              {t("footer.links.bookFlight", { defaultValue: "Book my Flight" })}
             </a>
             <a
               href="https://www.plumtrips.com"
               style={footerLinkStyle}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Book my Hotel on PlumTrips (opens in a new tab)"
+              aria-label={t("footer.aria.bookHotel", { defaultValue: "Book my Hotel on PlumTrips (opens in a new tab)" })}
             >
-              Book my Hotel
+              {t("footer.links.bookHotel", { defaultValue: "Book my Hotel" })}
             </a>
           </div>
 
           {/* SOCIAL MEDIA */}
           <div style={colWrapStyle(colAlign, colStack, mobile)}>
-            <div style={colHeaderStyle(mobile)}>SOCIAL MEDIA</div>
+            <div style={colHeaderStyle(mobile)}>{t("footer.headings.socialMedia", { defaultValue: "SOCIAL MEDIA" })}</div>
             <a
               href="https://instagram.com/helloviza"
               target="_blank"
               rel="noopener noreferrer"
               style={footerLinkStyle}
-              aria-label="Instagram (opens in a new tab)"
+              aria-label={t("footer.aria.instagram", { defaultValue: "Instagram (opens in a new tab)" })}
             >
-              Instagram
+              {t("footer.links.instagram", { defaultValue: "Instagram" })}
             </a>
             <a
               href="https://www.youtube.com/@helloviza"
               target="_blank"
               rel="noopener noreferrer"
               style={footerLinkStyle}
-              aria-label="YouTube (opens in a new tab)"
+              aria-label={t("footer.aria.youtube", { defaultValue: "YouTube (opens in a new tab)" })}
             >
-              YouTube
+              {t("footer.links.youtube", { defaultValue: "YouTube" })}
             </a>
             <a
               href="https://facebook.com/hellovizaofficial"
               target="_blank"
               rel="noopener noreferrer"
               style={footerLinkStyle}
-              aria-label="Facebook (opens in a new tab)"
+              aria-label={t("footer.aria.facebook", { defaultValue: "Facebook (opens in a new tab)" })}
             >
-              Facebook
+              {t("footer.links.facebook", { defaultValue: "Facebook" })}
             </a>
           </div>
 
           {/* SUBSCRIBE */}
           <div style={colWrapStyle(colAlign, colStack, mobile)}>
-            <div style={colHeaderStyle(mobile)}>SUBSCRIBE</div>
+            <div style={colHeaderStyle(mobile)}>{t("footer.headings.subscribe", { defaultValue: "SUBSCRIBE" })}</div>
             <div style={{ fontSize: mobile ? "0.7rem" : "0.8rem", opacity: 0.95 }}>
-              Get updates in your inbox.
+              {t("footer.subscribe.blurb", { defaultValue: "Get updates in your inbox." })}
             </div>
             <form style={subscribeFormStyles.wrapper} onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
-                placeholder="Enter your email address"
+                placeholder={t("footer.subscribe.placeholder", { defaultValue: "Enter your email address" })}
                 style={subscribeFormStyles.input}
-                aria-label="Email address"
+                aria-label={t("footer.subscribe.ariaEmail", { defaultValue: "Email address" })}
               />
-              <button type="submit" style={subscribeFormStyles.button}>Subscribe</button>
+              <button type="submit" style={subscribeFormStyles.button}>
+                {t("footer.subscribe.button", { defaultValue: "Subscribe" })}
+              </button>
             </form>
           </div>
         </div>
@@ -217,7 +224,8 @@ const VisaFooterBlock = () => {
               width: mobile ? "100%" : "auto",
             }}
           >
-            &copy; {new Date().getFullYear()} Helloviza, All rights reserved
+            © {new Date().getFullYear()} {t("footer.bottom.brand", { defaultValue: "Helloviza" })},{" "}
+            {t("footer.bottom.allRights", { defaultValue: "All rights reserved" })}
           </div>
 
           <div
@@ -231,9 +239,9 @@ const VisaFooterBlock = () => {
               flexWrap: "wrap",
             }}
           >
-            <Link to="/privacy" style={bottomLinkStyle}>Privacy Policy</Link>
-            <Link to="/terms" style={bottomLinkStyle}>Terms of Use</Link>
-            <Link to="/newsroom" style={bottomLinkStyle}>Newsroom</Link>
+            <Link to="/privacy" style={bottomLinkStyle}>{t("footer.bottom.privacy", { defaultValue: "Privacy Policy" })}</Link>
+            <Link to="/terms" style={bottomLinkStyle}>{t("footer.bottom.terms", { defaultValue: "Terms of Use" })}</Link>
+            <Link to="/newsroom" style={bottomLinkStyle}>{t("footer.bottom.newsroom", { defaultValue: "Newsroom" })}</Link>
           </div>
 
           <div
@@ -253,7 +261,7 @@ const VisaFooterBlock = () => {
               rel="noopener noreferrer"
               style={bottomCreditStyle}
             >
-              Helloviza’s website
+              {t("footer.bottom.linkText", { defaultValue: "Helloviza’s website" })}
             </a>
           </div>
         </div>

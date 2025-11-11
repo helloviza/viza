@@ -6,6 +6,7 @@ import {
   FaGift,
   FaRegClock,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import AccountSidebar from "../../components/account/Sidebar";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
@@ -15,6 +16,7 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function Wallet() {
+  const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,19 +35,20 @@ export default function Wallet() {
         const txnData = await txnRes.json();
 
         if (!balRes.ok) throw new Error(balData.error || "Failed to load balance");
-        if (!txnRes.ok) throw new Error(txnData.error || "Failed to load transactions");
+        if (!txnRes.ok)
+          throw new Error(txnData.error || "Failed to load transactions");
 
         setBalance(balData.balance || 0);
         setTransactions(txnData.items || []);
       } catch (err) {
         console.error("❌ Wallet Fetch Error:", err);
-        setError("Failed to load wallet data");
+        setError(t("account.wallet.errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     }
     fetchWallet();
-  }, []);
+  }, [t]);
 
   const renderIcon = (type) => {
     switch (type?.toLowerCase()) {
@@ -58,6 +61,15 @@ export default function Wallet() {
       default:
         return <FaRegClock style={{ color: "#00477f" }} />;
     }
+  };
+
+  const formatTypeLabel = (type) => {
+    if (!type) return "—";
+    const key = type.toLowerCase();
+    const translationKey = `account.wallet.types.${key}`;
+    const translated = t(translationKey);
+    // Fallback to original type string if no translation exists
+    return translated === translationKey ? type : translated;
   };
 
   const formatDate = (date) =>
@@ -77,69 +89,85 @@ export default function Wallet() {
           <header style={S.headerCard}>
             <FaWallet style={{ fontSize: 42, marginRight: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>My Wallet</h1>
-              <p style={{ opacity: 0.8 }}>
-                Track your travel credits, transactions, and referral bonuses
-              </p>
+              <h1 style={S.pageTitle}>{t("account.wallet.title")}</h1>
+              <p style={{ opacity: 0.8 }}>{t("account.wallet.subtitle")}</p>
             </div>
           </header>
 
           {error && <div style={S.error}>{error}</div>}
 
           {loading ? (
-            <p style={{ textAlign: "center" }}>Loading wallet details...</p>
+            <p style={{ textAlign: "center" }}>{t("account.wallet.loading")}</p>
           ) : (
             <>
               {/* === Balance Summary === */}
               <div style={S.balanceCard}>
-                <h2 style={S.balanceLabel}>Available Balance</h2>
-                <div style={S.balanceAmount}>₹ {balance.toFixed(2)}</div>
-                <p style={S.note}>
-                  You can redeem your wallet credits for visa, flight, or holiday bookings.
-                </p>
+                <h2 style={S.balanceLabel}>{t("account.wallet.balance.label")}</h2>
+                <div style={S.balanceAmount}>
+                  {t("account.wallet.balance.display", {
+                    amount: balance.toFixed(2),
+                  })}
+                </div>
+                <p style={S.note}>{t("account.wallet.balance.note")}</p>
               </div>
 
               {/* === Transactions Table === */}
               <div style={S.tableCard}>
-                <h3 style={S.subTitle}>Recent Transactions</h3>
+                <h3 style={S.subTitle}>
+                  {t("account.wallet.transactions.title")}
+                </h3>
                 {transactions.length === 0 ? (
                   <p style={{ textAlign: "center", color: "#666" }}>
-                    No transactions yet.
+                    {t("account.wallet.transactions.empty")}
                   </p>
                 ) : (
                   <table style={S.table}>
                     <thead>
                       <tr style={S.thRow}>
-                        <th style={S.th}>Type</th>
-                        <th style={S.th}>Amount</th>
-                        <th style={S.th}>Remarks</th>
-                        <th style={S.th}>Date</th>
+                        <th style={S.th}>
+                          {t("account.wallet.transactions.headers.type")}
+                        </th>
+                        <th style={S.th}>
+                          {t("account.wallet.transactions.headers.amount")}
+                        </th>
+                        <th style={S.th}>
+                          {t("account.wallet.transactions.headers.remarks")}
+                        </th>
+                        <th style={S.th}>
+                          {t("account.wallet.transactions.headers.date")}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {transactions.map((t) => (
-                        <tr key={t.id || t._id} style={S.tr}>
+                      {transactions.map((tItem) => (
+                        <tr key={tItem.id || tItem._id} style={S.tr}>
                           <td style={S.tdType}>
-                            <span style={{ marginRight: 8 }}>{renderIcon(t.type)}</span>
-                            {t.type || "—"}
+                            <span style={{ marginRight: 8 }}>
+                              {renderIcon(tItem.type)}
+                            </span>
+                            {formatTypeLabel(tItem.type)}
                           </td>
                           <td
                             style={{
                               ...S.td,
                               color:
-                                t.type?.toLowerCase() === "credit"
+                                tItem.type?.toLowerCase() === "credit"
                                   ? "#2ecc71"
-                                  : t.type?.toLowerCase() === "debit"
+                                  : tItem.type?.toLowerCase() === "debit"
                                   ? "#e74c3c"
                                   : "#00477f",
                               fontWeight: 700,
                             }}
                           >
-                            {t.type?.toLowerCase() === "debit" ? "-" : "+"}₹
-                            {Number(t.amount).toFixed(2)}
+                            {tItem.type?.toLowerCase() === "debit" ? "-" : "+"}
+                            {t("account.wallet.transactions.amountDisplay", {
+                              amount: Number(tItem.amount).toFixed(2),
+                            })}
                           </td>
-                          <td style={S.td}>{t.remarks || "—"}</td>
-                          <td style={S.td}>{formatDate(t.createdAt)}</td>
+                          <td style={S.td}>{tItem.remarks || "—"}</td>
+                          <td style={S.td}>
+                            {tItem.createdAt ? formatDate(tItem.createdAt) : "—"}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

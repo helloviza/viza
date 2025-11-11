@@ -1,3 +1,4 @@
+// helloviza/client/src/pages/account/SavedApplications.jsx
 import React, { useEffect, useState } from "react";
 import {
   FaBookmark,
@@ -8,6 +9,7 @@ import {
   FaTrashAlt,
   FaExternalLinkAlt,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import AccountSidebar from "../../components/account/Sidebar";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
@@ -17,6 +19,8 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function SavedApplications() {
+  const { t, i18n } = useTranslation("common");
+
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +28,7 @@ export default function SavedApplications() {
   useEffect(() => {
     async function fetchApps() {
       setLoading(true);
+      setError("");
       try {
         const res = await fetch(`${API_BASE}/api/applications/saved`, {
           credentials: "include",
@@ -33,16 +38,16 @@ export default function SavedApplications() {
         setApps(data.items || []);
       } catch (err) {
         console.error("❌ Saved Applications Fetch Error:", err);
-        setError("Failed to fetch saved applications");
+        setError(t("account.savedApplications.errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     }
     fetchApps();
-  }, []);
+  }, [t]);
 
   async function handleDelete(id) {
-    if (!window.confirm("Remove this saved application?")) return;
+    if (!window.confirm(t("account.savedApplications.confirmDelete"))) return;
     try {
       const res = await fetch(`${API_BASE}/api/applications/${id}`, {
         method: "DELETE",
@@ -52,7 +57,7 @@ export default function SavedApplications() {
       if (!res.ok) throw new Error(data.error || "Delete failed");
       setApps((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      setError("Failed to delete application");
+      setError(t("account.savedApplications.errors.deleteFailed"));
     }
   }
 
@@ -69,6 +74,16 @@ export default function SavedApplications() {
     }
   };
 
+  const statusLabel = (status) => {
+    const key = (status || "").toLowerCase();
+    if (key === "completed") return t("account.savedApplications.status.completed");
+    if (key === "pending" || !key) return t("account.savedApplications.status.pending");
+    if (key === "rejected") return t("account.savedApplications.status.rejected");
+    return t("account.savedApplications.status.default");
+  };
+
+  const locale = i18n.language === "ar" ? "ar-EG" : "en-IN";
+
   return (
     <div style={{ display: "flex" }}>
       <AccountSidebar />
@@ -77,9 +92,9 @@ export default function SavedApplications() {
           <header style={S.headerCard}>
             <FaBookmark style={{ fontSize: 42, marginRight: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>Saved Applications</h1>
+              <h1 style={S.pageTitle}>{t("account.savedApplications.title")}</h1>
               <p style={{ opacity: 0.8 }}>
-                Manage and continue your saved visa or travel applications
+                {t("account.savedApplications.subtitle")}
               </p>
             </div>
           </header>
@@ -87,40 +102,62 @@ export default function SavedApplications() {
           {error && <div style={S.error}>{error}</div>}
 
           {loading ? (
-            <p style={{ textAlign: "center" }}>Loading saved applications...</p>
+            <p style={{ textAlign: "center" }}>
+              {t("account.savedApplications.loading")}
+            </p>
           ) : apps.length === 0 ? (
             <div style={S.emptyState}>
               <FaBookmark style={{ fontSize: 60, color: "#ccc" }} />
-              <p>No saved applications found.</p>
+              <p>{t("account.savedApplications.empty")}</p>
             </div>
           ) : (
             <div style={S.tableCard}>
               <table style={S.table}>
                 <thead>
                   <tr style={S.thRow}>
-                    <th style={S.th}>Application ID</th>
-                    <th style={S.th}>Type</th>
-                    <th style={S.th}>Country</th>
-                    <th style={S.th}>Status</th>
-                    <th style={S.th}>Last Updated</th>
-                    <th style={S.th}>Action</th>
+                    <th style={S.th}>
+                      {t("account.savedApplications.table.headers.id")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.savedApplications.table.headers.type")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.savedApplications.table.headers.country")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.savedApplications.table.headers.status")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.savedApplications.table.headers.updated")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.savedApplications.table.headers.action")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {apps.map((a) => (
                     <tr key={a.id} style={S.tr}>
                       <td style={S.td}>{a.id || "—"}</td>
-                      <td style={S.td}>{a.type || "Visa"}</td>
+                      <td style={S.td}>
+                        {a.type || t("account.savedApplications.table.defaultType")}
+                      </td>
                       <td style={S.td}>{a.country || "—"}</td>
                       <td style={S.td}>
-                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
                           {statusIcon(a.status)}
-                          {a.status || "Pending"}
+                          {statusLabel(a.status)}
                         </span>
                       </td>
                       <td style={S.td}>
                         {a.updatedAt
-                          ? new Date(a.updatedAt).toLocaleDateString("en-IN", {
+                          ? new Date(a.updatedAt).toLocaleDateString(locale, {
                               day: "2-digit",
                               month: "short",
                               year: "numeric",
@@ -135,12 +172,14 @@ export default function SavedApplications() {
                             rel="noreferrer"
                             style={S.viewBtn}
                           >
-                            <FaExternalLinkAlt /> View
+                            <FaExternalLinkAlt />
+                            {t("account.savedApplications.actions.view")}
                           </a>
                         )}
                         <button
                           onClick={() => handleDelete(a.id)}
                           style={S.deleteBtn}
+                          aria-label={t("account.savedApplications.actions.remove")}
                         >
                           <FaTrashAlt />
                         </button>
@@ -185,6 +224,7 @@ const S = {
     boxShadow: "0 6px 18px rgba(0,71,127,0.15)",
     overflowX: "auto",
   },
+  table: { width: "100%", borderCollapse: "collapse" },
   thRow: { backgroundColor: "#00477f", color: "#fff" },
   th: { textAlign: "left", padding: "10px 14px", fontWeight: 700 },
   tr: { borderBottom: "1px solid #eee" },

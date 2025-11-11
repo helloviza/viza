@@ -7,6 +7,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 import AccountSidebar from "../../components/account/Sidebar";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
@@ -16,30 +17,36 @@ const API_BASE =
     : "https://api.helloviza.com";
 
 export default function VisaHistory() {
+  const { t, i18n } = useTranslation("common");
   const [visas, setVisas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const locale = i18n.language === "ar" ? "ar-EG" : "en-IN";
 
   useEffect(() => {
     async function fetchVisaHistory() {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/visa/history`, { credentials: "include" });
+        const res = await fetch(`${API_BASE}/api/visa/history`, {
+          credentials: "include",
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load visa history");
         setVisas(data.items || []);
       } catch (err) {
         console.error("❌ Visa History Fetch Error:", err);
-        setError("Failed to fetch visa history");
+        setError(t("account.visaHistory.errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     }
     fetchVisaHistory();
-  }, []);
+  }, [t]);
 
   const statusColor = (status) => {
-    switch (status?.toLowerCase()) {
+    const s = status?.toLowerCase();
+    switch (s) {
       case "approved":
         return "#2ecc71";
       case "pending":
@@ -51,6 +58,13 @@ export default function VisaHistory() {
     }
   };
 
+  const translateStatus = (status) => {
+    const s = status?.toLowerCase();
+    const key =
+      s === "approved" || s === "pending" || s === "rejected" ? s : "default";
+    return t(`account.visaHistory.status.${key}`);
+  };
+
   return (
     <div style={{ display: "flex" }}>
       <AccountSidebar />
@@ -59,78 +73,104 @@ export default function VisaHistory() {
           <header style={S.headerCard}>
             <FaGlobeAsia style={{ fontSize: 42, marginRight: 16 }} />
             <div>
-              <h1 style={S.pageTitle}>Visa Application History</h1>
-              <p style={{ opacity: 0.8 }}>
-                Track your previous visa requests and statuses
-              </p>
+              <h1 style={S.pageTitle}>{t("account.visaHistory.title")}</h1>
+              <p style={{ opacity: 0.8 }}>{t("account.visaHistory.subtitle")}</p>
             </div>
           </header>
 
           {error && <div style={S.error}>{error}</div>}
 
           {loading ? (
-            <p style={{ textAlign: "center" }}>Loading visa applications...</p>
+            <p style={{ textAlign: "center" }}>
+              {t("account.visaHistory.loading")}
+            </p>
           ) : visas.length === 0 ? (
             <div style={S.emptyState}>
               <FaPlaneDeparture style={{ fontSize: 60, color: "#ccc" }} />
-              <p>No visa applications found.</p>
+              <p>{t("account.visaHistory.empty")}</p>
             </div>
           ) : (
             <div style={S.tableCard}>
               <table style={S.table}>
                 <thead>
                   <tr style={S.thRow}>
-                    <th style={S.th}>Country</th>
-                    <th style={S.th}>Visa Type</th>
-                    <th style={S.th}>Applied On</th>
-                    <th style={S.th}>Status</th>
-                    <th style={S.th}>Remarks</th>
-                    <th style={S.th}>Download</th>
+                    <th style={S.th}>
+                      {t("account.visaHistory.table.headers.country")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.visaHistory.table.headers.type")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.visaHistory.table.headers.appliedOn")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.visaHistory.table.headers.status")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.visaHistory.table.headers.remarks")}
+                    </th>
+                    <th style={S.th}>
+                      {t("account.visaHistory.table.headers.download")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {visas.map((v) => (
-                    <tr key={v.id || v._id} style={S.tr}>
-                      <td style={S.td}>{v.country || "—"}</td>
-                      <td style={S.td}>{v.type || "Tourist"}</td>
-                      <td style={S.td}>
-                        {v.appliedAt
-                          ? new Date(v.appliedAt).toLocaleDateString("en-IN", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })
-                          : "—"}
-                      </td>
-                      <td style={{ ...S.td, color: statusColor(v.status) }}>
-                        {v.status?.toLowerCase() === "approved" && (
-                          <FaCheckCircle style={S.statusIcon} />
-                        )}
-                        {v.status?.toLowerCase() === "pending" && (
-                          <FaClock style={S.statusIcon} />
-                        )}
-                        {v.status?.toLowerCase() === "rejected" && (
-                          <FaTimesCircle style={S.statusIcon} />
-                        )}
-                        {v.status || "N/A"}
-                      </td>
-                      <td style={S.td}>{v.remarks || "—"}</td>
-                      <td style={S.td}>
-                        {v.documentUrl ? (
-                          <a
-                            href={v.documentUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={S.downloadLink}
-                          >
-                            <FaFileDownload /> PDF
-                          </a>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {visas.map((v) => {
+                    const appliedDate = v.appliedAt
+                      ? new Date(v.appliedAt).toLocaleDateString(locale, {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "—";
+
+                    const statusText = translateStatus(v.status);
+
+                    return (
+                      <tr key={v.id || v._id} style={S.tr}>
+                        <td style={S.td}>{v.country || "—"}</td>
+                        <td style={S.td}>
+                          {v.type || t("account.visaHistory.table.defaultType")}
+                        </td>
+                        <td style={S.td}>{appliedDate}</td>
+                        <td
+                          style={{
+                            ...S.td,
+                            color: statusColor(v.status),
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          {v.status?.toLowerCase() === "approved" && (
+                            <FaCheckCircle style={S.statusIcon} />
+                          )}
+                          {v.status?.toLowerCase() === "pending" && (
+                            <FaClock style={S.statusIcon} />
+                          )}
+                          {v.status?.toLowerCase() === "rejected" && (
+                            <FaTimesCircle style={S.statusIcon} />
+                          )}
+                          {statusText}
+                        </td>
+                        <td style={S.td}>{v.remarks || "—"}</td>
+                        <td style={S.td}>
+                          {v.documentUrl ? (
+                            <a
+                              href={v.documentUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={S.downloadLink}
+                            >
+                              <FaFileDownload />{" "}
+                              {t("account.visaHistory.table.downloadLabel")}
+                            </a>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

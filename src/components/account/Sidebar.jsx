@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FaUser,
   FaPassport,
@@ -14,33 +15,54 @@ import {
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
 export default function AccountSidebar() {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl" || i18n.language?.startsWith("ar");
+
   const links = [
-    { to: "/account/profile", label: "My Profile", icon: <FaUser /> },
-    { to: "/account/documents", label: "Documents", icon: <FaPassport /> },
-    { to: "/account/visa-history", label: "Visa History", icon: <FaHistory /> },
-    { to: "/account/saved", label: "Saved Applications", icon: <FaBookmark /> },
-    { to: "/account/wishlist", label: "Wishlist", icon: <FaHeart /> },
-    { to: "/account/wallet", label: "Wallet", icon: <FaWallet /> },
-    { to: "/account/referrals", label: "Referrals", icon: <FaUserFriends /> },
-    { to: "/account/settings", label: "Settings", icon: <FaCog /> },
+    { to: "/account/profile", labelKey: "account.profile.tabs.profile", icon: <FaUser /> },
+    { to: "/account/documents", labelKey: "account.documents.title", icon: <FaPassport /> },
+    { to: "/account/visa-history", labelKey: "account.visaHistory.title", icon: <FaHistory /> },
+    { to: "/account/saved", labelKey: "account.savedApplications.title", icon: <FaBookmark /> },
+    { to: "/account/wishlist", labelKey: "account.wishlist.title", icon: <FaHeart /> },
+    { to: "/account/wallet", labelKey: "account.wallet.title", icon: <FaWallet /> },
+    { to: "/account/referrals", labelKey: "account.referrals.title", icon: <FaUserFriends /> },
+    { to: "/account/settings", labelKey: "account.settings.title", icon: <FaCog /> },
   ];
 
   return (
-    <aside style={S.sidebar}>
-      <h2 style={S.title}>My Account</h2>
+    <aside
+      style={{
+        ...S.sidebar,
+        direction: isRTL ? "rtl" : "ltr",
+        textAlign: isRTL ? "right" : "left",
+      }}
+    >
+      {/* You can add a dedicated i18n key later if you want this translated */}
+      <h2 style={S.title}>{t("nav.user", "My Account")}</h2>
+
       <nav style={S.nav}>
         {links.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end
-            style={({ isActive }) => ({
-              ...S.link,
-              ...(isActive ? S.activeLink : {}),
-            })}
+            style={({ isActive }) => {
+              const base = {
+                ...S.link,
+                flexDirection: isRTL ? "row-reverse" : "row",
+                justifyContent: isRTL ? "flex-end" : "flex-start",
+              };
+              const active = isActive
+                ? {
+                    ...S.activeLink,
+                    transform: isRTL ? "translateX(-4px)" : "translateX(4px)",
+                  }
+                : {};
+              return { ...base, ...active };
+            }}
           >
             <span style={S.icon}>{item.icon}</span>
-            {item.label}
+            {t(item.labelKey)}
           </NavLink>
         ))}
       </nav>
@@ -60,8 +82,8 @@ const S = {
     flexDirection: "column",
     fontFamily: baseFont,
     position: "sticky",
-    top: 120, // ✅ aligns below fixed header
-    marginTop: "50px", // ensure no double offset
+    top: 120, // aligns below fixed header
+    marginTop: "50px",
     boxShadow: "4px 0 10px rgba(0,0,0,0.25)",
     zIndex: 2,
   },
@@ -97,7 +119,6 @@ const S = {
     background: "linear-gradient(90deg, #d06549, #00477f)",
     color: "#fff",
     boxShadow: "0 4px 15px rgba(0,0,0,0.35)",
-    transform: "translateX(4px)",
   },
   icon: {
     fontSize: 18,
@@ -113,7 +134,6 @@ if (typeof document !== "undefined") {
     aside a:hover {
       background: linear-gradient(90deg, rgba(208,101,73,0.8), rgba(0,71,127,0.9));
       color: #fff !important;
-      transform: translateX(3px);
     }
     aside a:hover span {
       transform: scale(1.15);

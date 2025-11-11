@@ -1,29 +1,8 @@
-import React from "react";
+// src/components/VisaServiceSection.jsx
+import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
-
-const services = [
-  {
-    number: 1,
-    title: "Tourist Visa",
-    desc: "Experience seamless travel for holidays and tourism across the globe.",
-  },
-  {
-    number: 2,
-    title: "Business Visa",
-    desc: "Accelerate your international business journeys with dedicated support.",
-  },
-  {
-    number: 3,
-    title: "Student Visa",
-    desc: "Unlock global education opportunities with our expert visa guidance.",
-  },
-  {
-    number: 4,
-    title: "Family Visa",
-    desc: "Bring your loved ones closer—smooth family visa processing for all destinations.",
-  },
-];
 
 function useMobile() {
   if (typeof window === "undefined") return false;
@@ -32,8 +11,25 @@ function useMobile() {
 
 export default function VisaServicesSection() {
   const isMobile = useMobile();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.dir() === "rtl";
 
-  // --- Responsive mystyle ---
+  // Localized content
+  const services = useMemo(
+    () => [
+      { number: 1, title: t("services.cards.0.title"), desc: t("services.cards.0.desc") },
+      { number: 2, title: t("services.cards.1.title"), desc: t("services.cards.1.desc") },
+      { number: 3, title: t("services.cards.2.title"), desc: t("services.cards.2.desc") },
+      { number: 4, title: t("services.cards.3.title"), desc: t("services.cards.3.desc") },
+    ],
+    [t]
+  );
+
+  const whyTitle   = t("services.why.title");
+  const whyLine1   = t("services.why.line1");
+  const whySignoff = t("services.why.signoff");
+
+  // --- Responsive style (unchanged essence)
   const wrapperStyle = isMobile
     ? {
         display: "flex",
@@ -60,7 +56,7 @@ export default function VisaServicesSection() {
       };
 
   return (
-    <section id="visa-services" style={wrapperStyle}>
+    <section id="visa-services" style={wrapperStyle} dir={isRTL ? "rtl" : "ltr"}>
       {services.map((item, i) => (
         <div
           key={i}
@@ -76,10 +72,10 @@ export default function VisaServicesSection() {
                 : "none",
             display: "flex",
             flexDirection: "column",
-            alignItems: isMobile ? "center" : "flex-start",
+            alignItems: isMobile ? "center" : (isRTL ? "flex-end" : "flex-start"),
             minWidth: 0,
             background: "#f6f6f6",
-            textAlign: isMobile ? "center" : "left",
+            textAlign: isMobile ? "center" : (isRTL ? "right" : "left"),
           }}
         >
           <div
@@ -131,16 +127,18 @@ export default function VisaServicesSection() {
           </div>
         </div>
       ))}
+
+      {/* Why block */}
       <div
         style={{
           padding: isMobile ? "2rem 6vw 2rem 6vw" : "2.5rem 2vw",
           background: "#f6f6f6",
           display: "flex",
           flexDirection: "column",
-          alignItems: isMobile ? "center" : "flex-start",
+          alignItems: isMobile ? "center" : (isRTL ? "flex-end" : "flex-start"),
           justifyContent: "flex-start",
           borderTop: isMobile ? "1px solid #eee" : "none",
-          textAlign: isMobile ? "center" : "left",
+          textAlign: isMobile ? "center" : (isRTL ? "right" : "left"),
         }}
       >
         <div
@@ -152,7 +150,7 @@ export default function VisaServicesSection() {
             color: "#00477f",
           }}
         >
-          Why Choose Helloviza?
+          {whyTitle}
         </div>
         <div
           style={{
@@ -168,9 +166,11 @@ export default function VisaServicesSection() {
           }}
         >
           <p style={{ margin: 0 }}>
-            Your trusted partner for global visas. Fast, reliable, and always by your side.
+            {whyLine1}
             <br />
-            <span style={{ color: "#aaa", fontSize: isMobile ? "0.85rem" : "1rem" }}>— Team Helloviza</span>
+            <span style={{ color: "#aaa", fontSize: isMobile ? "0.85rem" : "1rem" }}>
+              — {whySignoff}
+            </span>
           </p>
         </div>
       </div>

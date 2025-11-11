@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import allCountries from "../data/allCountries";
 
 /* ====== constants for handoff (no UI impact) ====== */
@@ -100,13 +101,6 @@ const EVISA = new Set([
   "Indonesia",
   "Qatar",
 ]);
-const PURPOSES = [
-  "Tourist Visa",
-  "Business Visa",
-  "Family Visa",
-  "Student Visa",
-  "Transit Visa",
-];
 
 function flagOf(name = "") {
   const m = {
@@ -162,7 +156,9 @@ function prettyIn(days = 5) {
   return d.toLocaleDateString(undefined, { day: "2-digit", month: "short" });
 }
 
-function useSuggestions(list, q, limit = 8) {
+/** i18n-aware suggestions */
+function useSuggestions(list, q, limit, labels) {
+  const { evisaChip, visaChip, subtitleFmt } = labels;
   return useMemo(() => {
     const query = norm(q);
     if (!query) return [];
@@ -189,10 +185,10 @@ function useSuggestions(list, q, limit = 8) {
     );
     return uniq.map((v) => ({
       value: v,
-      subtitle: `Get your visa by ${prettyIn(4 + Math.floor(Math.random() * 6))}`,
-      chip: EVISA.has(v) ? "E-VISA" : "VISA",
+      subtitle: subtitleFmt(prettyIn(4 + Math.floor(Math.random() * 6))),
+      chip: EVISA.has(v) ? evisaChip : visaChip,
     }));
-  }, [list, q, limit]);
+  }, [list, q, limit, evisaChip, visaChip, subtitleFmt]);
 }
 
 function Highlight({ text, query }) {
@@ -268,6 +264,10 @@ function CalendarPanel({
   minDate,
   selected,
   onPick,
+  i18nWeekShort,
+  i18nPrev,
+  i18nNext,
+  title
 }) {
   const startMonth = startOfDay(selected || minDate || today0());
   const [view, setView] = useState(new Date(startMonth));
@@ -280,13 +280,8 @@ function CalendarPanel({
   const daysInMonth = new Date(y, m + 1, 0).getDate();
 
   const days = [];
-  // leading blanks
   for (let i = 0; i < firstDow; i++) days.push(null);
-  // actual days
-  for (let d = 1; d <= daysInMonth; d++) {
-    days.push(new Date(y, m, d));
-  }
-  // trailing blanks to full rows
+  for (let d = 1; d <= daysInMonth; d++) days.push(new Date(y, m, d));
   while (days.length % 7) days.push(null);
 
   const isDisabled = (d) => !d || startOfDay(d) < startOfDay(minDate);
@@ -300,25 +295,25 @@ function CalendarPanel({
           type="button"
           style={S.calNav}
           onClick={() => setView(new Date(y, m - 1, 1))}
-          aria-label="Prev month"
+          aria-label={i18nPrev}
         >
           ←
         </button>
         <div style={S.calTitle}>
-          {view.toLocaleString(undefined, { month: "long", year: "numeric" })}
+          {title(view)}
         </div>
         <button
           type="button"
           style={S.calNav}
           onClick={() => setView(new Date(y, m + 1, 1))}
-          aria-label="Next month"
+          aria-label={i18nNext}
         >
           →
         </button>
       </div>
 
       <div style={S.calWeekHead}>
-        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((w) => (
+        {i18nWeekShort.map((w) => (
           <div key={w} style={S.calWeekCell}>
             {w}
           </div>
@@ -536,8 +531,9 @@ const S = {
 /* ---------- main component ---------- */
 export default function VisaSearchNeo({ onResults, user }) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation("common");
 
-  // global placeholder color (white)
+  // global placeholder color
   useEffect(() => {
     const id = "visa-placeholder-style";
     if (!document.getElementById(id)) {
@@ -550,7 +546,7 @@ export default function VisaSearchNeo({ onResults, user }) {
     }
   }, []);
 
-  // wizard state (unchanged around text steps)
+  // wizard state
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(true);
   useEffect(() => {
@@ -567,17 +563,12 @@ export default function VisaSearchNeo({ onResults, user }) {
   const [oText, setOText] = useState("");
   const [origin, setOrigin] = useState("");
   const oRef = useRef(null);
-  const oList = useSuggestions(allCountries, oText, 10);
   const [oActive, setOActive] = useState(0);
 
   const [dText, setDText] = useState("");
   const [destination, setDestination] = useState("");
   const dRef = useRef(null);
-  const dList = useSuggestions(allCountries, dText, 10);
   const [dActive, setDActive] = useState(0);
-
-  const oSuggest = oList.length ? oList : fallbackByFirstLetter(allCountries, oText);
-  const dSuggest = dList.length ? dList : fallbackByFirstLetter(allCountries, dText);
 
   const [start, setStart] = useState(""); // yyyy-mm-dd
   const [end, setEnd] = useState("");
@@ -590,11 +581,11 @@ export default function VisaSearchNeo({ onResults, user }) {
 
   // focus origin/destination inputs automatically
   useEffect(() => {
-    const t = setTimeout(() => {
+    const tmo = setTimeout(() => {
       if (step === 0) oRef.current?.focus();
       if (step === 1) dRef.current?.focus();
     }, 360);
-    return () => clearTimeout(t);
+    return () => clearTimeout(tmo);
   }, [step]);
 
   function pickOrigin(v) {
@@ -607,7 +598,7 @@ export default function VisaSearchNeo({ onResults, user }) {
     const c = normalizeCountry(v);
     setDestination(c);
     setDText(c);
-    setStep(2); // jump to start-date step immediately
+    setStep(2);
   }
 
   function canNext() {
@@ -668,25 +659,66 @@ export default function VisaSearchNeo({ onResults, user }) {
     }
   }
 
+  /* ===== i18n labels ===== */
   const labels = [
-    "Where are you starting from?",
-    "Your destination?",
-    "Visa start date",
-    "Visa end date",
-    "Purpose of visa",
+    t("searchNeo.labels.origin", { defaultValue: "Where are you starting from?" }),
+    t("searchNeo.labels.destination", { defaultValue: "Your destination?" }),
+    t("searchNeo.labels.startDate", { defaultValue: "Visa start date" }),
+    t("searchNeo.labels.endDate", { defaultValue: "Visa end date" }),
+    t("searchNeo.labels.purpose", { defaultValue: "Purpose of visa" }),
   ];
-  const placeholders = [labels[0], labels[1], "dd-mm-yyyy", "dd-mm-yyyy"];
+  const placeholders = [
+    labels[0],
+    labels[1],
+    t("searchNeo.placeholders.date", { defaultValue: "dd-mm-yyyy" }),
+    t("searchNeo.placeholders.date", { defaultValue: "dd-mm-yyyy" }),
+  ];
+
+  const weekdayShort = [
+    t("searchNeo.weekdays.mon", { defaultValue: "Mon" }),
+    t("searchNeo.weekdays.tue", { defaultValue: "Tue" }),
+    t("searchNeo.weekdays.wed", { defaultValue: "Wed" }),
+    t("searchNeo.weekdays.thu", { defaultValue: "Thu" }),
+    t("searchNeo.weekdays.fri", { defaultValue: "Fri" }),
+    t("searchNeo.weekdays.sat", { defaultValue: "Sat" }),
+    t("searchNeo.weekdays.sun", { defaultValue: "Sun" }),
+  ];
+  const prevMonthAria = t("searchNeo.aria.prevMonth", { defaultValue: "Prev month" });
+  const nextMonthAria = t("searchNeo.aria.nextMonth", { defaultValue: "Next month" });
+  const monthTitle = (view) =>
+    view.toLocaleString(undefined, {
+      month: "long",
+      year: "numeric",
+    });
+
+  const evisaChip = t("searchNeo.chips.evisa", { defaultValue: "E-VISA" });
+  const visaChip = t("searchNeo.chips.visa", { defaultValue: "VISA" });
+  const subtitleFmt = (date) =>
+    t("searchNeo.subtitleByDate", { date, defaultValue: `Get your visa by ${date}` });
+
+  const PURPOSES = [
+    { key: "tourist", label: t("searchNeo.purpose.tourist", { defaultValue: "Tourist" }) },
+    { key: "business", label: t("searchNeo.purpose.business", { defaultValue: "Business" }) },
+    { key: "family", label: t("searchNeo.purpose.family", { defaultValue: "Family" }) },
+    { key: "student", label: t("searchNeo.purpose.student", { defaultValue: "Student" }) },
+    { key: "transit", label: t("searchNeo.purpose.transit", { defaultValue: "Transit" }) },
+  ];
+
+  // Suggestions (i18n aware)
+  const oList = useSuggestions(allCountries, oText, 10, { evisaChip, visaChip, subtitleFmt });
+  const dList = useSuggestions(allCountries, dText, 10, { evisaChip, visaChip, subtitleFmt });
+
+  const oSuggest = oList.length ? oList : fallbackByFirstLetter(allCountries, oText, { evisaChip, visaChip, subtitleFmt });
+  const dSuggest = dList.length ? dList : fallbackByFirstLetter(allCountries, dText, { evisaChip, visaChip, subtitleFmt });
 
   // Calendar min constraints
-  const minStart = addDays(today0(), 1); // API requires > today
+  const minStart = addDays(today0(), 1);
   const selectedStart = start ? startOfDay(new Date(start)) : null;
   const minEnd = selectedStart ? addDays(selectedStart, 1) : addDays(today0(), 2);
   const selectedEnd = end ? startOfDay(new Date(end)) : null;
 
   return (
-    <div style={S.shell(visible)}>
-      {/*<div style={S.microLabel}>{labels[step]}</div>*/}
-
+    <div style={S.shell(visible)} dir={i18n.dir()}>
       {/* SLIM PILL */}
       <div style={S.pill} ref={pillRef}>
         <span style={S.flag}>
@@ -705,12 +737,10 @@ export default function VisaSearchNeo({ onResults, user }) {
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter")
-                pickOrigin((oSuggest[oActive]?.value) || oText);
+                pickOrigin(oSuggest[0]?.value || oText);
               if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setOActive((i) =>
-                  Math.min(i + 1, Math.max(0, oSuggest.length - 1))
-                );
+                setOActive((i) => Math.min(i + 1, Math.max(0, oSuggest.length - 1)));
               }
               if (e.key === "ArrowUp") {
                 e.preventDefault();
@@ -719,7 +749,7 @@ export default function VisaSearchNeo({ onResults, user }) {
             }}
             placeholder={placeholders[0]}
             style={S.input}
-            aria-label="Origin"
+            aria-label={t("searchNeo.aria.origin", { defaultValue: "Origin" })}
           />
         )}
 
@@ -734,12 +764,10 @@ export default function VisaSearchNeo({ onResults, user }) {
               setDActive(0);
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") pickDest((dSuggest[dActive]?.value) || dText);
+              if (e.key === "Enter") pickDest(dSuggest[0]?.value || dText);
               if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setDActive((i) =>
-                  Math.min(i + 1, Math.max(0, dSuggest.length - 1))
-                );
+                setDActive((i) => Math.min(i + 1, Math.max(0, dSuggest.length - 1)));
               }
               if (e.key === "ArrowUp") {
                 e.preventDefault();
@@ -748,20 +776,20 @@ export default function VisaSearchNeo({ onResults, user }) {
             }}
             placeholder={placeholders[1]}
             style={S.input}
-            aria-label="Destination"
+            aria-label={t("searchNeo.aria.destination", { defaultValue: "Destination" })}
           />
         )}
 
-        {/* Step 2: Start date (custom calendar; read-only display) */}
+        {/* Step 2: Start date */}
         {step === 2 && (
-          <div style={{ ...S.input, cursor: "pointer" }} aria-label="Visa start date">
+          <div style={{ ...S.input, cursor: "pointer" }} aria-label={t("searchNeo.aria.startDate", { defaultValue: "Visa start date" })}>
             {selectedStart ? nice(selectedStart) : placeholders[2]}
           </div>
         )}
 
         {/* Step 3: End date */}
         {step === 3 && (
-          <div style={{ ...S.input, cursor: "pointer" }} aria-label="Visa end date">
+          <div style={{ ...S.input, cursor: "pointer" }} aria-label={t("searchNeo.aria.endDate", { defaultValue: "Visa end date" })}>
             {selectedEnd ? nice(selectedEnd) : placeholders[3]}
           </div>
         )}
@@ -772,12 +800,12 @@ export default function VisaSearchNeo({ onResults, user }) {
             <div style={S.chipsWrap}>
               {PURPOSES.map((p) => (
                 <button
-                  key={p}
+                  key={p.key}
                   type="button"
-                  onClick={() => setPurpose(p)}
-                  style={S.chipBtn(purpose === p)}
+                  onClick={() => setPurpose(p.label)}
+                  style={S.chipBtn(purpose === p.label)}
                 >
-                  {p.replace(" Visa", "")}
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -787,7 +815,7 @@ export default function VisaSearchNeo({ onResults, user }) {
         {/* actions */}
         {step > 0 ? (
           <button className="ghost" style={S.btnGhost} onClick={() => setStep(step - 1)}>
-            ← Back
+            {i18n.dir() === "rtl" ? t("common.buttons.back", { defaultValue: "Back" }) + " →" : "← " + t("common.buttons.back", { defaultValue: "Back" })}
           </button>
         ) : (
           <span />
@@ -798,17 +826,17 @@ export default function VisaSearchNeo({ onResults, user }) {
             ref={nextBtnRef}
             style={S.btnPrimary}
             onClick={() => {
-              if (step === 0) pickOrigin((oSuggest[0]?.value) || oText);
-              else if (step === 1) pickDest((dSuggest[0]?.value) || dText);
+              if (step === 0) pickOrigin(oSuggest[0]?.value || oText);
+              else if (step === 1) pickDest(dSuggest[0]?.value || dText);
               else setStep(step + 1);
             }}
             disabled={!canNext()}
           >
-            Next →
+            {i18n.dir() === "rtl" ? t("common.buttons.next", { defaultValue: "Next" }) + " ←" : t("common.buttons.next", { defaultValue: "Next" }) + " →"}
           </button>
         ) : (
           <button style={S.btnPrimary} onClick={submit} disabled={!canNext()}>
-            🔎 Search
+            {t("common.buttons.search", { defaultValue: "Search" })}
           </button>
         )}
       </div>
@@ -880,15 +908,18 @@ export default function VisaSearchNeo({ onResults, user }) {
         <CalendarPanel
           minDate={minStart}
           selected={selectedStart || minStart}
+          i18nWeekShort={weekdayShort}
+          i18nPrev={prevMonthAria}
+          i18nNext={nextMonthAria}
+          title={monthTitle}
           onPick={(d) => {
             const iso = ymd(d);
             setStart(iso);
-            // ensure end respects min rule
             if (end) {
               const endD = startOfDay(new Date(end));
               if (endD <= d) setEnd(ymd(addDays(d, 1)));
             }
-            setStep(3); // auto-advance
+            setStep(3);
           }}
         />
       </FloatingPanel>
@@ -902,10 +933,14 @@ export default function VisaSearchNeo({ onResults, user }) {
         <CalendarPanel
           minDate={minEnd}
           selected={selectedEnd || minEnd}
+          i18nWeekShort={weekdayShort}
+          i18nPrev={prevMonthAria}
+          i18nNext={nextMonthAria}
+          title={monthTitle}
           onPick={(d) => {
             const iso = ymd(d);
             setEnd(iso);
-            setStep(4); // auto-advance
+            setStep(4);
           }}
         />
       </FloatingPanel>
@@ -913,7 +948,8 @@ export default function VisaSearchNeo({ onResults, user }) {
   );
 }
 
-function fallbackByFirstLetter(countries, text) {
+function fallbackByFirstLetter(countries, text, labels) {
+  const { evisaChip, visaChip, subtitleFmt } = labels;
   const ch = (text || "").trim().toLowerCase()[0];
   if (!ch) return [];
   return countries
@@ -921,7 +957,7 @@ function fallbackByFirstLetter(countries, text) {
     .slice(0, 8)
     .map((v) => ({
       value: v,
-      subtitle: `Get your visa by ${prettyIn(6)}`,
-      chip: EVISA.has(v) ? "E-VISA" : "VISA",
+      subtitle: subtitleFmt(prettyIn(6)),
+      chip: EVISA.has(v) ? evisaChip : visaChip,
     }));
 }
