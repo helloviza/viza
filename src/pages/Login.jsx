@@ -454,70 +454,55 @@ export default function Login({ onLogin }) {
   }, [navigate, resolveTarget]);
 
   /* =================== Email OTP (Signup) =================== */
-  async function sendOtp() {
-    if (!form.email) {
-      return setError(t("login.errors.enterEmail", "Enter your email"));
-    }
-    setLoading(true);
-    try {
-      const r = await fetch(`${API_BASE}/api/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: form.email }),
-      });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        throw new Error(
-          d.error || t("login.errors.sendOtpFailed", "Failed to send OTP")
-        );
-      }
-      setOtpSent(true);
-    } catch (err) {
-      setError(
-        err.message ||
-          t("login.errors.sendOtpFailed", "Failed to send OTP")
-      );
-    } finally {
-      setLoading(false);
-    }
+async function sendOtp() {
+  if (!form.email) {
+    return setError(t("login.errors.enterEmail", "Enter your email"));
   }
+  setLoading(true);
+  try {
+    const r = await fetch(`${API_BASE}/api/otp/send-otp`, {  // <-- /api/otp/send-otp
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: form.email }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      throw new Error(d.error || t("login.errors.sendOtpFailed", "Failed to send OTP"));
+    }
+    setOtpSent(true);
+    setError("");
+  } catch (err) {
+    setError(err.message || t("login.errors.sendOtpFailed", "Failed to send OTP"));
+  } finally {
+    setLoading(false);
+  }
+}
 
-  async function verifyOtp() {
-    if (!otp) {
-      return setError(t("login.errors.enterOtp", "Enter OTP"));
-    }
-    setLoading(true);
-    try {
-      const r = await fetch(`${API_BASE}/api/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: form.email, otp }),
-      });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        throw new Error(
-          d.error ||
-            t(
-              "login.errors.otpVerificationFailed",
-              "OTP verification failed"
-            )
-        );
-      }
-      setOtpVerified(true);
-    } catch (err) {
-      setError(
-        err.message ||
-          t(
-            "login.errors.otpVerificationFailed",
-            "OTP verification failed"
-          )
-      );
-    } finally {
-      setLoading(false);
-    }
+async function verifyOtp() {
+  if (!otp) {
+    return setError(t("login.errors.enterOtp", "Enter OTP"));
   }
+  setLoading(true);
+  try {
+    const r = await fetch(`${API_BASE}/api/otp/verify-otp`, {  // <-- /api/otp/verify-otp
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: form.email, otp }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      throw new Error(d.error || t("login.errors.otpVerificationFailed", "OTP verification failed"));
+    }
+    setOtpVerified(true);
+    setError("");
+  } catch (err) {
+    setError(err.message || t("login.errors.otpVerificationFailed", "OTP verification failed"));
+  } finally {
+    setLoading(false);
+  }
+}
 
   /* =================== Email Login / Signup =================== */
   async function handleSubmit(e) {
