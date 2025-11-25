@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
+const SECTION_BG = "rgba(246,246,246,.30)";
 
 function useMobile() {
   if (typeof window === "undefined") return false;
@@ -29,12 +30,12 @@ export default function VisaServicesSection() {
   const whyLine1   = t("services.why.line1");
   const whySignoff = t("services.why.signoff");
 
-  // --- Responsive style (unchanged essence)
+  // --- Responsive style
   const wrapperStyle = isMobile
     ? {
         display: "flex",
         flexDirection: "column",
-        background: "#f6f6f6",
+        background: SECTION_BG,
         borderTop: "1px solid #ddd",
         borderBottom: "1px solid #ddd",
         padding: "0 0 0 0",
@@ -46,7 +47,7 @@ export default function VisaServicesSection() {
         display: "grid",
         gridTemplateColumns: "repeat(4, 1fr) 1.1fr",
         gap: "0px",
-        background: "#f6f6f6",
+        background: SECTION_BG,
         borderTop: "1px solid #ddd",
         borderBottom: "1px solid #ddd",
         padding: "0 0 0 0",
@@ -74,7 +75,7 @@ export default function VisaServicesSection() {
             flexDirection: "column",
             alignItems: isMobile ? "center" : (isRTL ? "flex-end" : "flex-start"),
             minWidth: 0,
-            background: "#f6f6f6",
+            background: SECTION_BG,
             textAlign: isMobile ? "center" : (isRTL ? "right" : "left"),
           }}
         >
@@ -132,7 +133,7 @@ export default function VisaServicesSection() {
       <div
         style={{
           padding: isMobile ? "2rem 6vw 2rem 6vw" : "2.5rem 2vw",
-          background: "#f6f6f6",
+          background: SECTION_BG,
           display: "flex",
           flexDirection: "column",
           alignItems: isMobile ? "center" : (isRTL ? "flex-end" : "flex-start"),

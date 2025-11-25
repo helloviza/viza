@@ -8,26 +8,40 @@ import { getCookie } from "../utils/geo";
 import { normalizeLang, applyHtmlLangDir, pushDL } from "../utils/lang";
 
 /* =====================================
-   Small inline SVG icons
+   Small inline SVG icons (premium look)
 ===================================== */
 const IconWrap = ({ children }) => <span className="menuItem">{children}</span>;
 
-const GlobeIcon = ({ size = 18 }) => (
+/** Luxurious world-mark:
+ *  - No outer circle/badge
+ *  - Balanced meridians/parallels
+ *  - Tiny “continent” strokes for character
+ *  - Rounded caps/joins for a refined feel
+ */
+const LuxWorldIcon = ({ size = 18, color = "currentColor", stroke = 2 }) => (
   <svg
     width={size}
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
+    stroke={color}
+    strokeWidth={stroke}
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
   >
-    <circle cx="12" cy="12" r="9" />
-    <path d="M3 12h18" />
-    <path d="M12 3a12 12 0 0 1 0 18" />
-    <path d="M12 3a12 12 0 0 0 0 18" />
+    {/* open-hemisphere silhouette */}
+    <path d="M4 12c1.8-4.7 6-8 8.9-8 4.7 0 9.1 4.4 9.1 9.1 0 4.5-3.4 8-7.4 8.9" />
+    {/* meridians */}
+    <path d="M12 4.2c-2.6 3.3-2.6 12.3 0 15.6" />
+    <path d="M12 4.2c2.6 3.3 2.6 12.3 0 15.6" />
+    {/* parallels */}
+    <path d="M5.2 9.4c2 .8 4.6 1.2 6.8 1.2s4.8-.4 6.8-1.2" />
+    <path d="M5.8 15.2c1.9-.7 4.3-1 6.2-1s4.3.3 6.2 1" />
+    {/* subtle continents touches */}
+    <path d="M8.6 8.6l1 .6 1-.4" />
+    <path d="M15.4 8.4l.8.6" />
+    <path d="M13.6 16.2l-1 .6" />
   </svg>
 );
 
@@ -128,7 +142,6 @@ const LANG_OPTIONS = [
   { code: "ar", label: "العربية", subtitle: "Arabic" },
 ];
 
-// Trim/extend as needed. First is the generic fallback.
 const REGION_OPTIONS = [
   { code: "ZZ", name: "Unknown / Global" },
   { code: "AE", name: "United Arab Emirates" },
@@ -319,7 +332,7 @@ export default function Header({ onFlightClick, user, onLogout }) {
             {/* Desktop Navigation */}
             <nav className="desktop-nav" style={styles.nav}>
               <button style={{ ...NAV_ITEM, color: linkColor }} onClick={handleVisaServicesClick} aria-label={t("nav.visaServices")}>
-                <IconWrap><GlobeIcon size={20} /></IconWrap>
+                <IconWrap><LuxWorldIcon size={20} color="currentColor" stroke={2} /></IconWrap>
                 <span style={NAV_LABEL}>{t("nav.visaServices")}</span>
               </button>
 
@@ -338,19 +351,15 @@ export default function Header({ onFlightClick, user, onLogout }) {
                 <span style={NAV_LABEL}>{t("nav.supportContact")}</span>
               </Link>
 
-              {/* Tiny Globe button → opens modal */}
+              {/* Language/Region trigger — icon only (no circle/bg/border) */}
               <button
                 type="button"
                 onClick={openLangModal}
                 aria-label={t("nav.languageRegion")}
-                style={{
-                  ...styles.globeBtn,
-                  color: "#1b5b84",
-                  borderColor: "#d06549",
-                }}
+                style={styles.globeLinkBtn}
                 title={t("nav.languageRegion")}
               >
-                <GlobeIcon size={16} />
+                <LuxWorldIcon size={18} color="#1b5b84" stroke={2} />
               </button>
 
               {/* User Menu */}
@@ -416,7 +425,7 @@ export default function Header({ onFlightClick, user, onLogout }) {
             <button className="close-btn" onClick={() => setShowMobileNav(false)} aria-label="Close menu">×</button>
 
             <button onClick={handleVisaServicesClick} className="mobile-link-btn">
-              <IconWrap><GlobeIcon size={20} /></IconWrap> {t("nav.visaServices")}
+              <IconWrap><LuxWorldIcon size={20} /></IconWrap> {t("nav.visaServices")}
             </button>
             <button onClick={handleGoForVisaClick} className="mobile-link-btn">
               <IconWrap><PassportIcon /></IconWrap> {t("nav.goForVisa")}
@@ -430,7 +439,7 @@ export default function Header({ onFlightClick, user, onLogout }) {
 
             {/* Mobile entry to open modal */}
             <button className="mobile-link-btn" onClick={openLangModal}>
-              <IconWrap><GlobeIcon size={18} /></IconWrap> {t("nav.languageRegion")}
+              <IconWrap><LuxWorldIcon size={18} /></IconWrap> {t("nav.languageRegion")}
             </button>
           </div>
         </div>
@@ -547,9 +556,6 @@ export default function Header({ onFlightClick, user, onLogout }) {
         }
         .logout-btn{color:#d06549;}
         @keyframes slideInRight{from{transform:translateX(80%);}to{transform:translateX(0);}}
-
-        /* Tiny globe button */
-        .globe-btn-reset{all:unset}
       `}</style>
 
       {/* Modal styles */}
@@ -568,9 +574,7 @@ export default function Header({ onFlightClick, user, onLogout }) {
         .lr-close{background:none;border:none;font-size:28px;cursor:pointer;color:#4b4b4b;line-height:1}
         .lr-section{margin-top:16px}
         .lr-label{color:#1b5b84;font-weight:600;font-size:16px;margin:6px 0 10px}
-        .lr-suggest-grid{
-          display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;
-        }
+        .lr-suggest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
         .lr-chip{
           background:#fff;border:1px solid #d06549;color:#1b5b84;border-radius:12px;
           padding:10px 12px;text-align:left;cursor:pointer;
@@ -580,28 +584,16 @@ export default function Header({ onFlightClick, user, onLogout }) {
         .lr-chip.active{background:#f7fbff; box-shadow:0 8px 18px rgba(0,0,0,.06);}
         .lr-chip-main{font-size:16px;line-height:1.2}
         .lr-chip-sub{font-size:12px;opacity:.8;margin-top:2px}
-
         .lr-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
         @media(max-width:640px){ .lr-form{grid-template-columns:1fr;} }
-
-        /* Labels normal (400) as requested */
         .lr-field-label{color:#1b5b84;font-weight:400;margin-bottom:6px}
-
         .lr-select{
           width:100%;font-size:15px;border:1px solid #d06549;border-radius:12px;
           padding:10px 12px;color:#1b5b84;font-weight:400;background:#fff;
-          appearance:none; background-image: linear-gradient(45deg, transparent 50%, #d06549 50%),
-                           linear-gradient(135deg, #d06549 50%, transparent 50%),
-                           linear-gradient(to right, transparent, transparent);
-          background-position: calc(100% - 22px) calc(1em + 2px), calc(100% - 16px) calc(1em + 2px), 100% 0;
-          background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
-          background-repeat: no-repeat;
+          appearance:none;
         }
         .lr-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
-        .lr-btn{
-          border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer;border:1px solid transparent;
-          font-weight:600
-        }
+        .lr-btn{border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer;border:1px solid transparent;font-weight:600}
         .lr-btn.primary{background:#00477f;color:#fff;border-color:#00477f}
         .lr-btn.ghost{background:#fff;color:#00477f;border-color:#00477f}
       `}</style>
@@ -625,18 +617,18 @@ const styles = {
   logo: { height: 56, objectFit: "contain" },
   nav: { display: "flex", gap: "1.1rem", alignItems: "center" },
 
-  /* tiny circular globe trigger */
-  globeBtn: {
+  // icon-only button for language/region (no circle, no border)
+  globeLinkBtn: {
+    background: "transparent",
+    border: "none",
+    padding: 0,
+    margin: 0,
+    lineHeight: 1,
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    width: 32,
-    height: 32,
-    borderRadius: "50%",
-    border: "1px solid",
-    background: "#f2f4f7",
-    fontWeight: 400,
     cursor: "pointer",
+    color: "#1b5b84",
   },
 
   dropdownMenu: {

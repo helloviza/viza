@@ -7,8 +7,8 @@ import VisaSearchNeo from "../components/VisaSearchNeo";
 
 function ResultsList({ items = [] }) {
   const { t } = useTranslation();
-
   if (!items || items.length === 0) return null;
+
   return (
     <section style={{ maxWidth: 1120, margin: "24px auto", padding: "0 24px" }}>
       <h3
@@ -32,88 +32,85 @@ function ResultsList({ items = [] }) {
               v.type || v.visaType || t("home.results.fallbackVisa")
             }`;
 
-        return (
-          <div
-            key={v.id || `${v.country || v.route}-${idx}`}
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
-              borderRadius: 12,
-              padding: 16,
-              boxShadow: "0 6px 16px rgba(0,0,0,.06)",
-            }}
-          >
+          return (
             <div
+              key={v.id || `${v.country || v.route}-${idx}`}
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-                alignItems: "center",
-                flexWrap: "wrap",
+                background: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: 12,
+                padding: 16,
+                boxShadow: "0 6px 16px rgba(0,0,0,.06)",
               }}
             >
               <div
                 style={{
-                  fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "1.15rem",
-                  color: "#0f172a",
-                  textAlign: "start",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  alignItems: "center",
+                  flexWrap: "wrap",
                 }}
               >
-                {title}
+                <div
+                  style={{
+                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
+                    fontWeight: 800,
+                    fontSize: "1.15rem",
+                    color: "#0f172a",
+                    textAlign: "start",
+                  }}
+                >
+                  {title}
+                </div>
+
+                <div
+                  style={{
+                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
+                    fontWeight: 800,
+                    fontSize: "1.05rem",
+                    color: "#00477f",
+                    textAlign: "end",
+                  }}
+                >
+                  {(v.currency === "INR" || !v.currency ? "₹" : v.currency) + " "}
+                  {v.fees || (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") || "—"}
+                </div>
               </div>
 
               <div
                 style={{
-                  fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "1.05rem",
-                  color: "#00477f",
-                  textAlign: "end",
-                }}
-              >
-                {(v.currency === "INR" || !v.currency ? "₹" : v.currency) + " "}
-                {v.fees || (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") || "—"}
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 16,
-                flexWrap: "wrap",
-                marginTop: 8,
-                color: "#475569",
-                fontFamily: "'Barlow Condensed', Arial, sans-serif",
-              }}
-            >
-              {v.processing_time && (
-                <span>{t("home.results.processing")} {v.processing_time}</span>
-              )}
-              {v.processing && !v.processing_time && (
-                <span>{t("home.results.processing")} {v.processing}</span>
-              )}
-              {v.validity && <span>{t("home.results.validity")} {v.validity}</span>}
-              {v.stay && <span>{t("home.results.stay")} {v.stay}</span>}
-              {v.type && !v.visaType && <span>{t("home.results.type")} {v.type}</span>}
-              {v.visaType && <span>{t("home.results.type")} {v.visaType}</span>}
-            </div>
-
-            {Array.isArray(v.requirements) && v.requirements.length > 0 && (
-              <div
-                style={{
+                  display: "flex",
+                  gap: 16,
+                  flexWrap: "wrap",
                   marginTop: 8,
-                  color: "#64748b",
+                  color: "#475569",
                   fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                  textAlign: "start",
                 }}
               >
-                {t("home.results.requirements")} {v.requirements.join(", ")}
+                {v.processing_time && <span>{t("home.results.processing")} {v.processing_time}</span>}
+                {v.processing && !v.processing_time && <span>{t("home.results.processing")} {v.processing}</span>}
+                {v.validity && <span>{t("home.results.validity")} {v.validity}</span>}
+                {v.stay && <span>{t("home.results.stay")} {v.stay}</span>}
+                {v.type && !v.visaType && <span>{t("home.results.type")} {v.type}</span>}
+                {v.visaType && <span>{t("home.results.type")} {v.visaType}</span>}
               </div>
-            )}
-          </div>
-        );})}
+
+              {Array.isArray(v.requirements) && v.requirements.length > 0 && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    color: "#64748b",
+                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
+                    textAlign: "start",
+                  }}
+                >
+                  {t("home.results.requirements")} {v.requirements.join(", ")}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -143,49 +140,50 @@ const Home = () => {
   }, []);
 
   return (
-    <>
-      <div className="hero-wrapper" id="hero">
-        {/* Background layer */}
-        <div
-          ref={bgRef}
-          className="hero-bg"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100vh",
-            zIndex: -1,
-            transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
-            opacity: showBg ? 1 : 0,
-            pointerEvents: "none",
-            willChange: "opacity",
-          }}
-        />
+    <main id="home-main">
+      {/* Background layer */}
+      <div
+        ref={bgRef}
+        className="hero-bg"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100vh",
+          zIndex: -1,
+          transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
+          opacity: showBg ? 1 : 0,
+          pointerEvents: "none",
+          willChange: "opacity",
+        }}
+      />
 
-        {/* Foreground content */}
+      {/* Foreground content */}
+      <section className="hero-wrapper" id="hero">
         <div className="hero-content">
           <div className="text-block" style={{ textAlign: "start" }}>
             <h1 style={{ lineHeight: 1.05 }}>
-              {/* Split lines so Arabic reflows naturally with dir=rtl */}
               <span>{t("home.hero.titleLine1")}</span>
               <br />
               <span>{t("home.hero.titleLine2")}</span>
             </h1>
-
-            <p style={{ marginTop: 10 }}>
-              {t("home.hero.subtitle")}
-            </p>
+            <p style={{ marginTop: 10 }}>{t("home.hero.subtitle")}</p>
           </div>
 
           <div style={{ width: "100%", marginTop: 16 }}>
             <VisaSearchNeo onResults={setResults} />
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Spacer clamp: removes any big gap between hero and the next section */}
+      <div style={{ height: "clamp(0px, 1vh, 8px)" }} />
 
       <ResultsList items={results} />
-    </>
+
+      {/* NOTE: Footer is rendered ONCE globally (e.g., in App/Layout alongside <Routes />). */}
+    </main>
   );
 };
 

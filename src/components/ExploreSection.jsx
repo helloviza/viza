@@ -12,7 +12,7 @@ const ExploreSection = () => {
     <section
       style={{
         width: "100vw",
-        background: "#f6f6f6",
+        background: "rgba(248, 232, 238, 0.60)",
         fontFamily: baseFont,
         display: "flex",
         flexWrap: "wrap",
