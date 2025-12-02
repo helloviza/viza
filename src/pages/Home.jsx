@@ -4,7 +4,11 @@ import { useTranslation } from "react-i18next";
 import "../styles/Home.css";
 import bgImg from "../assets/hero-bg.jpg"; // fallback static bg
 import VisaSearchNeo from "../components/VisaSearchNeo";
+import AnnouncementBar from "../components/AnnouncementBar";
 
+/* =========================
+   Results block (simple list)
+========================= */
 function ResultsList({ items = [] }) {
   const { t } = useTranslation();
   if (!items || items.length === 0) return null;
@@ -88,8 +92,12 @@ function ResultsList({ items = [] }) {
                   fontFamily: "'Barlow Condensed', Arial, sans-serif",
                 }}
               >
-                {v.processing_time && <span>{t("home.results.processing")} {v.processing_time}</span>}
-                {v.processing && !v.processing_time && <span>{t("home.results.processing")} {v.processing}</span>}
+                {v.processing_time && (
+                  <span>{t("home.results.processing")} {v.processing_time}</span>
+                )}
+                {v.processing && !v.processing_time && (
+                  <span>{t("home.results.processing")} {v.processing}</span>
+                )}
                 {v.validity && <span>{t("home.results.validity")} {v.validity}</span>}
                 {v.stay && <span>{t("home.results.stay")} {v.stay}</span>}
                 {v.type && !v.visaType && <span>{t("home.results.type")} {v.type}</span>}
@@ -116,12 +124,16 @@ function ResultsList({ items = [] }) {
   );
 }
 
+/* =========================
+   Home page
+========================= */
 const Home = () => {
   const { t } = useTranslation();
   const [showBg, setShowBg] = useState(true);
   const [results, setResults] = useState([]);
   const bgRef = useRef(null);
 
+  // toggle hero bg fade based on scroll
   useEffect(() => {
     const sectionHeight = typeof window !== "undefined" ? window.innerHeight : 700;
     const onScroll = () => setShowBg(window.scrollY < sectionHeight * 2 - 40);
@@ -129,7 +141,7 @@ const Home = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Static background image (no animation)
+  // static background image
   useEffect(() => {
     const el = bgRef.current;
     if (!el) return;
@@ -140,50 +152,55 @@ const Home = () => {
   }, []);
 
   return (
-    <main id="home-main">
-      {/* Background layer */}
-      <div
-        ref={bgRef}
-        className="hero-bg"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100vh",
-          zIndex: -1,
-          transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
-          opacity: showBg ? 1 : 0,
-          pointerEvents: "none",
-          willChange: "opacity",
-        }}
-      />
+    <>
+      {/* Global announcement – appears once at the very top */}
+      <AnnouncementBar />
 
-      {/* Foreground content */}
-      <section className="hero-wrapper" id="hero">
-        <div className="hero-content">
-          <div className="text-block" style={{ textAlign: "start" }}>
-            <h1 style={{ lineHeight: 1.05 }}>
-              <span>{t("home.hero.titleLine1")}</span>
-              <br />
-              <span>{t("home.hero.titleLine2")}</span>
-            </h1>
-            <p style={{ marginTop: 10 }}>{t("home.hero.subtitle")}</p>
+      <main id="home-main">
+        {/* Background layer (fixed) */}
+        <div
+          ref={bgRef}
+          className="hero-bg"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100vh",
+            zIndex: -1,
+            transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
+            opacity: showBg ? 1 : 0,
+            pointerEvents: "none",
+            willChange: "opacity",
+          }}
+        />
+
+        {/* Foreground hero */}
+        <section className="hero-wrapper" id="hero">
+          <div className="hero-content">
+            <div className="text-block" style={{ textAlign: "start" }}>
+              <h1 style={{ lineHeight: 1.05 }}>
+                <span>{t("home.hero.titleLine1")}</span>
+                <br />
+                <span>{t("home.hero.titleLine2")}</span>
+              </h1>
+              <p style={{ marginTop: 10 }}>{t("home.hero.subtitle")}</p>
+            </div>
+
+            <div style={{ width: "100%", marginTop: 16 }}>
+              <VisaSearchNeo onResults={setResults} />
+            </div>
           </div>
+        </section>
 
-          <div style={{ width: "100%", marginTop: 16 }}>
-            <VisaSearchNeo onResults={setResults} />
-          </div>
-        </div>
-      </section>
+        {/* Tight spacer to avoid visible gap between hero and next section */}
+        <div style={{ height: "clamp(0px, 1vh, 8px)" }} />
 
-      {/* Spacer clamp: removes any big gap between hero and the next section */}
-      <div style={{ height: "clamp(0px, 1vh, 8px)" }} />
+        <ResultsList items={results} />
 
-      <ResultsList items={results} />
-
-      {/* NOTE: Footer is rendered ONCE globally (e.g., in App/Layout alongside <Routes />). */}
-    </main>
+        {/* Footer is rendered globally in your layout/App – not here */}
+      </main>
+    </>
   );
 };
 

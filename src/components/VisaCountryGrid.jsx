@@ -1,121 +1,227 @@
-import React from "react";
+// helloviza/client/src/components/VisaCountryGrid.jsx
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { api, API_BASE } from "../utils/api";
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
-/**
- * NOTE:
- *  - `key`: i18n key under "countries.<key>"
- *  - `defaultName`: stable English name used for URLs/back-end
- *  - `img`: path as before
- *  - price label is translated via t('visaCountryGrid.applyToSeePrice', { defaultValue: '₹ Apply to see price' })
- */
-const countries = [
-  { img: "/images/uae.jpg", key: "UAE", defaultName: "UAE" },
-  { img: "/images/thailand.jpg", key: "Thailand", defaultName: "Thailand" },
-  { img: "/images/malaysia.jpg", key: "Malaysia", defaultName: "Malaysia" },
-  { img: "/images/singapore.jpg", key: "Singapore", defaultName: "Singapore" },
-  { img: "/images/argentina.jpg", key: "Argentina", defaultName: "Argentina" },
-  { img: "/images/armenia.jpg", key: "Armenia", defaultName: "Armenia" },
-  { img: "/images/azerbaijan.jpg", key: "Azerbaijan", defaultName: "Azerbaijan" },
-  { img: "/images/bahrain.jpg", key: "Bahrain", defaultName: "Bahrain" },
-  { img: "/images/benin.jpg", key: "Benin", defaultName: "Benin" },
-  { img: "/images/colombia.jpg", key: "Colombia", defaultName: "Colombia" },
-  { img: "/images/cote_divoire.jpg", key: "CoteDIvoire", defaultName: "Cote D' Ivoire" },
-  { img: "/images/djibouti.jpg", key: "Djibouti", defaultName: "Djibouti" },
-  { img: "/images/georgia.jpg", key: "Georgia", defaultName: "Georgia" },
-  { img: "/images/kazakhstan.jpg", key: "Kazakhstan", defaultName: "Kazakhstan" },
-  { img: "/images/kyrgyzstan.jpg", key: "KyrgyzstanRepublic", defaultName: "Kyrgyzstan Republic" },
-  { img: "/images/lesotho.jpg", key: "Lesotho", defaultName: "Lesotho" },
-  { img: "/images/moldova.jpg", key: "Moldova", defaultName: "Moldova" },
-  { img: "/images/new_zealand.jpg", key: "NewZealand", defaultName: "New Zealand" },
-  { img: "/images/oman.jpg", key: "Oman", defaultName: "Oman" },
-  { img: "/images/papua_new_guinea.jpg", key: "PapuaNewGuinea", defaultName: "Papua New Guinea" },
-  { img: "/images/russia.jpg", key: "RussianFederation", defaultName: "Russian Federation" },
-  { img: "/images/south_korea.jpg", key: "SouthKorea", defaultName: "South Korea" },
-  { img: "/images/taiwan.jpg", key: "Taiwan", defaultName: "Taiwan" },
-  { img: "/images/turkey.jpg", key: "Turkey", defaultName: "Turkey" },
-  { img: "/images/uganda.jpg", key: "Uganda", defaultName: "Uganda" },
-  { img: "/images/uzbekistan.jpg", key: "Uzbekistan", defaultName: "Uzbekistan" },
-  { img: "/images/zambia.jpg", key: "Zambia", defaultName: "Zambia" },
-  { img: "/images/barbados.jpg", key: "Barbados", defaultName: "Barbados" },
-  { img: "/images/bhutan.jpg", key: "Bhutan", defaultName: "Bhutan" },
-  { img: "/images/dominica.jpg", key: "Dominica", defaultName: "Dominica" },
-  { img: "/images/grenada.jpg", key: "Grenada", defaultName: "Grenada" },
-  { img: "/images/haiti.jpg", key: "Haiti", defaultName: "Haiti" },
-  { img: "/images/hong_kong.jpg", key: "HongKong", defaultName: "Hong Kong" },
-  { img: "/images/maldives.jpg", key: "Maldives", defaultName: "Maldives" },
-  { img: "/images/mauritius.jpg", key: "Mauritius", defaultName: "Mauritius" },
-  { img: "/images/montserrat.jpg", key: "Montserrat", defaultName: "Montserrat" },
-  { img: "/images/nepal.jpg", key: "Nepal", defaultName: "Nepal" },
-  { img: "/images/niue.jpg", key: "NiueIsland", defaultName: "Niue Island" },
-  { img: "/images/saint_vincent.jpg", key: "SaintVincentGrenadines", defaultName: "Saint Vincent & the Grenadines" },
-  { img: "/images/samoa.jpg", key: "Samoa", defaultName: "Samoa" },
-  { img: "/images/senegal.jpg", key: "Senegal", defaultName: "Senegal" },
-  { img: "/images/serbia.jpg", key: "Serbia", defaultName: "Serbia" },
-  { img: "/images/trinidad_tobago.jpg", key: "TrinidadTobago", defaultName: "Trinidad & Tobago" },
-  { img: "/images/angola.jpg", key: "Angola", defaultName: "Angola" },
-  { img: "/images/bolivia.jpg", key: "Bolivia", defaultName: "Bolivia" },
-  { img: "/images/cabo_verde.jpg", key: "CaboVerde", defaultName: "Cabo Verde" },
-  { img: "/images/cameroon.jpg", key: "CameroonUnionRepublic", defaultName: "Cameroon Union Republic" },
-  { img: "/images/cook_islands.jpg", key: "CookIslands", defaultName: "Cook Islands" },
-  { img: "/images/fiji.jpg", key: "Fiji", defaultName: "Fiji" },
-  { img: "/images/guinea_bissau.jpg", key: "GuineaBissau", defaultName: "Guinea Bissau" },
-  { img: "/images/indonesia.jpg", key: "Indonesia", defaultName: "Indonesia" },
-  { img: "/images/iran.jpg", key: "Iran", defaultName: "Iran" },
-  { img: "/images/jamaica.jpg", key: "Jamaica", defaultName: "Jamaica" },
-  { img: "/images/jordan.jpg", key: "Jordan", defaultName: "Jordan" },
-  { img: "/images/kiribati.jpg", key: "Kiribati", defaultName: "Kiribati" },
-  { img: "/images/laos.jpg", key: "Laos", defaultName: "Laos" },
-  { img: "/images/madagascar.jpg", key: "Madagascar", defaultName: "Madagascar" },
-  { img: "/images/mauritania.jpg", key: "Mauritania", defaultName: "Mauritania" },
-  { img: "/images/nigeria.jpg", key: "Nigeria", defaultName: "Nigeria" },
-  { img: "/images/qatar.jpg", key: "Qatar", defaultName: "Qatar" },
-  { img: "/images/marshall_islands.jpg", key: "RepublicOfMarshallIslands", defaultName: "Republic of Marshall Islands" },
-  { img: "/images/reunion_island.jpg", key: "ReunionIsland", defaultName: "Reunion Island" },
-  { img: "/images/rwanda.jpg", key: "Rwanda", defaultName: "Rwanda" },
-  { img: "/images/seychelles.jpg", key: "Seychelles", defaultName: "Seychelles" },
-  { img: "/images/somalia.jpg", key: "Somalia", defaultName: "Somalia" },
-  { img: "/images/tunisia.jpg", key: "Tunisia", defaultName: "Tunisia" },
-  { img: "/images/tuvalu.jpg", key: "Tuvalu", defaultName: "Tuvalu" },
-  { img: "/images/vanuatu.jpg", key: "Vanuatu", defaultName: "Vanuatu" },
-  { img: "/images/zimbabwe.jpg", key: "Zimbabwe", defaultName: "Zimbabwe" },
-  { img: "/images/kenya.jpg", key: "Kenya", defaultName: "Kenya" },
-  { img: "/images/myanmar.jpg", key: "Myanmar", defaultName: "Myanmar" },
-  { img: "/images/saint_lucia.jpg", key: "SaintLucia", defaultName: "Saint Lucia" },
-  { img: "/images/sri_lanka.jpg", key: "SriLanka", defaultName: "Sri Lanka" },
-  { img: "/images/suriname.jpg", key: "Suriname", defaultName: "Suriname" },
-  { img: "/images/tajikistan.jpg", key: "Tajikistan", defaultName: "Tajikistan" },
-  { img: "/images/tanzania.jpg", key: "Tanzania", defaultName: "Tanzania" },
-  { img: "/images/vietnam.jpg", key: "Vietnam", defaultName: "Vietnam" },
-  { img: "/images/ethiopia.jpg", key: "Ethiopia", defaultName: "Ethiopia" },
-  { img: "/images/cambodia.jpg", key: "Cambodia", defaultName: "Cambodia" },
-];
+function readActive(row) {
+  if (typeof row?.isActive === "boolean") return row.isActive;
+  if (typeof row?.active === "boolean") return row.active; // legacy
+  return true;
+}
 
-const CountryCard = React.memo(function CountryCard({ img, label, price, onApply, applyText }) {
+/**
+ * fee can be null/blank.
+ * Number(null) => 0 (BUG) so return null for empty.
+ */
+function readFee(row) {
+  const v = row?.fee ?? row?.price; // fee(new) | price(legacy)
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function readCurrency(row) {
+  return String(row?.currency || "INR").trim().toUpperCase() || "INR";
+}
+
+function fmtPrice(currency = "INR", fee = 0) {
+  if (!Number.isFinite(Number(fee))) return null;
+  const n = Number(fee);
+  try {
+    return `${currency} ${n.toLocaleString()}`;
+  } catch {
+    return `${currency} ${n}`;
+  }
+}
+
+function isExternalUrl(u = "") {
+  return /^https?:\/\//i.test(String(u || "").trim());
+}
+
+function normalizeInternalPath(p = "") {
+  const s = String(p || "").trim();
+  if (!s) return "";
+  if (isExternalUrl(s)) return s;
+  if (s.startsWith("/")) return s;
+  return `/${s}`;
+}
+
+function resolveImageUrl(rawUrl) {
+  const u0 = String(rawUrl || "").trim();
+  if (!u0) return "";
+
+  if (/^https?:\/\//i.test(u0)) return u0;
+
+  const u = u0.startsWith("uploads/") ? `/${u0}` : u0;
+
+  if (u.startsWith("/uploads/")) {
+    return `${String(API_BASE || "").replace(/\/+$/, "")}${u}`;
+  }
+
+  return u;
+}
+
+/** Card */
+const CountryCard = React.memo(function CountryCard({
+  imageUrl,
+  label,
+  priceLabel,
+  badgeText,
+  onApply,
+  applyText,
+}) {
+  const [imgErr, setImgErr] = useState(false);
+  const finalImg = resolveImageUrl(imageUrl);
+
   return (
     <div style={styles.card}>
-      <img src={img} alt={label} style={styles.img} loading="lazy" />
-      <div style={styles.cardContent}>
+      <div style={styles.media}>
+        {finalImg && !imgErr ? (
+          <img
+            src={finalImg}
+            alt={label}
+            loading="lazy"
+            style={styles.img}
+            onError={() => setImgErr(true)}
+          />
+        ) : (
+          <div style={styles.fallbackImg}>
+            <div style={styles.fallbackText}>
+              {String(label || "Visa").slice(0, 2).toUpperCase()}
+            </div>
+          </div>
+        )}
+
+        {badgeText ? <div style={styles.badge}>{badgeText}</div> : null}
+        <div style={styles.mediaShade} />
+      </div>
+
+      <div style={styles.body}>
         <div style={styles.country}>{label}</div>
-        <div style={styles.price}>{price}</div>
-        <button onClick={onApply} style={styles.applyBtn} aria-label={`${label} - ${applyText}`}>
+        <div style={styles.price}>{priceLabel}</div>
+
+        <button onClick={onApply} type="button" style={styles.applyBtn}>
           {applyText}
+          <span style={styles.arrow}>→</span>
         </button>
       </div>
     </div>
   );
 });
 
-const VisaCountryGrid = () => {
+export default function VisaCountryGrid() {
   const navigate = useNavigate();
   const { t } = useTranslation("common");
 
-  function handleApply(countryParam) {
+  const [cardsRows, setCardsRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const aliveRef = useRef(true);
+
+  const fetchCards = useCallback(async ({ showSpinner } = { showSpinner: true }) => {
+    try {
+      if (showSpinner) setLoading(true);
+      else setRefreshing(true);
+
+      // ✅ Force refresh:
+      // 1) cache:no-store
+      // 2) append t= timestamp to defeat any caching layers
+      const url = `/api/country-cards?t=${Date.now()}`;
+
+      const rows = await api
+        // many api wrappers accept a 2nd param; if yours ignores it, the ?t= still works.
+        .get(url, { cache: "no-store" })
+        .then((j) => (Array.isArray(j?.rows) ? j.rows : []))
+        .catch(() => []);
+
+      if (!aliveRef.current) return;
+
+      setCardsRows(rows);
+      setLastUpdated(new Date().toISOString());
+    } finally {
+      if (!aliveRef.current) return;
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    fetchCards({ showSpinner: true });
+
+    // ✅ Live refresh every 60s (optional but helps “live pricing”)
+    const id = window.setInterval(() => {
+      fetchCards({ showSpinner: false });
+    }, 60 * 1000);
+
+    // ✅ Listen for admin-triggered refresh
+    const onPricesUpdated = () => fetchCards({ showSpinner: false });
+    window.addEventListener("hv:country-prices-updated", onPricesUpdated);
+
+    return () => {
+      aliveRef.current = false;
+      window.clearInterval(id);
+      window.removeEventListener("hv:country-prices-updated", onPricesUpdated);
+    };
+  }, [fetchCards]);
+
+  const visibleCards = useMemo(() => {
+    const list = (cardsRows || [])
+      .filter((c) => c && readActive(c))
+      .map((c) => {
+        const fee = readFee(c); // null means “Apply to Check”
+        const currency = readCurrency(c);
+
+        return {
+          _id:
+            c._id ||
+            `${c.country || ""}__${c.type || ""}` ||
+            Math.random().toString(16).slice(2),
+          country: String(c.country || "").trim(),
+          displayName: String(c.displayName || c.country || "").trim(),
+          imageUrl: String(c.imageUrl || "").trim(),
+          applyMode: String(c.applyMode || "go-visa").trim(),
+          applyUrl: String(c.applyUrl || "").trim(),
+          badgeText: String(c.badgeText || "").trim(),
+          sortOrder: Number.isFinite(Number(c.sortOrder)) ? Number(c.sortOrder) : 9999,
+          type: String(c.type || "").trim(),
+          currency: currency || "INR",
+          fee,
+        };
+      });
+
+    list.sort((a, b) => {
+      const ao = Number.isFinite(Number(a.sortOrder)) ? Number(a.sortOrder) : 9999;
+      const bo = Number.isFinite(Number(b.sortOrder)) ? Number(b.sortOrder) : 9999;
+      if (ao !== bo) return ao - bo;
+      return String(a.displayName || "").localeCompare(String(b.displayName || ""));
+    });
+
+    return list;
+  }, [cardsRows]);
+
+  function handleApply(card) {
+    const displayName = String(card?.displayName || "").trim();
+    const mode = String(card?.applyMode || "go-visa").trim();
+    const url = String(card?.applyUrl || "").trim();
+
+    if (mode !== "go-visa" && url) {
+      if (isExternalUrl(url)) {
+        window.open(url, "_blank", "noopener,noreferrer");
+        return;
+      }
+      navigate(normalizeInternalPath(url));
+      return;
+    }
+
     const params = new URLSearchParams({
       from: "IN",
-      to: countryParam, // keep English for downstream services
+      to: displayName || "Unknown",
       autostart: "1",
     });
     const nextUrl = `/go/visa?${params.toString()}`;
@@ -125,118 +231,231 @@ const VisaCountryGrid = () => {
         localStorage.getItem("helloviza_user") ||
         localStorage.getItem("hv_user") ||
         sessionStorage.getItem("hv_user");
-      if (!stored) {
-        navigate(`/login?next=${encodeURIComponent(nextUrl)}`);
-      } else {
-        navigate(nextUrl);
-      }
+
+      if (!stored) navigate(`/login?next=${encodeURIComponent(nextUrl)}`);
+      else navigate(nextUrl);
     } catch {
       navigate(`/login?next=${encodeURIComponent(nextUrl)}`);
     }
   }
 
-  const title = t("visaCountryGrid.title", { defaultValue: "Popular Visa Destinations" });
-  const priceLabel = t("visaCountryGrid.applyToSeePrice", { defaultValue: "₹ Apply to see price" });
+  const title = t("visaCountryGrid.title", { defaultValue: "Visa Destinations" });
+  const subtitle = t("visaCountryGrid.subtitle", {
+    defaultValue: "Live prices, instant apply, and manual/offline routing where needed.",
+  });
+
+  const fallbackPrice = t("visaCountryGrid.applyToSeePrice", { defaultValue: "Apply to Check" });
   const applyText = t("common.applyNow", { defaultValue: "Apply Now" });
+
+  const updatedLabel = lastUpdated
+    ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}`
+    : "";
 
   return (
     <section style={styles.section}>
-      <h2 style={styles.title}>{title}</h2>
+      <div style={styles.headerWrap}>
+        <h2 style={styles.title}>{title}</h2>
+        <div style={styles.subtitle}>
+          {subtitle}
+          <span style={styles.metaPill}>
+            {refreshing ? "Refreshing…" : updatedLabel || "—"}
+          </span>
+          <button
+            type="button"
+            onClick={() => fetchCards({ showSpinner: false })}
+            style={styles.refreshBtn}
+            disabled={loading || refreshing}
+            aria-label="Refresh prices"
+            title="Refresh prices"
+          >
+            ↻ Refresh
+          </button>
+        </div>
+      </div>
+
+      {loading ? <div style={styles.loader}>Loading destinations…</div> : null}
+
+      {!loading && visibleCards.length === 0 ? (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyTitle}>No destinations enabled yet.</div>
+          <div style={styles.emptyText}>Enable countries in Admin and mark them Active.</div>
+        </div>
+      ) : null}
+
       <div style={styles.grid}>
-        {countries.map((c, idx) => {
-          const label = t(`countries.${c.key}`, { defaultValue: c.defaultName });
+        {visibleCards.map((c) => {
+          const priceLabel =
+            c.fee != null && c.currency ? fmtPrice(c.currency, c.fee) : fallbackPrice;
+
+          const label = t(`countries.${c.displayName}`, { defaultValue: c.displayName || "—" });
+
+          const badgeText =
+            c.badgeText
+              ? String(c.badgeText)
+              : c.applyMode && String(c.applyMode) !== "go-visa"
+              ? String(c.applyMode).toUpperCase()
+              : "";
+
           return (
             <CountryCard
-              key={c.key + idx}
-              img={c.img}
+              key={String(c._id)}
+              imageUrl={c.imageUrl || ""}
               label={label}
-              price={priceLabel}
+              priceLabel={priceLabel}
+              badgeText={badgeText}
               applyText={applyText}
-              onApply={() => handleApply(c.defaultName)}
+              onApply={() => handleApply(c)}
             />
           );
         })}
       </div>
     </section>
   );
-};
+}
 
 const styles = {
   section: {
     width: "100vw",
-    padding: "3rem 0 1.5rem 0",
-    background: "rgba(248, 232, 238, 0.50)",
+    padding: "44px 0 34px",
     fontFamily: baseFont,
+    background:
+      "radial-gradient(1200px 520px at 15% 10%, rgba(208,101,73,.14), transparent 55%), radial-gradient(900px 520px at 85% 20%, rgba(88,199,255,.10), transparent 60%), rgba(248, 232, 238, 0.50)",
   },
-  title: {
-    fontSize: "2.4rem",
+  headerWrap: { width: "min(1200px, 92vw)", margin: "0 auto 18px", textAlign: "center" },
+  title: { fontSize: "2.4rem", fontWeight: 900, margin: 0, letterSpacing: ".01em", color: "#00477f" },
+  subtitle: {
+    marginTop: 10,
+    fontSize: "1.05rem",
     fontWeight: 700,
-    textAlign: "center",
-    marginBottom: "2rem",
-    letterSpacing: ".01em",
-    color: "#00477f",
+    color: "rgba(2,9,23,.70)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    flexWrap: "wrap",
   },
+  metaPill: {
+    fontSize: 13,
+    fontWeight: 900,
+    padding: "6px 10px",
+    borderRadius: 999,
+    background: "rgba(255,255,255,.65)",
+    border: "1px solid rgba(2,9,23,.10)",
+    color: "rgba(2,9,23,.72)",
+  },
+  refreshBtn: {
+    padding: "7px 12px",
+    borderRadius: 999,
+    border: "1px solid rgba(0,71,127,.18)",
+    background: "rgba(255,255,255,.82)",
+    color: "#00477f",
+    fontFamily: baseFont,
+    fontWeight: 900,
+    cursor: "pointer",
+    boxShadow: "0 10px 24px rgba(2,9,23,.08)",
+  },
+  loader: {
+    width: "min(1200px, 92vw)",
+    margin: "10px auto 8px",
+    textAlign: "center",
+    color: "rgba(2,9,23,.60)",
+    fontWeight: 800,
+  },
+  emptyState: {
+    width: "min(900px, 92vw)",
+    margin: "18px auto 10px",
+    borderRadius: 18,
+    padding: "16px 16px",
+    border: "1px solid rgba(2,9,23,.10)",
+    background: "rgba(255,255,255,.78)",
+    boxShadow: "0 14px 40px rgba(2,9,23,.08)",
+    textAlign: "center",
+  },
+  emptyTitle: { fontWeight: 900, color: "#0b2a4a", fontSize: 18 },
+  emptyText: { marginTop: 6, fontWeight: 700, color: "rgba(2,9,23,.60)" },
   grid: {
+    width: "min(1200px, 92vw)",
+    margin: "18px auto 0",
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "2.3rem",
-    width: "90vw",
-    maxWidth: 1150,
-    margin: "0 auto",
+    gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+    gap: 18,
   },
   card: {
-    background: "#ABE0F0",
-    borderRadius: "0px",
-    boxShadow: "0 2px 18px 0 rgba(64,64,64,0.11)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+    borderRadius: 18,
     overflow: "hidden",
-    transition: "transform .19s",
-    minHeight: 200,
+    background: "rgba(255,255,255,.88)",
+    border: "1px solid rgba(2,9,23,.10)",
+    boxShadow: "0 16px 52px rgba(2,9,23,.10)",
+    transform: "translateZ(0)",
+    transition: "transform .18s ease, box-shadow .18s ease",
   },
-  img: {
+  media: { position: "relative", width: "100%", height: 128, overflow: "hidden" },
+  img: { width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "scale(1.02)" },
+  mediaShade: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.16) 70%, rgba(0,0,0,.22) 100%)",
+    pointerEvents: "none",
+  },
+  fallbackImg: {
     width: "100%",
-    height: 120,
-    objectFit: "cover",
-  },
-  cardContent: {
-    padding: "1rem",
+    height: "100%",
+    background:
+      "radial-gradient(800px 220px at 10% 20%, rgba(208,101,73,.45), transparent 60%), radial-gradient(700px 220px at 90% 20%, rgba(88,199,255,.40), transparent 60%), linear-gradient(135deg, rgba(11,42,74,.95), rgba(0,35,72,.92))",
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
-    flex: 1,
-    width: "100%",
+    justifyContent: "center",
   },
-  country: {
-    fontSize: "1rem",
-    fontWeight: 700,
-    marginBottom: "0.3rem",
-    color: "#1b1b1b",
-    letterSpacing: ".01em",
+  fallbackText: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(255,255,255,.12)",
+    border: "1px solid rgba(255,255,255,.18)",
+    color: "#fff",
+    fontWeight: 900,
+    fontSize: 22,
+    letterSpacing: 0.5,
+    boxShadow: "0 18px 50px rgba(0,0,0,.28)",
   },
-  price: {
-    fontSize: ".9rem",
-    color: "#d06549",
-    fontWeight: 600,
-    marginBottom: ".8rem",
+  badge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    padding: "7px 10px",
+    borderRadius: 999,
+    fontWeight: 900,
+    fontSize: 13,
+    background: "rgba(255,255,255,.86)",
+    border: "1px solid rgba(2,9,23,.10)",
+    color: "#0b2a4a",
+    backdropFilter: "blur(8px)",
   },
+  body: { padding: 14, display: "flex", flexDirection: "column", gap: 8, minHeight: 150 },
+  country: { fontSize: "1.05rem", fontWeight: 900, color: "#0b2a4a", letterSpacing: ".01em", lineHeight: 1.1 },
+  price: { fontSize: ".98rem", fontWeight: 900, color: "#d06549" },
   applyBtn: {
-    background: "#00477f",
-    color: "#ffffff",
-    padding: "0.9rem 1.3rem",
-    lineHeight: .2,
-    border: "none",
-    borderRadius: "100px",
-    fontFamily: baseFont,
-    fontWeight: 600,
-    fontSize: "1rem",
-    letterSpacing: ".01em",
-    textDecoration: "none",
-    cursor: "pointer",
     marginTop: "auto",
-    transition: "background .15s",
+    width: "100%",
+    padding: "12px 14px",
+    borderRadius: 999,
+    border: "1px solid rgba(0,71,127,.12)",
+    background: "linear-gradient(135deg, #00477f 0%, #0b2a4a 100%)",
+    color: "#fff",
+    fontFamily: baseFont,
+    fontWeight: 900,
+    fontSize: 16,
+    letterSpacing: ".02em",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    boxShadow: "0 14px 40px rgba(0,71,127,.22)",
   },
+  arrow: { display: "inline-block", transform: "translateY(-1px)", fontWeight: 900 },
 };
-
-export default VisaCountryGrid;

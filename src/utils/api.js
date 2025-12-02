@@ -1,8 +1,7 @@
-// helloviza/client/src/utils/api.js
 // ------------------------------------------------------------
 // 🌍 API Base URL Detection
 // ------------------------------------------------------------
-export const API_BASE =
+const DETECTED_BASE =
   (typeof import.meta !== "undefined" &&
     import.meta.env &&
     import.meta.env.VITE_API_BASE) ||
@@ -12,8 +11,22 @@ export const API_BASE =
     ? "http://localhost:8080"
     : "https://api.helloviza.com");
 
+// Normalize once (trim + remove trailing slashes)
+export const API_BASE = String(DETECTED_BASE || "").trim().replace(/\/+$/, "");
+
 // ------------------------------------------------------------
-// 🌐 Unified response handler
+// 🔧 URL join helper (prevents double slashes)
+// ------------------------------------------------------------
+function joinUrl(path = "") {
+  const base = String(API_BASE || "").replace(/\/+$/, "");
+  const p = String(path || "").trim();
+  if (!p) return base;
+  if (/^https?:\/\//i.test(p)) return p;
+  return `${base}${p.startsWith("/") ? "" : "/"}${p}`;
+}
+
+// ------------------------------------------------------------
+// 🌐 Unified response handler (safe JSON/text parsing)
 // ------------------------------------------------------------
 async function handle(res) {
   if (!res.ok) {
@@ -21,10 +34,32 @@ async function handle(res) {
     try {
       const data = await res.json();
       msg = data?.message || data?.error || msg;
-    } catch {}
-    throw new Error(msg);
+    } catch {
+      try {
+        const t = await res.text();
+        if (t) msg = t;
+      } catch {}
+    }
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
   }
-  return res.status === 204 ? undefined : res.json();
+
+  if (res.status === 204) return undefined;
+
+  const ct = (res.headers.get("content-type") || "").toLowerCase();
+  if (ct.includes("application/json")) {
+    try {
+      return await res.json();
+    } catch {
+      return undefined;
+    }
+  }
+  try {
+    return await res.text();
+  } catch {
+    return undefined;
+  }
 }
 
 // ------------------------------------------------------------
@@ -34,7 +69,7 @@ function jsonHeaders(extra = {}) {
   return {
     "Content-Type": "application/json",
     Accept: "application/json",
-    ...extra,
+    ...(extra || {}),
   };
 }
 
@@ -42,15 +77,25 @@ function jsonHeaders(extra = {}) {
 // 🧩 Main API helper (cookie-only auth)
 // ------------------------------------------------------------
 export const api = {
+  // Low-level: returns the raw Response (useful for downloads/uploads)
+  raw: (path, opts = {}) => {
+    const headers = { ...(opts.headers || {}) };
+    return fetch(joinUrl(path), {
+      credentials: "include",
+      ...opts,
+      headers,
+    });
+  },
+
   get: (path, opts = {}) =>
-    fetch(`${API_BASE}${path}`, {
+    fetch(joinUrl(path), {
       method: "GET",
-      credentials: "include",            // send cookie
+      credentials: "include",
       headers: jsonHeaders(opts.headers),
     }).then(handle),
 
   post: (path, body, opts = {}) =>
-    fetch(`${API_BASE}${path}`, {
+    fetch(joinUrl(path), {
       method: "POST",
       credentials: "include",
       headers: jsonHeaders(opts.headers),
@@ -58,7 +103,7 @@ export const api = {
     }).then(handle),
 
   put: (path, body, opts = {}) =>
-    fetch(`${API_BASE}${path}`, {
+    fetch(joinUrl(path), {
       method: "PUT",
       credentials: "include",
       headers: jsonHeaders(opts.headers),
@@ -66,7 +111,7 @@ export const api = {
     }).then(handle),
 
   patch: (path, body, opts = {}) =>
-    fetch(`${API_BASE}${path}`, {
+    fetch(joinUrl(path), {
       method: "PATCH",
       credentials: "include",
       headers: jsonHeaders(opts.headers),
@@ -74,7 +119,15 @@ export const api = {
     }).then(handle),
 
   delete: (path, opts = {}) =>
-    fetch(`${API_BASE}${path}`, {
+    fetch(joinUrl(path), {
+      method: "DELETE",
+      credentials: "include",
+      headers: jsonHeaders(opts.headers),
+    }).then(handle),
+
+  // Alias used across many codebases
+  del: (path, opts = {}) =>
+    fetch(joinUrl(path), {
       method: "DELETE",
       credentials: "include",
       headers: jsonHeaders(opts.headers),
@@ -94,4 +147,13 @@ export const API = {
   WISHLIST: "/api/wishlist",
   SAVED: "/api/saved",
   HISTORY: "/api/history",
+
+  // Admin
+  ADMIN_PROFILES: "/api/admin/profiles",
+  ADMIN_COUNTRY_PRICES: "/api/admin/country-prices",
+  ADMIN_OFFERS: "/api/admin/offers",
+
+  // Public (visa grid)
+  COUNTRY_PRICES_PUBLIC: "/api/country-prices",
+  ANNOUNCEMENT: "/api/announcement",
 };

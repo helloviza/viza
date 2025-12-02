@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -132,10 +132,7 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
   async function sendOtp() {
     if (!mobile) {
       return setError(
-        t(
-          "login.mobileModal.errors.noMobile",
-          "Please enter your mobile number"
-        )
+        t("login.mobileModal.errors.noMobile", "Please enter your mobile number")
       );
     }
     setError("");
@@ -149,17 +146,11 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(
-          data.error ||
-            t("login.errors.sendOtpFailed", "Failed to send OTP")
-        );
+        throw new Error(data.error || t("login.errors.sendOtpFailed", "Failed to send OTP"));
       }
       setOtpSent(true);
     } catch (err) {
-      setError(
-        err.message ||
-          t("login.errors.sendOtpFailed", "Failed to send OTP")
-      );
+      setError(err.message || t("login.errors.sendOtpFailed", "Failed to send OTP"));
     } finally {
       setLoading(false);
     }
@@ -181,11 +172,7 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(
-          data.error ||
-            t(
-              "login.errors.otpVerificationFailed",
-              "OTP verification failed"
-            )
+          data.error || t("login.errors.otpVerificationFailed", "OTP verification failed")
         );
       }
 
@@ -198,13 +185,7 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
 
       onVerified(mobile);
     } catch (err) {
-      setError(
-        err.message ||
-          t(
-            "login.errors.otpVerificationFailed",
-            "OTP verification failed"
-          )
-      );
+      setError(err.message || t("login.errors.otpVerificationFailed", "OTP verification failed"));
     } finally {
       setLoading(false);
     }
@@ -213,13 +194,7 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
   return (
     <div style={M.overlay}>
       <div style={M.box}>
-        <h2
-          style={{
-            marginBottom: "1rem",
-            color: "#00477f",
-            fontFamily: baseFont,
-          }}
-        >
+        <h2 style={{ marginBottom: "1rem", color: "#00477f", fontFamily: baseFont }}>
           {t("login.mobileModal.title", "Verify your mobile")}
         </h2>
         {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
@@ -227,19 +202,14 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
           <>
             <input
               type="tel"
-              placeholder={t(
-                "login.placeholders.mobile",
-                "Enter mobile number"
-              )}
+              placeholder={t("login.placeholders.mobile", "Enter mobile number")}
               value={mobile}
               onChange={(e) => setMobile(e.target.value)}
               maxLength={10}
               style={M.input}
             />
             <button onClick={sendOtp} style={M.button} disabled={loading}>
-              {loading
-                ? t("login.buttons.sending", "Sending...")
-                : t("login.buttons.sendOtp", "Send OTP")}
+              {loading ? t("login.buttons.sending", "Sending...") : t("login.buttons.sendOtp", "Send OTP")}
             </button>
           </>
         ) : (
@@ -253,12 +223,7 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
               style={M.input}
             />
             <button onClick={verifyOtp} style={M.button} disabled={loading}>
-              {loading
-                ? t("login.buttons.verifying", "Verifying...")
-                : t(
-                    "login.buttons.verifyAndContinue",
-                    "Verify & Continue"
-                  )}
+              {loading ? t("login.buttons.verifying", "Verifying...") : t("login.buttons.verifyAndContinue", "Verify & Continue")}
             </button>
           </>
         )}
@@ -346,6 +311,13 @@ export default function Login({ onLogin }) {
   // Session guard
   const [checkingSession, setCheckingSession] = useState(true);
 
+  // Forgot password UI
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMsg, setForgotMsg] = useState("");
+  const [forgotErr, setForgotErr] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -401,9 +373,7 @@ export default function Login({ onLogin }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/session`, {
-          credentials: "include",
-        });
+        const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
         if (!cancelled && res.ok) {
           const data = await res.json().catch(() => ({}));
           if (data && data.user) {
@@ -433,18 +403,14 @@ export default function Login({ onLogin }) {
       navigate(target, { replace: true });
     };
     try {
-      const res = await fetch(`${API_BASE}/api/auth/session`, {
-        credentials: "include",
-      });
+      const res = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data && data.user) return go();
       }
       // retry once quickly
       setTimeout(async () => {
-        const res2 = await fetch(`${API_BASE}/api/auth/session`, {
-          credentials: "include",
-        });
+        const res2 = await fetch(`${API_BASE}/api/auth/session`, { credentials: "include" });
         if (res2.ok) {
           const data2 = await res2.json().catch(() => ({}));
           if (data2 && data2.user) go();
@@ -454,71 +420,65 @@ export default function Login({ onLogin }) {
   }, [navigate, resolveTarget]);
 
   /* =================== Email OTP (Signup) =================== */
-async function sendOtp() {
-  if (!form.email) {
-    return setError(t("login.errors.enterEmail", "Enter your email"));
-  }
-  setLoading(true);
-  try {
-    const r = await fetch(`${API_BASE}/api/otp/send-otp`, {  // <-- /api/otp/send-otp
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email: form.email }),
-    });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      throw new Error(d.error || t("login.errors.sendOtpFailed", "Failed to send OTP"));
+  async function sendOtp() {
+    if (!form.email) {
+      return setError(t("login.errors.enterEmail", "Enter your email"));
     }
-    setOtpSent(true);
-    setError("");
-  } catch (err) {
-    setError(err.message || t("login.errors.sendOtpFailed", "Failed to send OTP"));
-  } finally {
-    setLoading(false);
+    setLoading(true);
+    try {
+      const r = await fetch(`${API_BASE}/api/otp/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: form.email }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(d.error || t("login.errors.sendOtpFailed", "Failed to send OTP"));
+      }
+      setOtpSent(true);
+      setError("");
+    } catch (err) {
+      setError(err.message || t("login.errors.sendOtpFailed", "Failed to send OTP"));
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
-async function verifyOtp() {
-  if (!otp) {
-    return setError(t("login.errors.enterOtp", "Enter OTP"));
-  }
-  setLoading(true);
-  try {
-    const r = await fetch(`${API_BASE}/api/otp/verify-otp`, {  // <-- /api/otp/verify-otp
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email: form.email, otp }),
-    });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      throw new Error(d.error || t("login.errors.otpVerificationFailed", "OTP verification failed"));
+  async function verifyOtp() {
+    if (!otp) {
+      return setError(t("login.errors.enterOtp", "Enter OTP"));
     }
-    setOtpVerified(true);
-    setError("");
-  } catch (err) {
-    setError(err.message || t("login.errors.otpVerificationFailed", "OTP verification failed"));
-  } finally {
-    setLoading(false);
+    setLoading(true);
+    try {
+      const r = await fetch(`${API_BASE}/api/otp/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: form.email, otp }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(d.error || t("login.errors.otpVerificationFailed", "OTP verification failed"));
+      }
+      setOtpVerified(true);
+      setError("");
+    } catch (err) {
+      setError(err.message || t("login.errors.otpVerificationFailed", "OTP verification failed"));
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   /* =================== Email Login / Signup =================== */
   async function handleSubmit(e) {
     e.preventDefault();
     if (mode === "signup" && !otpVerified) {
-      return setError(
-        t(
-          "login.errors.verifyEmailFirst",
-          "Please verify your email first"
-        )
-      );
+      return setError(t("login.errors.verifyEmailFirst", "Please verify your email first"));
     }
     setLoading(true);
     try {
-      const endpoint =
-        mode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const r = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -527,9 +487,7 @@ async function verifyOtp() {
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) {
-        throw new Error(
-          d.error || t("login.errors.authFailed", "Auth failed")
-        );
+        throw new Error(d.error || t("login.errors.authFailed", "Auth failed"));
       }
 
       const userData = d.user;
@@ -540,9 +498,7 @@ async function verifyOtp() {
       onLogin?.(userData);
       await finishLogin();
     } catch (err) {
-      setError(
-        err.message || t("login.errors.authFailed", "Auth failed")
-      );
+      setError(err.message || t("login.errors.authFailed", "Auth failed"));
     } finally {
       setLoading(false);
     }
@@ -565,19 +521,13 @@ async function verifyOtp() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
-        throw new Error(
-          data.message ||
-            t("login.errors.sendOtpFailed", "Failed to send OTP")
-        );
+        throw new Error(data.message || t("login.errors.sendOtpFailed", "Failed to send OTP"));
       }
       setMobileOtpSent(true);
       setTimer(30);
       setError("");
     } catch (err) {
-      setError(
-        err.message ||
-          t("login.errors.sendOtpFailed", "Failed to send OTP")
-      );
+      setError(err.message || t("login.errors.sendOtpFailed", "Failed to send OTP"));
     } finally {
       setLoading(false);
     }
@@ -598,17 +548,12 @@ async function verifyOtp() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.type !== "success") {
-        throw new Error(
-          t("login.errors.resendOtpFailed", "Failed to resend OTP")
-        );
+        throw new Error(t("login.errors.resendOtpFailed", "Failed to resend OTP"));
       }
       setTimer(30);
       setError("");
     } catch (err) {
-      setError(
-        err.message ||
-          t("login.errors.resendOtpFailed", "Failed to resend OTP")
-      );
+      setError(err.message || t("login.errors.resendOtpFailed", "Failed to resend OTP"));
     } finally {
       setLoading(false);
     }
@@ -629,9 +574,7 @@ async function verifyOtp() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || data.success === false) {
-        throw new Error(
-          data.message || t("login.errors.invalidOtp", "Invalid OTP")
-        );
+        throw new Error(data.message || t("login.errors.invalidOtp", "Invalid OTP"));
       }
 
       const loginRes = await fetch(`${API_BASE}/api/auth/mobile-login`, {
@@ -642,10 +585,7 @@ async function verifyOtp() {
       });
       const loginData = await loginRes.json().catch(() => ({}));
       if (!loginRes.ok) {
-        throw new Error(
-          loginData.error ||
-            t("login.errors.loginFailed", "Login failed")
-        );
+        throw new Error(loginData.error || t("login.errors.loginFailed", "Login failed"));
       }
 
       const userData = loginData.user;
@@ -656,13 +596,51 @@ async function verifyOtp() {
       onLogin?.(userData);
       await finishLogin();
     } catch (err) {
-      setError(
-        err.message || t("login.errors.loginFailed", "Login failed")
-      );
+      setError(err.message || t("login.errors.loginFailed", "Login failed"));
     } finally {
       setLoading(false);
     }
   }
+
+  /* =================== Forgot Password (inline panel) =================== */
+  const requestPasswordReset = useCallback(async () => {
+    setForgotErr("");
+    setForgotMsg("");
+    if (!forgotEmail) {
+      setForgotErr(t("login.errors.enterEmail", "Enter your email"));
+      return;
+    }
+    setForgotBusy(true);
+    try {
+      // Try primary route
+      let res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      // Fallback route name if the primary isn't present
+      if (res.status === 404) {
+        res = await fetch(`${API_BASE}/api/auth/request-password-reset`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: forgotEmail }),
+        });
+      }
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Unable to process request");
+      }
+      setForgotMsg(t("login.forgot.success", "If this email exists, a reset link has been sent."));
+    } catch (e) {
+      setForgotErr(e.message || t("login.forgot.failed", "Reset request failed"));
+    } finally {
+      setForgotBusy(false);
+    }
+  }, [forgotEmail, t]);
 
   /* =================== Google Auth =================== */
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -685,16 +663,10 @@ async function verifyOtp() {
       const txt = await r.text();
       const d = txt ? JSON.parse(txt) : {};
       if (!r.ok) {
-        throw new Error(
-          d.error ||
-            t("login.errors.googleFailedGeneric", "Google login failed")
-        );
+        throw new Error(d.error || t("login.errors.googleFailedGeneric", "Google login failed"));
       }
 
-      const userData = {
-        ...d.user,
-        picture: decoded?.picture || d.user?.picture,
-      };
+      const userData = { ...d.user, picture: decoded?.picture || d.user?.picture };
       localStorage.setItem("helloviza_user", JSON.stringify(userData));
       localStorage.setItem("hv_user", JSON.stringify(userData));
       sessionStorage.setItem("hv_user", JSON.stringify(userData));
@@ -708,22 +680,11 @@ async function verifyOtp() {
       onLogin?.(userData);
       await finishLogin();
     } catch (err) {
-      setError(
-        err.message ||
-          t(
-            "login.errors.googleFailedRetry",
-            "Google login failed, please try again."
-          )
-      );
+      setError(err.message || t("login.errors.googleFailedRetry", "Google login failed, please try again."));
     }
   };
   const handleGoogleFailure = () =>
-    setError(
-      t(
-        "login.errors.googleFailedRetry",
-        "Google login failed, please try again."
-      )
-    );
+    setError(t("login.errors.googleFailedRetry", "Google login failed, please try again."));
 
   /* =================== Tabs =================== */
   const tabDefs = useMemo(() => {
@@ -765,11 +726,8 @@ async function verifyOtp() {
     <div className="login-outer" style={S.outer}>
       <style>{responsiveCSS}</style>
 
-      {/* Left hero (visible like SS2) */}
-      <div
-        className="login-left-bg"
-        style={{ ...S.leftBg, backgroundImage: `url(${loginBg})` }}
-      />
+      {/* Left hero */}
+      <div className="login-left-bg" style={{ ...S.leftBg, backgroundImage: `url(${loginBg})` }} />
 
       {/* Right form */}
       <div className="login-form-area" style={S.formArea}>
@@ -783,10 +741,7 @@ async function verifyOtp() {
                   setMode(tab.key);
                   setError("");
                 }}
-                style={{
-                  ...S.tabBtn,
-                  ...(mode === tab.key ? S.tabBtnActive : {}),
-                }}
+                style={{ ...S.tabBtn, ...(mode === tab.key ? S.tabBtnActive : {}) }}
               >
                 <span style={S.bullet}>•</span> {t(tab.labelKey)}
                 {mode === tab.key && <div style={S.underline} />}
@@ -796,12 +751,8 @@ async function verifyOtp() {
 
           {/* Google button */}
           {ENABLE_GOOGLE && mode !== "mobile" && (
-            <div style={{ margin: "8px 0 18px", width: "min(560px, 88vw)" }}>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleFailure}
-                useOneTap={false}
-              />
+            <div style={{ margin: "8px 0 12px", width: 240 }}>
+              <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} useOneTap={false} />
             </div>
           )}
 
@@ -813,28 +764,12 @@ async function verifyOtp() {
               {mode === "signup" && (
                 <div style={S.row}>
                   <div style={S.col}>
-                    <label style={S.label}>
-                      {t("login.labels.firstName", "First Name*")}
-                    </label>
-                    <input
-                      name="firstName"
-                      style={S.input}
-                      value={form.firstName}
-                      onChange={handleChange}
-                      required
-                    />
+                    <label style={S.label}>{t("login.labels.firstName", "First Name*")}</label>
+                    <input name="firstName" style={S.input} value={form.firstName} onChange={handleChange} required />
                   </div>
                   <div style={S.col}>
-                    <label style={S.label}>
-                      {t("login.labels.lastName", "Last Name*")}
-                    </label>
-                    <input
-                      name="lastName"
-                      style={S.input}
-                      value={form.lastName}
-                      onChange={handleChange}
-                      required
-                    />
+                    <label style={S.label}>{t("login.labels.lastName", "Last Name*")}</label>
+                    <input name="lastName" style={S.input} value={form.lastName} onChange={handleChange} required />
                   </div>
                 </div>
               )}
@@ -842,9 +777,7 @@ async function verifyOtp() {
               {/* Email + password */}
               <div style={S.row}>
                 <div style={S.col}>
-                  <label style={S.label}>
-                    {t("login.labels.email", "Email*")}
-                  </label>
+                  <label style={S.label}>{t("login.labels.email", "Email*")}</label>
                   <input
                     type="email"
                     name="email"
@@ -855,9 +788,7 @@ async function verifyOtp() {
                   />
                 </div>
                 <div style={S.col}>
-                  <label style={S.label}>
-                    {t("login.labels.password", "Password")}
-                  </label>
+                  <label style={S.label}>{t("login.labels.password", "Password")}</label>
                   <input
                     type="password"
                     name="password"
@@ -869,75 +800,93 @@ async function verifyOtp() {
                 </div>
               </div>
 
+              {/* Bottom helper links + Forgot panel trigger (Login tab only) */}
+              {mode === "login" && (
+                <>
+                  <div style={S.bottomLinksRow}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForgotOpen((v) => !v);
+                        setForgotErr("");
+                        setForgotMsg("");
+                        setForgotEmail(form.email || "");
+                      }}
+                      style={S.linkButton}
+                    >
+                      {t("login.links.forgotPassword", "Forgot your password?")}{" "}
+                      <span style={S.linkEmph}>{t("login.links.resetHere", "Reset here")}</span>
+                    </button>
+
+                    <Link to="/contact" style={S.linkButton} aria-label="Trouble logging in? Contact us">
+                      {t("login.links.trouble", "Trouble logging in?")}{" "}
+                      <span style={S.linkEmph}>{t("login.links.contactUs", "Contact us")}</span>
+                    </Link>
+                  </div>
+
+                  {forgotOpen && (
+                    <div style={S.forgotPanel}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "0.6rem" }}>
+                        <input
+                          type="email"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder={t("login.placeholders.email", "Enter email")}
+                          style={S.input}
+                        />
+                        <button
+                          type="button"
+                          onClick={requestPasswordReset}
+                          disabled={forgotBusy}
+                          style={S.smallCta}
+                        >
+                          {forgotBusy ? t("login.buttons.sending", "Sending...") : t("login.buttons.sendLink", "Send link")}
+                        </button>
+                      </div>
+                      {forgotErr && <div style={S.forgotErr}>{forgotErr}</div>}
+                      {forgotMsg && <div style={S.forgotOk}>{forgotMsg}</div>}
+                      <div style={{ textAlign: "right", marginTop: 6 }}>
+                        <Link to="/reset-password" style={S.deepLink}>
+                          {t("login.links.haveCode", "Already have a code? Reset page")}
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
               {mode === "signup" && (
                 <>
                   {!otpSent ? (
-                    <button
-                      type="button"
-                      onClick={sendOtp}
-                      style={S.otpBtn}
-                    >
-                      {loading
-                        ? t("login.buttons.sending", "Sending...")
-                        : t("login.buttons.sendOtp", "Send OTP")}
+                    <button type="button" onClick={sendOtp} style={S.otpBtn}>
+                      {loading ? t("login.buttons.sending", "Sending...") : t("login.buttons.sendOtp", "Send OTP")}
                     </button>
                   ) : !otpVerified ? (
                     <div style={S.row}>
                       <div style={S.col}>
-                        <label style={S.label}>
-                          {t("login.labels.otp", "Enter OTP")}
-                        </label>
+                        <label style={S.label}>{t("login.labels.otp", "Enter OTP")}</label>
                         <input
-                          placeholder={t(
-                            "login.placeholders.otp",
-                            "Enter OTP"
-                          )}
+                          placeholder={t("login.placeholders.otp", "Enter OTP")}
                           value={otp}
                           onChange={(e) => setOtp(e.target.value)}
                           style={S.input}
                         />
                       </div>
-                      <div
-                        style={{
-                          ...S.col,
-                          display: "flex",
-                          alignItems: "flex-end",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={verifyOtp}
-                          style={S.otpBtn}
-                        >
-                          {loading
-                            ? t("login.buttons.verifying", "Verifying...")
-                            : t("login.buttons.verifyOtp", "Verify OTP")}
+                      <div style={{ ...S.col, display: "flex", alignItems: "flex-end" }}>
+                        <button type="button" onClick={verifyOtp} style={S.otpBtn}>
+                          {loading ? t("login.buttons.verifying", "Verifying...") : t("login.buttons.verifyOtp", "Verify OTP")}
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <p
-                      style={{
-                        color: "#bae6a1",
-                        fontWeight: 700,
-                        margin: "8px 0",
-                      }}
-                    >
-                      {t(
-                        "login.status.emailVerified",
-                        "Email verified!"
-                      )}
+                    <p style={{ color: "#bae6a1", fontWeight: 700, margin: "8px 0" }}>
+                      {t("login.status.emailVerified", "Email verified!")}
                     </p>
                   )}
 
                   <div style={S.row}>
                     <div style={S.col}>
-                      <label style={S.label}>
-                        {t(
-                          "login.labels.confirmPassword",
-                          "Confirm Password"
-                        )}
-                      </label>
+                      <label style={S.label}>{t("login.labels.confirmPassword", "Confirm Password")}</label>
                       <input
                         type="password"
                         name="confirmPassword"
@@ -948,15 +897,8 @@ async function verifyOtp() {
                       />
                     </div>
                     <div style={S.col}>
-                      <label style={S.label}>
-                        {t("login.labels.country", "Country")}
-                      </label>
-                      <input
-                        name="country"
-                        style={S.input}
-                        value={form.country}
-                        onChange={handleChange}
-                      />
+                      <label style={S.label}>{t("login.labels.country", "Country")}</label>
+                      <input name="country" style={S.input} value={form.country} onChange={handleChange} />
                     </div>
                   </div>
                 </>
@@ -964,9 +906,7 @@ async function verifyOtp() {
 
               <div style={{ marginTop: 6 }}>
                 <button type="submit" style={S.submitBtn}>
-                  {mode === "login"
-                    ? t("login.buttons.login", "Log In")
-                    : t("login.buttons.signup", "Sign Up")}
+                  {mode === "login" ? t("login.buttons.login", "Log In") : t("login.buttons.signup", "Sign Up")}
                 </button>
               </div>
             </form>
@@ -975,22 +915,15 @@ async function verifyOtp() {
           {/* === MOBILE LOGIN === */}
           {ENABLE_MOBILE && mode === "mobile" && (
             <form
-              onSubmit={
-                mobileOtpSent ? handleVerifyMobileOtp : handleSendMobileOtp
-              }
+              onSubmit={mobileOtpSent ? handleVerifyMobileOtp : handleSendMobileOtp}
               style={S.form}
             >
               {error && <div style={S.error}>{error}</div>}
               <div style={S.rowSingle}>
-                <label style={S.label}>
-                  {t("login.labels.mobile", "Mobile Number")}
-                </label>
+                <label style={S.label}>{t("login.labels.mobile", "Mobile Number")}</label>
                 <input
                   type="tel"
-                  placeholder={t(
-                    "login.placeholders.mobile",
-                    "Enter mobile number"
-                  )}
+                  placeholder={t("login.placeholders.mobile", "Enter mobile number")}
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   maxLength={10}
@@ -1002,15 +935,10 @@ async function verifyOtp() {
               {mobileOtpSent ? (
                 <>
                   <div style={S.rowSingle}>
-                    <label style={S.label}>
-                      {t("login.labels.otp", "Enter OTP")}
-                    </label>
+                    <label style={S.label}>{t("login.labels.otp", "Enter OTP")}</label>
                     <input
                       type="text"
-                      placeholder={t(
-                        "login.placeholders.otp",
-                        "Enter OTP"
-                      )}
+                      placeholder={t("login.placeholders.otp", "Enter OTP")}
                       value={mobileOtp}
                       onChange={(e) => setMobileOtp(e.target.value)}
                       maxLength={6}
@@ -1019,37 +947,23 @@ async function verifyOtp() {
                     />
                   </div>
                   <button type="submit" style={S.submitBtn}>
-                    {loading
-                      ? t("login.buttons.verifying", "Verifying...")
-                      : t(
-                          "login.buttons.verifyAndLogin",
-                          "Verify & Login"
-                        )}
+                    {loading ? t("login.buttons.verifying", "Verifying...") : t("login.buttons.verifyAndLogin", "Verify & Login")}
                   </button>
 
                   <button
                     type="button"
                     onClick={handleResendMobileOtp}
                     disabled={timer > 0 || loading}
-                    style={{
-                      ...S.otpBtn,
-                      backgroundColor:
-                        timer > 0 ? "#888" : "#d06549",
-                      marginTop: "10px",
-                    }}
+                    style={{ ...S.otpBtn, backgroundColor: timer > 0 ? "#888" : "#d06549", marginTop: "10px" }}
                   >
                     {timer > 0
-                      ? t("login.buttons.resendOtpIn", {
-                          seconds: timer,
-                        })
+                      ? t("login.buttons.resendOtpIn", { seconds: timer })
                       : t("login.buttons.resendOtp", "Resend OTP")}
                   </button>
                 </>
               ) : (
                 <button type="submit" style={S.otpBtn}>
-                  {loading
-                    ? t("login.buttons.sending", "Sending...")
-                    : t("login.buttons.sendOtp", "Send OTP")}
+                  {loading ? t("login.buttons.sending", "Sending...") : t("login.buttons.sendOtp", "Send OTP")}
                 </button>
               )}
             </form>
@@ -1081,120 +995,140 @@ const S = {
   outer: {
     minHeight: "100vh",
     display: "grid",
-    gridTemplateColumns: "1.35fr 0.8fr",
+    gridTemplateColumns: "1.15fr 0.85fr",
     background: "linear-gradient(180deg, #00477f 0%, #0a5aa4 100%)",
     fontFamily: baseFont,
   },
-  leftBg: {
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    minHeight: "100vh",
-  },
-  formArea: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "5rem 2rem 3rem",
-  },
-  formInner: {
-    width: "min(640px, 90vw)",
-    color: "#fff",
-  },
+  leftBg: { backgroundSize: "cover", backgroundPosition: "center", minHeight: "100vh" },
+  formArea: { display: "flex", alignItems: "center", justifyContent: "center", padding: "3.75rem 1.5rem 2.5rem" },
 
-  tabs: {
-    display: "flex",
-    gap: "1.4rem",
-    marginBottom: "1.1rem",
-    flexWrap: "wrap",
-    maxWidth: "520px",
-    justifyContent: "flex-start",
-  },
+  /* ↓ narrower form */
+  formInner: { width: "min(520px, 92vw)", color: "#fff" },
+
+  /* Tabs */
+  tabs: { display: "flex", gap: "1rem", marginBottom: ".8rem", flexWrap: "wrap", maxWidth: "520px" },
   tabBtn: {
     position: "relative",
     background: "transparent",
     border: "none",
     color: "#c9def3",
     fontWeight: 800,
-    fontSize: "1.45rem",
+    fontSize: "1.25rem",       // was 1.45rem
     cursor: "pointer",
-    paddingBottom: 6,
-    lineHeight: 1.15,
+    paddingBottom: 4,          // was 6
+    lineHeight: 1.1,
   },
-  tabBtnActive: {
-    color: "#ffffff",
-  },
-  underline: {
-    position: "absolute",
-    left: 0,
-    bottom: 0,
-    width: "64px",
-    height: "3px",
-    background: "#ffffff",
-    borderRadius: 2,
-  },
-  bullet: { marginRight: 8 },
+  tabBtnActive: { color: "#ffffff" },
+  underline: { position: "absolute", left: 0, bottom: 0, width: "56px", height: "2px", background: "#ffffff", borderRadius: 2 },
+  bullet: { marginRight: 6 },
 
-  form: {
-    width: "min(640px, 90vw)",
-    background: "transparent",
-  },
-  row: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "1.2rem",
-    marginBottom: "1rem",
-  },
-  rowSingle: { marginBottom: "1rem" },
+  form: { width: "min(520px, 92vw)", background: "transparent" },
+
+  /* ↓ tighter grid */
+  row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".9rem", marginBottom: ".8rem" },
+  rowSingle: { marginBottom: ".8rem" },
   col: { display: "flex", flexDirection: "column" },
+
   label: {
-    display: "block",
     color: "#e8f1fb",
-    marginBottom: 6,
+    marginBottom: 4,           // was 6
     fontWeight: 900,
-    letterSpacing: ".4px",
-    fontSize: "1.05rem",
+    letterSpacing: ".3px",
+    fontSize: ".98rem",        // was 1.05rem
   },
+
+  /* ↓ slimmer inputs */
   input: {
     width: "100%",
-    padding: "1rem 1rem",
-    borderRadius: 12,
+    padding: ".72rem .9rem",   // was 1rem 1rem
+    borderRadius: 10,          // was 12
     border: "none",
     outline: "none",
     background: "#e6f0ff",
     color: "#0b315c",
-    fontWeight: 700,
-    boxShadow: "inset 0 1px 0 rgba(0,0,0,.06)",
+    fontWeight: 600,           // was 700
+    boxShadow: "inset 0 1px 0 rgba(0,0,0,.05)",
   },
+
+  /* ↓ slimmer small button (Send OTP etc.) */
   otpBtn: {
     background: "#d06549",
     color: "#fff",
     border: "none",
-    borderRadius: 12,
-    padding: ".75rem 1rem",
-    fontWeight: 900,
+    borderRadius: 10,          // was 12
+    padding: ".6rem .9rem",    // was .75rem 1rem
+    fontWeight: 800,
     cursor: "pointer",
   },
+
+  /* ↓ slimmer primary button */
   submitBtn: {
     background: "#ffffff",
     color: "#00477f",
     border: "none",
-    borderRadius: 12,
-    padding: "1rem 1.1rem",
-    fontWeight: 900,
+    borderRadius: 10,          // was 12
+    padding: ".85rem 1rem",    // was 1rem 1.1rem
+    fontWeight: 800,           // was 900
     cursor: "pointer",
     width: "100%",
     marginTop: 6,
-    boxShadow: "0 6px 16px rgba(0,0,0,.15)",
+    boxShadow: "0 4px 12px rgba(0,0,0,.12)", // lighter
   },
+
   error: {
     background: "#ffefef",
     color: "#a40000",
-    padding: "10px 12px",
-    borderRadius: 10,
-    marginBottom: 12,
+    padding: "8px 10px",       // was 10px 12px
+    borderRadius: 8,
+    marginBottom: 10,
     fontWeight: 700,
   },
+
+  /* Forgot-password row */
+  bottomLinksRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4,
+    marginBottom: 8,
+    gap: ".6rem",
+  },
+  linkButton: {
+    background: "transparent",
+    border: "none",
+    color: "#e8f1fb",
+    textDecoration: "none",
+    fontFamily: baseFont,
+    fontWeight: 800,
+    fontSize: ".92rem",        // was .95rem
+    cursor: "pointer",
+    padding: 0,
+    lineHeight: 1.15,
+  },
+  linkEmph: { color: "#ffffff", textDecoration: "underline" },
+  forgotPanel: {
+    background: "rgba(255,255,255,.1)",
+    border: "1px solid rgba(255,255,255,.22)",
+    borderRadius: 10,
+    padding: "8px 10px",
+    marginTop: 6,
+    backdropFilter: "blur(2px)",
+  },
+  smallCta: {
+    background: "#ffffff",
+    color: "#00477f",
+    border: "none",
+    borderRadius: 10,
+    padding: ".6rem .9rem",
+    fontWeight: 800,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  },
+  forgotErr: { color: "#ffe2e2", fontWeight: 800, marginTop: 6 },
+  forgotOk: { color: "#c6ffd4", fontWeight: 800, marginTop: 6 },
+  deepLink: { color: "#ffffff", textDecoration: "underline", fontWeight: 800 },
 };
+
 
 const responsiveCSS = `
 @media (max-width: 1080px) {
