@@ -54,6 +54,9 @@ import AdminCountryPrices from "./pages/admin/AdminCountryPrices";
 import AdminOffers from "./pages/admin/Offers";
 import AdminUserStats from "./pages/admin/UserStats";
 
+/* ==== ✅ Manual/Offline Visa Pages ==== */
+import ChinaVisa from "./pages/visa/China";
+
 /* ==== Auth Context ==== */
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -98,10 +101,7 @@ function getNextFromSearch(search) {
 function isSafeNextUrl(nextUrl) {
   // Only allow redirecting to our subdomain(s) to prevent open-redirect abuse
   // Add localhost cases if you ever test visa on local.
-  const allow = [
-    "https://visa.helloviza.com",
-    "http://visa.helloviza.com",
-  ];
+  const allow = ["https://visa.helloviza.com", "http://visa.helloviza.com"];
 
   try {
     const u = new URL(nextUrl);
@@ -306,6 +306,9 @@ The Helloviza Community 💖`}
               </>
             }
           />
+
+          {/* ===== ✅ Manual/Offline Visa Pages ===== */}
+          <Route path="/visa/china" element={<ChinaVisa />} />
 
           {/* ===== Auth ===== */}
           <Route path="/login" element={<Login onLogin={handleLogin} />} />

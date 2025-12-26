@@ -7,8 +7,8 @@ const baseFont = "'Barlow Condensed', Arial, sans-serif";
  *  ------------------------------------------------------------------ */
 
 // 1) Your required intro block FIRST (exact text)
-const introBlock = `Last Updated: 05.11.2025
-Helloviza Private Limited (“Helloviza,” “we,” “our,” or “us”) is committed to protecting your privacy and handling your personal data responsibly, in compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act), the Information Technology Act, 2000 & IT Rules 2021, and other applicable data protection laws (including GDPR where relevant).`;
+const introBlock = `Last Updated: 27.12.2025
+Helloviza is a brand and online platform operated by Peachmint Trips and Planners Private Limited (“Peachmint”, “we”, “our”, or “us”). We are committed to protecting your privacy and handling your personal data responsibly, in compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act), the Information Technology Act, 2000 and applicable rules (including the IT Rules, 2021), and other applicable data protection laws (including GDPR where relevant).`;
 
 // 2) Your sections (exact text)
 const sections = [
@@ -191,7 +191,7 @@ Your information may be processed outside your country. We ensure safeguards con
     content: `
 If you have complaints about our handling of your data, please contact:
 Grievance Officer
- Helloviza Private Limited
+ Peachmint Trips and Planners Private Limited
  [Registered Address]
  Email: grievance@helloviza.com
 As per Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, the Grievance Officer will acknowledge your complaint within 24 hours and resolve it within 15 days of receipt, or sooner if required by law.
@@ -223,8 +223,9 @@ We may update this policy periodically. The updated version will be posted with 
     title: "13. Contact Us",
     content: `
 For privacy-related queries:
-Helloviza Private Limited
- [Registered Address]
+Peachmint Trips and Planners Private Limited
+ Vatika Business Park,
+ Gurugram, Haryana
  📧 privacy@helloviza.com 
     `,
   },

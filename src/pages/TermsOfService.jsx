@@ -13,7 +13,8 @@ const introBlock = `Last updated: 05.11.2025`;
 const sections = [
   {
     title: "1. Introduction",
-    content: `Welcome to Helloviza.com, a digital platform owned and operated by Helloviza Private Limited ("Helloviza," "we," "us," or "our"). These Terms of Service ("Terms") govern your access to and use of the website, mobile site, applications, and services (collectively, the "Services") offered by Helloviza.com.
+    content: `Welcome to Helloviza.com, a digital platform operated under the brand name “Helloviza” by Peachmint Trips and Planners Private Limited (“Peachmint,” “we,” “us,” or “our”). These Terms of Service (“Terms”) govern your access to and use of the website, mobile site, applications, and services (collectively, the “Services”) made available through Helloviza.com.
+
 By using our Services, you agree to these Terms, our Privacy Policy, and Refund Policy. If you do not agree, you must discontinue use of our Services immediately.`,
   },
   {
@@ -119,7 +120,7 @@ Helloviza.com is not responsible for losses or costs (including missed flights, 
   },
   {
     title: "11. Intellectual Property Rights",
-    content: `All content, branding, trademarks, graphics, and technology on Helloviza.com are owned by or licensed to Helloviza Private Limited. No user may reproduce, republish, sell, or exploit any part of our platform without prior written consent.`,
+    content: `All content, branding, trademarks, logos, graphics, software, and technology made available on Helloviza.com (the “Platform”) are owned by or licensed to Peachmint Trips and Planners Private Limited, operating under the brand name “Helloviza” (“Peachmint”, “we”, “us”, or “our”). No user may copy, reproduce, modify, distribute, republish, sell, license, or otherwise exploit any portion of the Platform or its content without our prior written consent.`,
   },
   {
     title: "12. Prohibited Uses",
@@ -232,8 +233,9 @@ If unresolved, disputes shall be subject to the exclusive jurisdiction of the co
     title: "29. Grievances & Complaints (IT Rules 2021)",
     content: `If you have complaints about our services, please contact:
 Grievance Officer
- Helloviza Private Limited
- [Registered Address]
+ Peachmint Trips and Planners Private Limited (operating under the brand name “Helloviza”)
+ Vatika Business Park,
+ Gurugram, Haryana
  Email: grievance@helloviza.com
 As per Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, the Grievance Officer will acknowledge your complaint within 24 hours and resolve it within 15 days of receipt, or sooner if required by law.
 
