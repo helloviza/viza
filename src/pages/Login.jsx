@@ -603,44 +603,40 @@ export default function Login({ onLogin }) {
   }
 
   /* =================== Forgot Password (inline panel) =================== */
-  const requestPasswordReset = useCallback(async () => {
-    setForgotErr("");
-    setForgotMsg("");
-    if (!forgotEmail) {
-      setForgotErr(t("login.errors.enterEmail", "Enter your email"));
-      return;
-    }
-    setForgotBusy(true);
-    try {
-      // Try primary route
-      let res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: forgotEmail }),
-      });
+const requestPasswordReset = useCallback(async () => {
+  setForgotErr("");
+  setForgotMsg("");
 
-      // Fallback route name if the primary isn't present
-      if (res.status === 404) {
-        res = await fetch(`${API_BASE}/api/auth/request-password-reset`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email: forgotEmail }),
-        });
-      }
+  if (!forgotEmail) {
+    setForgotErr(t("login.errors.enterEmail", "Enter your email"));
+    return;
+  }
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.error || "Unable to process request");
-      }
-      setForgotMsg(t("login.forgot.success", "If this email exists, a reset link has been sent."));
-    } catch (e) {
-      setForgotErr(e.message || t("login.forgot.failed", "Reset request failed"));
-    } finally {
-      setForgotBusy(false);
+  setForgotBusy(true);
+  try {
+    const res = await fetch(`${API_BASE}/api/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: forgotEmail }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || "Unable to process request");
     }
-  }, [forgotEmail, t]);
+
+    setForgotMsg(
+      t("login.forgot.success", "If this email exists, a reset link has been sent.")
+    );
+  } catch (e) {
+    setForgotErr(
+      e.message || t("login.forgot.failed", "Reset request failed")
+    );
+  } finally {
+    setForgotBusy(false);
+  }
+}, [forgotEmail, t]);
 
   /* =================== Google Auth =================== */
   const handleGoogleSuccess = async (credentialResponse) => {
