@@ -2,23 +2,25 @@
 import React, { useState, useRef, useLayoutEffect, useMemo, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 
+import NewHome from "./pages/NewHome";
+
 /* ==== Core Components ==== */
 import Header from "./components/Header";
 import AnnouncementBar from "./components/AnnouncementBar";
 import BackgroundBreakSection from "./components/BackgroundBreakSection";
 import BookingPanel from "./components/BookingPanel";
-import VisaFooterBlock from "./components/VisaFooterBlock";
+// import VisaFooterBlock from "./components/VisaFooterBlock";
 import ScrollToHeroButton from "./components/ScrollToHeroButton";
 import ScrollToTop from "./components/ScrollToTop";
 import WelcomePopup from "./components/WelcomePopup";
 
 /* ==== Home & Sections (Home never renders footer) ==== */
 import Home from "./pages/Home";
-import ScrollTextSections from "./components/ScrollTextSections";
-import ExploreSection from "./components/ExploreSection";
-import VisaServicesSection from "./components/VisaServicesSection";
-import VisaCountryGrid from "./components/VisaCountryGrid";
-import VisaStatsSection from "./components/VisaStatsSection";
+// import ScrollTextSections from "./components/ScrollTextSections";
+// import ExploreSection from "./components/ExploreSection";
+// import VisaServicesSection from "./components/VisaServicesSection";
+// import VisaCountryGrid from "./components/VisaCountryGrid";
+// import VisaStatsSection from "./components/VisaStatsSection";
 
 /* ==== Auth Pages ==== */
 import Login from "./pages/Login";
@@ -59,6 +61,11 @@ import ChinaVisa from "./pages/visa/China";
 
 /* ==== Auth Context ==== */
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import TransferForTaxi from "./pages/TransferForTaxi";
+import NewFooter from "./components/NewFooter";
+import EventsSection from "./components/EventsSection";
+import Events from "./components new/Events";
+import Experience from "./components new/Experience";
 
 /* ============================================================
    ✅ Admin access helpers
@@ -197,6 +204,11 @@ function AppShell() {
   }, []);
 
   const isAdminRoute = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
+  const noLayoutRoutes = [ "/gonew/visa" ,"/transfer-service","/","/login" ];
+  const headerNoLayoutRoutes = [ "/gonew/visa" ,"/transfer-service","/events","/experiences","/login" ];
+  const hideLayout = isAdminRoute || noLayoutRoutes.includes(location.pathname);
+  const headerHideLayout = isAdminRoute || headerNoLayoutRoutes.includes(location.pathname);
+  
 
   const bookingPanelRef = useRef();
   const modalPanelRef = useRef();
@@ -249,7 +261,7 @@ function AppShell() {
     navigate(postLoginTarget, { replace: true });
   }
 
-  function handleLogout() {
+  function handleLogout() { 
     try {
       localStorage.removeItem("helloviza_user");
       localStorage.removeItem("hv_user");
@@ -261,7 +273,7 @@ function AppShell() {
 
   return (
     <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-      {!isAdminRoute && (
+      {!headerHideLayout && (
         <>
           <Header onFlightClick={openBookingPanel} user={user} onLogout={handleLogout} />
           <AnnouncementBar />
@@ -273,12 +285,11 @@ function AppShell() {
 
           {showWelcomePopup && (
             <WelcomePopup
-              message={`Hello ${firstName}, Welcome onboard!
+              message={`Hi ${firstName}, welcome to Helloviza!
 
-We’re beyond thrilled to have you join the Helloviza family! You’re now part of a vibrant, creative, and inspiring community that’s all about connection, growth, and making every moment sparkle. 🌟
-You’re a unique spark in our universe, and we can’t wait to see the incredible energy you bring. Dive in, explore, and let’s create something extraordinary together!
-With all the love and excitement,
-The Helloviza Community 💖`}
+We’re thrilled to have you in our vibrant community. Dive in, explore, and let’s create something amazing together! 🌟
+With excitement,
+The Helloviza Team 💖`}
               onClose={() => {
                 setShowWelcomePopup(false);
                 localStorage.setItem("welcomePopupClosed", "true");
@@ -297,18 +308,30 @@ The Helloviza Community 💖`}
             path="/"
             element={
               <>
-                <Home onDiscoverNow={openModalBookingPanel} />
-                <ScrollTextSections />
+                <Home onDiscoverNow={openModalBookingPanel} user={user} />
+                {/* <ScrollTextSections />
                 <ExploreSection />
                 <VisaServicesSection />
-                <VisaCountryGrid />
-                <VisaStatsSection />
+                <VisaCountryGrid /> 
+                <VisaStatsSection /> */}
               </>
             }
           />
 
+          {/* ===== ✅ Events Pages ===== */}
+          <Route path="/events" element={<Events/>} />
+
+          {/* ===== ✅ Events Pages ===== */}
+          <Route path="/experiences" element={<Experience/>} />
+
+
+          <Route path="/gonew/visa" element={<NewHome/>} />
+
           {/* ===== ✅ Manual/Offline Visa Pages ===== */}
           <Route path="/visa/china" element={<ChinaVisa />} />
+
+          {/* Transfer Taxi Service */}
+          <Route path="/transfer-service" element={<TransferForTaxi/>} />
 
           {/* ===== Auth ===== */}
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
@@ -389,6 +412,8 @@ The Helloviza Community 💖`}
           <Route path="/go/visa" element={<VisaHandoff user={user} />} />
           <Route path="/go-for-visa" element={<Navigate to="/go/visa" replace />} />
 
+
+
           {/* ===== Admin ===== */}
           <Route
             path="/admin"
@@ -417,10 +442,10 @@ The Helloviza Community 💖`}
         </Routes>
       </main>
 
-      {!isAdminRoute && (
+      {!hideLayout && (
         <>
-          <BackgroundBreakSection />
-          <VisaFooterBlock />
+          {/* <BackgroundBreakSection /> */}
+          <NewFooter/>
           <ScrollToHeroButton />
         </>
       )}

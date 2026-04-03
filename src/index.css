@@ -29,3 +29,7 @@ body {
 section {
   animation: fade-in 1.2s ease-out forwards;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

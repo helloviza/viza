@@ -263,7 +263,7 @@ export default function TermsOfService() {
     <div className="min-h-screen bg-gray-100">
       {/* Responsive mobile style */}
       <style>{`
-        @media (max-width: 600px) {
+        @media (max-width: 100vw) {
           .hv-terms-wrap {
             margin: 24px 0 0 0 !important;
             border-radius: 0 !important;

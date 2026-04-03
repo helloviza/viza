@@ -179,9 +179,9 @@ export default function VisaCountryGrid() {
 
         return {
           _id:
-            c._id ||
-            `${c.country || ""}__${c.type || ""}` ||
-            Math.random().toString(16).slice(2),
+          c._id ||
+          `${c.country || ""}__${c.type || ""}` ||
+          Math.random().toString(16).slice(2),
           country: String(c.country || "").trim(),
           displayName: String(c.displayName || c.country || "").trim(),
           imageUrl: String(c.imageUrl || "").trim(),

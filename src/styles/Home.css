@@ -1,29 +1,43 @@
+/* =========================
+   HOME.CSS — DROP-IN REPLACEMENT
+   - Supports fixed fullscreen video/image/canvas hero background
+   - Fixes duplicate .hero-content override by scoping scroll-hero styles
+========================= */
+
+/* === Main Hero Wrapper === */
 .hero-wrapper {
   position: relative;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
-  /* Ensure a clean stacking context so content stays above bg */
   z-index: 0;
 }
 
+/* === Background Layer (fixed) === */
 .hero-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
-  /* The Three.js canvas will be appended inside this container */
-  z-index: 0;
-  pointer-events: none;                 /* background shouldn’t block clicks */
-  will-change: opacity;                 /* smoother fades */
+  z-index: -1;
+  pointer-events: none;
+  will-change: opacity;
   transition: opacity .7s cubic-bezier(.7,0,.3,1);
-  /* If you ever need a static fallback, you can still use background-* */
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
 }
 
-/* Ensure an appended canvas fills the container (extra safety) */
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.15));
+  pointer-events: none;
+}
+
 .hero-bg canvas {
   position: absolute;
   inset: 0;
@@ -32,30 +46,50 @@
   display: block;
 }
 
-.hero-content {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  padding-left: 5%;
-  color: #ffffff;
-  /* extra top padding on desktop */
-  padding-top: 90px;
-  position: relative; /* stays above bg */
-  z-index: 1;
+.hero-bg video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
+/* === Foreground Content (Main Hero) === */
+.hero-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;          /* side-by-side */
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding: 90px 5% 48px 5%;
+  box-sizing: border-box;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* === Text Column (left) === */
 .text-block {
-  max-width: 600px;
+  flex: 1 1 0;
+  min-width: 0;                 /* prevent flex blowout */
+  text-align: start;
 }
 
 .text-block h1 {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  line-height: 1.05;
   margin-bottom: 1rem;
 }
 
 .text-block p {
-  font-size: 1.2rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.2rem);
   margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
 .text-block button {
@@ -68,58 +102,74 @@
   cursor: pointer;
 }
 
-/* ----- RESPONSIVE STYLES ----- */
-@media (max-width: 900px) {
+/* === Tiles Column (right) === */
+.hero-tiles-col {
+  flex: 1 1 0;
+  min-width: 0;                 /* prevent flex blowout */
+}
+
+/* ----- TABLET: 768px–1024px ----- */
+@media (max-width: 1024px) {
   .hero-content {
-    padding-left: 2%;
-    justify-content: center;
-    /* Keep desktop top padding for tablets, or adjust if needed */
-    padding-top: 80px;
-  }
-  .text-block h1 {
-    font-size: 2.4rem;
-  }
-  .text-block p {
-    font-size: 1rem;
+    gap: 32px;
+    padding: 90px 4% 40px 4%;
   }
 }
 
-@media (max-width: 600px) {
-  .hero-wrapper,
-  .hero-bg,
-  .hero-content {
+/* ----- MOBILE: stack vertically below 768px ----- */
+@media (max-width: 768px) {
+  .hero-wrapper {
     height: auto;
     min-height: 100vh;
   }
 
   .hero-content {
-    /* top padding for mobile */
-    padding: 110px 10px 40px 10px;
-    align-items: flex-start;
-    justify-content: flex-start;
+    flex-direction: column;     /* stack on mobile */
+    align-items: stretch;
+    gap: 28px;
+    padding: 100px 20px 48px 20px;
+    min-height: 100vh;
   }
+
   .text-block {
-    max-width: 100vw;
+    text-align: center;
   }
+
   .text-block h1 {
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
-    word-break: break-word;
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
   }
+
   .text-block p {
-    font-size: 0.97rem;
-    margin-bottom: 1.1rem;
+    font-size: 1rem;
   }
-  .text-block button {
-    padding: 0.65rem 1.2rem;
-    font-size: 0.97rem;
+
+  .hero-tiles-col {
     width: 100%;
-    border-radius: 6px;
-    margin-top: 0.6rem;
   }
 }
 
-/* Respect users who prefer reduced motion – keep bg visible, no animated fades */
+@media (max-width: 480px) {
+  .hero-content {
+    padding: 90px 16px 40px 16px;
+    gap: 20px;
+  }
+
+  .text-block h1 {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+    word-break: break-word;
+  }
+
+  .text-block p {
+    font-size: 0.95rem;
+  }
+
+  .text-block button {
+    width: 100%;
+    border-radius: 6px;
+  }
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .hero-bg {
     transition: none;
@@ -129,7 +179,10 @@
 
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* === Scroll Hero Section === */
+/* =========================
+   SCROLL HERO SECTION
+========================= */
+
 .hero-scroll-container {
   position: relative;
   width: 100%;
@@ -162,10 +215,12 @@
   z-index: 2;
   will-change: transform;
 }
+
 .hero-door-left {
   left: 0;
   transform: translateX(0%);
 }
+
 .hero-door-right {
   right: 0;
   transform: translateX(0%);
@@ -182,22 +237,25 @@
   will-change: transform, opacity;
 }
 
-.hero-content {
+.hero-scroll-content {
   position: relative;
   z-index: 3;
   text-align: center;
   top: 45%;
   transform: translateY(-50%);
   padding: 0 1rem;
+  color: #ffffff;
 }
-.hero-content h1 {
+
+.hero-scroll-content h1 {
   font-size: 2.6rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
   color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-.hero-content p {
+
+.hero-scroll-content p {
   font-size: 1.25rem;
   margin-bottom: 1.5rem;
   color: #e3e9ef;
@@ -209,7 +267,7 @@
 }
 
 @media (max-width: 768px) {
-  .hero-content h1 {
+  .hero-scroll-content h1 {
     font-size: 1.8rem;
   }
   .hero-plane {

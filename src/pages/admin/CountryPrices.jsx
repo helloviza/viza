@@ -43,6 +43,7 @@ export default function CountryPrices() {
     type: "e-visa",
     currency: "INR",
     fee: "",
+    slash: "",
     isActive: true,
     notes: "",
   });
@@ -55,6 +56,7 @@ export default function CountryPrices() {
       type: "e-visa",
       currency: "INR",
       fee: "",
+      slash: "",
       isActive: true,
       notes: "",
     });
@@ -97,6 +99,8 @@ export default function CountryPrices() {
     if (!["e-visa", "sticker"].includes(payload.type)) return setError("type must be e-visa or sticker");
     if (!Number.isFinite(fee) || fee < 0) return setError("fee must be a non-negative number");
     payload.fee = fee;
+    if (!Number.isFinite(slash) || slash < 0) return setError("Slash must be a non-negative number");
+    payload.slash = slash;
 
     try {
       if (editingId) {
@@ -120,6 +124,7 @@ export default function CountryPrices() {
       type: row?.type || "e-visa",
       currency: row?.currency || "INR",
       fee: row?.fee ?? "",
+      slash: row?.slash ?? "",
       isActive: row?.isActive !== false,
       notes: row?.notes || "",
     });
@@ -273,6 +278,19 @@ export default function CountryPrices() {
             />
           </div>
 
+          <div>
+            <div style={{ fontWeight: 900, color: "#334155", marginBottom: 6 }}>Fee</div>
+            <input
+              style={inputStyle}
+              type="number"
+              min="0"
+              placeholder="e.g., 2999"
+              value={form.slash}
+              onChange={(e) => setForm((f) => ({ ...f, slash: e.target.value }))}
+              required
+            />
+          </div>
+
           <label style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 900, color: "#334155" }}>
             <input
               type="checkbox"
@@ -312,6 +330,7 @@ export default function CountryPrices() {
                 <th style={th}>Country</th>
                 <th style={th}>Type</th>
                 <th style={th}>Fee</th>
+                <th style={th}>Slash</th>
                 <th style={th}>Currency</th>
                 <th style={th}>Active</th>
                 <th style={th}>Updated</th>
@@ -327,6 +346,7 @@ export default function CountryPrices() {
                     <td style={td}>{r.country}</td>
                     <td style={td}>{r.type}</td>
                     <td style={td}>{r.fee}</td>
+                    <td style={td}>{r.slash}</td>
                     <td style={td}>{r.currency || "INR"}</td>
                     <td style={td}>
                       <button disabled={busyId === String(r._id)} onClick={() => toggleActive(r)} style={btnLink}>

@@ -214,14 +214,15 @@ function MobileVerificationModal({ show, onClose, onVerified }) {
           </>
         ) : (
           <>
-            <input
+            {/* <input
               type="text"
               placeholder={t("login.placeholders.otp", "Enter OTP")}
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               maxLength={6}
               style={M.input}
-            />
+            /> */}
+            <OtpInput value={otp} onChange={setOtp} style={{ justifyContent: "center" }} />
             <button onClick={verifyOtp} style={M.button} disabled={loading}>
               {loading ? t("login.buttons.verifying", "Verifying...") : t("login.buttons.verifyAndContinue", "Verify & Continue")}
             </button>
@@ -277,6 +278,89 @@ const M = {
     cursor: "pointer",
   },
 };
+
+/* Reusable 4-box OTP Input */
+function OtpInput({ value, onChange, style }) {
+  const inputsRef = React.useRef([]);
+
+  // Keep internal array of 4 chars in sync with parent value string
+  const chars = (value || "").split("").concat(["", "", "", ""]).slice(0, 4);
+
+  function handleKey(i, e) {
+    const key = e.key;
+
+    if (key === "Backspace") {
+      e.preventDefault();
+      const next = chars.slice();
+      if (next[i]) {
+        next[i] = "";
+      } else if (i > 0) {
+        next[i - 1] = "";
+        inputsRef.current[i - 1]?.focus();
+      }
+      onChange(next.join(""));
+      return;
+    }
+
+    if (key === "ArrowLeft" && i > 0) {
+      inputsRef.current[i - 1]?.focus();
+      return;
+    }
+    if (key === "ArrowRight" && i < 3) {
+      inputsRef.current[i + 1]?.focus();
+      return;
+    }
+
+    if (/^\d$/.test(key)) {
+      e.preventDefault();
+      const next = chars.slice();
+      next[i] = key;
+      onChange(next.join(""));
+      if (i < 3) inputsRef.current[i + 1]?.focus();
+    }
+  }
+
+  function handlePaste(e) {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
+    const next = pasted.split("").concat(["", "", "", ""]).slice(0, 4);
+    onChange(next.join(""));
+    const lastFilled = Math.min(pasted.length, 3);
+    inputsRef.current[lastFilled]?.focus();
+  }
+
+  return (
+    <div style={{ display: "flex", gap: "0.6rem", ...style }}>
+      {chars.map((ch, i) => (
+        <input
+          key={i}
+          ref={(el) => (inputsRef.current[i] = el)}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={ch}
+          onChange={() => {}} // controlled via onKeyDown
+          onKeyDown={(e) => handleKey(i, e)}
+          onPaste={handlePaste}
+          style={{
+            width: "3rem",
+            height: "3.2rem",
+            textAlign: "center",
+            fontSize: "1.4rem",
+            fontWeight: 800,
+            borderRadius: 10,
+            border: "none",
+            outline: ch ? "2px solid #00477f" : "2px solid transparent",
+            background: "#e6f0ff",
+            color: "#0b315c",
+            boxShadow: "inset 0 1px 0 rgba(0,0,0,.05)",
+            transition: "outline 0.15s",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* =================== MAIN =================== */
 export default function Login({ onLogin }) {
@@ -861,12 +945,13 @@ const requestPasswordReset = useCallback(async () => {
                     <div style={S.row}>
                       <div style={S.col}>
                         <label style={S.label}>{t("login.labels.otp", "Enter OTP")}</label>
-                        <input
+                        {/* <input
                           placeholder={t("login.placeholders.otp", "Enter OTP")}
                           value={otp}
                           onChange={(e) => setOtp(e.target.value)}
                           style={S.input}
-                        />
+                        /> */}
+                        <OtpInput value={otp} onChange={setOtp} />
                       </div>
                       <div style={{ ...S.col, display: "flex", alignItems: "flex-end" }}>
                         <button type="button" onClick={verifyOtp} style={S.otpBtn}>
@@ -932,7 +1017,7 @@ const requestPasswordReset = useCallback(async () => {
                 <>
                   <div style={S.rowSingle}>
                     <label style={S.label}>{t("login.labels.otp", "Enter OTP")}</label>
-                    <input
+                    {/* <input
                       type="text"
                       placeholder={t("login.placeholders.otp", "Enter OTP")}
                       value={mobileOtp}
@@ -940,7 +1025,8 @@ const requestPasswordReset = useCallback(async () => {
                       maxLength={6}
                       style={S.input}
                       required
-                    />
+                    /> */}
+                    <OtpInput value={mobileOtp} onChange={setMobileOtp} />
                   </div>
                   <button type="submit" style={S.submitBtn}>
                     {loading ? t("login.buttons.verifying", "Verifying...") : t("login.buttons.verifyAndLogin", "Verify & Login")}
@@ -953,7 +1039,7 @@ const requestPasswordReset = useCallback(async () => {
                     style={{ ...S.otpBtn, backgroundColor: timer > 0 ? "#888" : "#d06549", marginTop: "10px" }}
                   >
                     {timer > 0
-                      ? t("login.buttons.resendOtpIn", { seconds: timer })
+                      ? `${t("login.buttons.resendOtpIn", "seconds:" )} ${timer}`
                       : t("login.buttons.resendOtp", "Resend OTP")}
                   </button>
                 </>

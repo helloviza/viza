@@ -1,118 +1,51 @@
 // src/pages/Home.jsx
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import "../styles/Home.css";
-import bgImg from "../assets/hero-bg.jpg"; // fallback static bg
-import VisaSearchNeo from "../components/VisaSearchNeo";
 import AnnouncementBar from "../components/AnnouncementBar";
+import VisaTilesSection from "../components/VisaTilesSection";
 
-/* =========================
-   Results block (simple list)
-========================= */
+
+/* ─────────────────────────────────────────
+   Results List
+───────────────────────────────────────── */
 function ResultsList({ items = [] }) {
   const { t } = useTranslation();
   if (!items || items.length === 0) return null;
 
   return (
-    <section style={{ maxWidth: 1120, margin: "24px auto", padding: "0 24px" }}>
-      <h3
-        style={{
-          fontFamily: "'Barlow Condensed', Arial, sans-serif",
-          color: "#00477f",
-          fontSize: "1.4rem",
-          marginBottom: 12,
-          fontWeight: 800,
-          textAlign: "start",
-        }}
-      >
+    <section className="max-w-6xl mx-auto mt-6 px-6">
+      <h3 className="text-[#00477f] text-2xl font-extrabold mb-3 text-start">
         {t("home.results.title")}
       </h3>
-
-      <div style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr" }}>
+      <div className="flex flex-col gap-3">
         {items.map((v, idx) => {
           const title =
             v.route ??
             `${v.country || t("home.results.fallbackDestination")} — ${
               v.type || v.visaType || t("home.results.fallbackVisa")
             }`;
-
           return (
             <div
               key={v.id || `${v.country || v.route}-${idx}`}
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e5e7eb",
-                borderRadius: 12,
-                padding: 16,
-                boxShadow: "0 6px 16px rgba(0,0,0,.06)",
-              }}
+              className="bg-white border border-gray-200 rounded-xl p-4"
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                    fontWeight: 800,
-                    fontSize: "1.15rem",
-                    color: "#0f172a",
-                    textAlign: "start",
-                  }}
-                >
-                  {title}
-                </div>
-
-                <div
-                  style={{
-                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                    fontWeight: 800,
-                    fontSize: "1.05rem",
-                    color: "#00477f",
-                    textAlign: "end",
-                  }}
-                >
+              <div className="flex justify-between items-center gap-3 flex-wrap">
+                <span className="font-extrabold text-lg text-slate-900">{title}</span>
+                <span className="font-extrabold text-[#00477f]">
                   {(v.currency === "INR" || !v.currency ? "₹" : v.currency) + " "}
                   {v.fees || (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") || "—"}
-                </div>
+                </span>
               </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: 16,
-                  flexWrap: "wrap",
-                  marginTop: 8,
-                  color: "#475569",
-                  fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                }}
-              >
-                {v.processing_time && (
-                  <span>{t("home.results.processing")} {v.processing_time}</span>
-                )}
-                {v.processing && !v.processing_time && (
-                  <span>{t("home.results.processing")} {v.processing}</span>
-                )}
+              <div className="flex gap-4 flex-wrap mt-2 text-slate-500 text-sm">
+                {v.processing_time && <span>{t("home.results.processing")} {v.processing_time}</span>}
+                {v.processing && !v.processing_time && <span>{t("home.results.processing")} {v.processing}</span>}
                 {v.validity && <span>{t("home.results.validity")} {v.validity}</span>}
                 {v.stay && <span>{t("home.results.stay")} {v.stay}</span>}
                 {v.type && !v.visaType && <span>{t("home.results.type")} {v.type}</span>}
                 {v.visaType && <span>{t("home.results.type")} {v.visaType}</span>}
               </div>
-
               {Array.isArray(v.requirements) && v.requirements.length > 0 && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    color: "#64748b",
-                    fontFamily: "'Barlow Condensed', Arial, sans-serif",
-                    textAlign: "start",
-                  }}
-                >
+                <div className="mt-2 text-slate-400 text-sm text-start">
                   {t("home.results.requirements")} {v.requirements.join(", ")}
                 </div>
               )}
@@ -124,16 +57,15 @@ function ResultsList({ items = [] }) {
   );
 }
 
-/* =========================
-   Home page
-========================= */
-const Home = () => {
+
+/* ─────────────────────────────────────────
+   Home Page
+───────────────────────────────────────── */
+const Home = ({ user }) => {
   const { t } = useTranslation();
   const [showBg, setShowBg] = useState(true);
   const [results, setResults] = useState([]);
-  const bgRef = useRef(null);
 
-  // toggle hero bg fade based on scroll
   useEffect(() => {
     const sectionHeight = typeof window !== "undefined" ? window.innerHeight : 700;
     const onScroll = () => setShowBg(window.scrollY < sectionHeight * 2 - 40);
@@ -141,64 +73,70 @@ const Home = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // static background image
-  useEffect(() => {
-    const el = bgRef.current;
-    if (!el) return;
-    el.style.backgroundImage = `url(${bgImg})`;
-    el.style.backgroundSize = "cover";
-    el.style.backgroundPosition = "center";
-    el.style.backgroundRepeat = "no-repeat";
-  }, []);
-
   return (
     <>
-      {/* Global announcement – appears once at the very top */}
       <AnnouncementBar />
 
       <main id="home-main">
-        {/* Background layer (fixed) */}
+
+        {/* ── Video Background (fixed) ── */}
         <div
-          ref={bgRef}
-          className="hero-bg"
+          className="fixed inset-0 w-full h-screen -z-10 overflow-hidden pointer-events-none"
           style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100vh",
-            zIndex: -1,
-            transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
             opacity: showBg ? 1 : 0,
-            pointerEvents: "none",
+            transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
             willChange: "opacity",
           }}
-        />
+        >
+          <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+          <video
+            autoPlay muted loop playsInline preload="auto"
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/videos/helloviza.webm" type="video/webm" />
+            <source src="/videos/helloviza.mp4" type="video/mp4" />
+          </video>
+        </div>
 
-        {/* Foreground hero */}
-        <section className="hero-wrapper" id="hero">
-          <div className="hero-content">
-            <div className="text-block" style={{ textAlign: "start" }}>
-              <h1 style={{ lineHeight: 1.05 }}>
+        {/* ── Hero Section ── */}
+        <section
+          id="hero"
+          className="relative z-10 w-full min-h-screen flex items-center"
+        >
+          {/*
+            flex-col      → mobile: text top, tiles bottom
+            md:flex-row   → 768px+: text LEFT | tiles RIGHT  ← side by side
+          */}
+          <div className="
+            w-full max-w-[1280px] mx-auto
+            pt-24
+            flex flex-col md:flex-row
+            items-center
+            gap-8 md:gap-10 lg:gap-14
+          ">   
+          
+
+            {/* ── LEFT: Text ── */}
+            <div className="w-full md:w-1/2 text-center md:text-left text-white shrink-0">
+              <h1 className="font-extrabold leading-[1.05] text-[2rem] sm:text-[2.5rem] md:text-[2.8rem] lg:text-[3.2rem] mb-3">
                 <span>{t("home.hero.titleLine1")}</span>
                 <br />
                 <span>{t("home.hero.titleLine2")}</span>
               </h1>
-              <p style={{ marginTop: 10 }}>{t("home.hero.subtitle")}</p>
+              <p className="text-white/85 leading-relaxed text-sm sm:text-base md:text-lg max-w-sm mx-auto md:mx-0">
+                {t("home.hero.subtitle")}
+              </p>
             </div>
 
-            <div style={{ width: "100%", marginTop: 16 }}>
-              <VisaSearchNeo onResults={setResults} />
+            {/* ── RIGHT: Visa Tiles (now normal flow, not fixed) ── */}
+            <div className="w-full md:w-1/2 shrink-0">
+              <VisaTilesSection user={user} />
             </div>
+
           </div>
         </section>
 
-        {/* Tight spacer to avoid visible gap between hero and next section */}
-        <div style={{ height: "clamp(0px, 1vh, 8px)" }} />
-
-        <ResultsList items={results} />
-
-        {/* Footer is rendered globally in your layout/App – not here */}
+        {/* <ResultsList items={results} /> */}
       </main>
     </>
   );

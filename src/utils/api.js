@@ -148,6 +148,9 @@ export const API = {
   SAVED: "/api/saved",
   HISTORY: "/api/history",
 
+  //Transfer
+  TRANSFER_TAXI: "/api/transfer",
+
   // Admin
   ADMIN_PROFILES: "/api/admin/profiles",
   ADMIN_COUNTRY_PRICES: "/api/admin/country-prices",

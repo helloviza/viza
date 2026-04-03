@@ -1,6 +1,41 @@
 // helloviza/client/src/pages/admin/AdminCountryPrices.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE } from "../../utils/api";
+import {MaterialReactTable} from "material-react-table";   
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      default: "#0f172a",   // page bg (change to yours)
+      paper: "#111827",     // table/card bg (match ui.card)
+    },
+    primary: {
+      main: "#ffb199",      // your accent color
+    },
+  },
+  components: {
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          borderColor: "rgba(255,255,255,0.08)",
+        },
+        head: {
+          fontWeight: 900,
+        },
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "transparent",
+        },
+      },
+    },
+  },
+});
+
 
 const baseFont = "'Barlow Condensed', Arial, sans-serif";
 
@@ -86,6 +121,7 @@ export default function AdminCountryPrices() {
     type: "e-visa",
     currency: "INR",
     fee: "",
+    slash:"",
 
     imageUrl: "",
     applyMode: "go-visa",
@@ -142,6 +178,7 @@ export default function AdminCountryPrices() {
       type: "e-visa",
       currency: "INR",
       fee: "",
+      slash:"",
       imageUrl: "",
       applyMode: "go-visa",
       applyUrl: "",
@@ -167,6 +204,7 @@ export default function AdminCountryPrices() {
       type: r.type || "e-visa",
       currency: r.currency || "INR",
       fee: r.fee === null || r.fee === undefined ? "" : String(r.fee),
+      slash: r.slash === null || r.slash === undefined ? "" : String(r.slash),
       imageUrl: r.imageUrl || "",
       applyMode: r.applyMode || "go-visa",
       applyUrl: r.applyUrl || "",
@@ -196,6 +234,7 @@ export default function AdminCountryPrices() {
       type: cls(form.type) || "e-visa",
       currency: cls(form.currency).toUpperCase() || "INR",
       fee: form.fee === "" ? null : Number(form.fee),
+      slash: form.slash === "" ? null : Number(form.slash),
       notes: cls(form.notes),
 
       imageUrl: cls(form.imageUrl),
@@ -213,6 +252,8 @@ export default function AdminCountryPrices() {
     if (!Number.isFinite(payload.sortOrder)) payload.sortOrder = 1000;
 
     if (payload.fee !== null && !Number.isFinite(payload.fee)) return setErr("Fee must be a number");
+    if (payload.slash !== null && !Number.isFinite(payload.slash)) return setErr("Slash must be a number");
+    
 
     if (payload.applyMode !== "go-visa" && !payload.applyUrl) {
       return setErr("Apply URL is required for Offline/External mode");
@@ -387,6 +428,159 @@ export default function AdminCountryPrices() {
 
   const formPreviewImg = resolveImageUrl(form.imageUrl, apiBase);
 
+  const columns = useMemo(
+  () => [
+    {
+      header: "Card",
+      accessorKey: "imageUrl",
+      enableSorting: false,
+      Cell: ({ row }) => {
+        const r = row.original;
+        const img = resolveImageUrl(r.imageUrl, apiBase);
+        const label = cls(r.displayName) || "—";
+
+        return (
+          <div
+            style={{
+              width: 56,
+              height: 40,
+              borderRadius: 12,
+              overflow: "hidden",
+              border: "1px solid rgba(255,255,255,.12)",
+              background: "rgba(255,255,255,.06)",
+            }}
+          >
+            {img ? (
+              <img
+                src={img}
+                alt={label}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 900,
+                }}
+              >
+                {label.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+
+    {
+      header: "Name",
+      accessorFn: (row) => cls(row.displayName) || "—",
+      id: "name",
+    },
+
+    {
+      header: "Type",
+      accessorKey: "type",
+    },
+
+    {
+      header: "Fee",
+      accessorFn: (row) =>
+        row.fee === null || row.fee === undefined
+          ? "Apply to Check"
+          : `${row.currency || "INR"} ${row.fee}`,
+      id: "fee",
+    },
+
+    {
+      header: "Slash",
+      accessorFn: (row) =>
+        row.slash === null || row.slash === undefined
+          ? "Apply to Check"
+          : `${row.currency || "INR"} ${row.slash}`,
+      id: "slash",
+    },
+
+    {
+      header: "Badge",
+      accessorKey: "badgeText",
+    },
+
+    {
+      header: "Key",
+      accessorKey: "country",
+    },
+
+    {
+      header: "Mode",
+      accessorKey: "applyMode",
+    },
+
+    {
+      header: "URL",
+      accessorKey: "applyUrl",
+      Cell: ({ cell }) => {
+        const value = cell.getValue();
+        if (!value) return "—";
+
+        return /^https?:\/\//i.test(value) ? (
+          <a href={value} target="_blank" rel="noreferrer">
+            {value}
+          </a>
+        ) : (
+          normalizeInternalPath(value)
+        );
+      },
+    },
+
+    {
+      header: "Active",
+      accessorKey: "isActive",
+      Cell: ({ row }) => (
+        <button
+          onClick={() => toggleActive(row.original)}
+          style={ui.btn("ghost")}
+          type="button"
+        >
+          {row.original.isActive ? "Active" : "Inactive"}
+        </button>
+      ),
+    },
+
+    {
+      header: "Actions",
+      id: "actions",
+      enableSorting: false,
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={() => startEdit(row.original)}
+            style={ui.btn("ghost")}
+            type="button"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => remove(row.original)}
+            style={ui.danger}
+            type="button"
+          >
+            Disable
+          </button>
+        </div>
+      ),
+    },
+  ],
+  [filtered]
+  );
+
   return (
     <div style={{ fontFamily: baseFont }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
@@ -458,6 +652,11 @@ export default function AdminCountryPrices() {
           <div style={{ gridColumn: "span 2" }}>
             <div style={ui.label}>Fee (optional)</div>
             <input value={form.fee} onChange={(e) => setForm((f) => ({ ...f, fee: e.target.value }))} style={ui.input} placeholder="e.g. 3499" />
+          </div>
+
+          <div style={{ gridColumn: "span 2" }}>
+            <div style={ui.label}>Slash (optional)</div>
+            <input value={form.slash} onChange={(e) => setForm((f) => ({ ...f, slash: e.target.value }))} style={ui.input} placeholder="e.g. 1000" />
           </div>
 
           <div style={{ gridColumn: "span 4" }}>
@@ -587,7 +786,70 @@ export default function AdminCountryPrices() {
           </div>
         </div>
 
-        <div style={{ overflowX: "auto" }}>
+<ThemeProvider theme={darkTheme}>
+  
+          <MaterialReactTable
+  columns={columns}
+  data={filtered}
+  enableSorting
+  enablePagination
+  enableColumnFilters
+  enableGlobalFilter
+  enableHiding
+  enableColumnOrdering
+  enableDensityToggle
+  enableFullScreenToggle
+  enableRowSelection
+  state={{ isLoading: loading }}
+
+  muiTablePaperProps={{
+    elevation: 0,
+    sx: {
+      backgroundColor: "transparent !important",
+      boxShadow: "none",
+    },
+  }}
+
+  muiTableContainerProps={{
+    sx: {
+      backgroundColor: "transparent !important",
+    },
+  }}
+
+  muiTopToolbarProps={{
+    sx: {
+      backgroundColor: "transparent !important",
+    },
+  }}
+
+  muiBottomToolbarProps={{
+    sx: {
+      backgroundColor: "transparent !important",
+    },
+  }}
+
+  muiTableBodyCellProps={{
+    sx: {
+      backgroundColor: "transparent !important",
+    },
+  }}
+
+  muiTableHeadCellProps={{
+    sx: {
+      backgroundColor: "transparent !important",
+    },
+  }}
+
+  muiTableHeadProps={{
+    sx: {
+      backgroundColor: "transparent !important",
+    },
+  }}
+/>
+</ThemeProvider>
+        
+
+        {/* <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ textAlign: "left" }}>
@@ -684,8 +946,8 @@ export default function AdminCountryPrices() {
                 </tr>
               ) : null}
             </tbody>
-          </table>
-        </div>
+          </table> 
+        </div>*/}
       </div>
     </div>
   );
