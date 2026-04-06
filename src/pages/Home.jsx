@@ -93,22 +93,22 @@ const Home = ({ user }) => {
             autoPlay muted loop playsInline preload="auto"
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="/videos/helloviza.webm" type="video/webm" />
-            <source src="/videos/helloviza.mp4" type="video/mp4" />
+            {/* <source src="/videos/helloviza.webm" type="video/webm" /> */}
+            <source src="https://hellovizavideo.s3.ap-south-1.amazonaws.com/helloviza.mp4" type="video/mp4" />
           </video>
         </div>
 
         {/* ── Hero Section ── */}
         <section
           id="hero"
-          className="relative z-10 w-full min-h-screen flex items-center"
+          className="relative z-10 w-full min-h-[80vh] md:min-h-screen flex items-center"
         >
           {/*
             flex-col      → mobile: text top, tiles bottom
             md:flex-row   → 768px+: text LEFT | tiles RIGHT  ← side by side
           */}
           <div className="
-            w-full max-w-[1280px] mx-auto
+            w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-10 mx-auto
             pt-24
             flex flex-col md:flex-row
             items-center
@@ -123,7 +123,7 @@ const Home = ({ user }) => {
                 <br />
                 <span>{t("home.hero.titleLine2")}</span>
               </h1>
-              <p className="text-white/85 leading-relaxed text-sm sm:text-base md:text-lg max-w-sm mx-auto md:mx-0">
+              <p className="text-white/85 leading-relaxed text-sm sm:text-base md:text-lg max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto md:mx-0">
                 {t("home.hero.subtitle")}
               </p>
             </div>

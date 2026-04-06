@@ -17,7 +17,7 @@ const AVATAR_IMAGES = [
 
 
 
-const SKY_VIDEO_MP4 = `/videos/Background_Vid2.mp4?v=${Date.now()}`;
+const SKY_VIDEO_MP4 = "https://hellovizavideo.s3.ap-south-1.amazonaws.com/Background_Vid2.mp4";
 
 const EXPLORE_IMAGES = [
   { src: "/images/Dominic_A.jpg",              label: "Malaysia"    },
@@ -365,7 +365,7 @@ const HeroSection = ({ user }) => {
     objectFit: "cover", display: "block",
   }}
 >
-  <source src={SKY_VIDEO_MP4} type="video/mp4"/>
+  <source src="https://hellovizavideo.s3.ap-south-1.amazonaws.com/Background_Vid2.mp4" type="video/mp4"/>
 </video>
 
           {/* Dark overlay */}
