@@ -6,60 +6,135 @@ import VisaTilesSection from "../components/VisaTilesSection";
 
 
 /* ─────────────────────────────────────────
-   Results List
+   Results List - Fully Responsive
 ───────────────────────────────────────── */
-function ResultsList({ items = [] }) {
-  const { t } = useTranslation();
-  if (!items || items.length === 0) return null;
+// function ResultsList({ items = [] }) {
+//   const { t } = useTranslation();
+//   if (!items || items.length === 0) return null;
 
-  return (
-    <section className="max-w-6xl mx-auto mt-6 px-6">
-      <h3 className="text-[#00477f] text-2xl font-extrabold mb-3 text-start">
-        {t("home.results.title")}
-      </h3>
-      <div className="flex flex-col gap-3">
-        {items.map((v, idx) => {
-          const title =
-            v.route ??
-            `${v.country || t("home.results.fallbackDestination")} — ${
-              v.type || v.visaType || t("home.results.fallbackVisa")
-            }`;
-          return (
-            <div
-              key={v.id || `${v.country || v.route}-${idx}`}
-              className="bg-white border border-gray-200 rounded-xl p-4"
-            >
-              <div className="flex justify-between items-center gap-3 flex-wrap">
-                <span className="font-extrabold text-lg text-slate-900">{title}</span>
-                <span className="font-extrabold text-[#00477f]">
-                  {(v.currency === "INR" || !v.currency ? "₹" : v.currency) + " "}
-                  {v.fees || (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") || "—"}
-                </span>
-              </div>
-              <div className="flex gap-4 flex-wrap mt-2 text-slate-500 text-sm">
-                {v.processing_time && <span>{t("home.results.processing")} {v.processing_time}</span>}
-                {v.processing && !v.processing_time && <span>{t("home.results.processing")} {v.processing}</span>}
-                {v.validity && <span>{t("home.results.validity")} {v.validity}</span>}
-                {v.stay && <span>{t("home.results.stay")} {v.stay}</span>}
-                {v.type && !v.visaType && <span>{t("home.results.type")} {v.type}</span>}
-                {v.visaType && <span>{t("home.results.type")} {v.visaType}</span>}
-              </div>
-              {Array.isArray(v.requirements) && v.requirements.length > 0 && (
-                <div className="mt-2 text-slate-400 text-sm text-start">
-                  {t("home.results.requirements")} {v.requirements.join(", ")}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
+//   return (
+//     <section className="w-full">
+//       {/* Responsive padding container */}
+//       <div className="
+//         w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12
+//         py-8 sm:py-10 md:py-12 lg:py-14 xl:py-16
+//       ">
+//         {/* Max width wrapper */}
+//         <div className="w-full max-w-7xl mx-auto">
+//           <h3 className="
+//             text-[#00477f] font-extrabold
+//             text-xl sm:text-2xl md:text-2xl lg:text-3xl xl:text-3xl
+//             mb-4 sm:mb-5 md:mb-6 lg:mb-7 xl:mb-8
+//             text-start leading-tight
+//           ">
+//             {t("home.results.title")}
+//           </h3>
+
+//           {/* Results grid - responsive spacing */}
+//           <div className="flex flex-col gap-3 sm:gap-3.5 md:gap-4 lg:gap-4.5">
+//             {items.map((v, idx) => {
+//               const title =
+//                 v.route ??
+//                 `${v.country || t("home.results.fallbackDestination")} — ${
+//                   v.type || v.visaType || t("home.results.fallbackVisa")
+//                 }`;
+              
+//               return (
+//                 <div
+//                   key={v.id || `${v.country || v.route}-${idx}`}
+//                   className="
+//                     w-full bg-white border border-gray-200 rounded-lg sm:rounded-lg md:rounded-xl lg:rounded-xl
+//                     p-3 sm:p-4 md:p-5 lg:p-6
+//                     hover:shadow-md transition-shadow duration-200
+//                   "
+//                 >
+//                   {/* Title and fees row - responsive flex */}
+//                   <div className="
+//                     flex flex-col sm:flex-row sm:justify-between sm:items-center
+//                     gap-2 sm:gap-3 md:gap-4
+//                   ">
+//                     <span className="
+//                       font-extrabold text-base sm:text-lg md:text-lg lg:text-xl
+//                       text-slate-900
+//                       break-words
+//                     ">
+//                       {title}
+//                     </span>
+//                     <span className="
+//                       font-extrabold text-[#00477f]
+//                       text-base sm:text-lg md:text-lg lg:text-xl
+//                       whitespace-nowrap
+//                     ">
+//                       {(v.currency === "INR" || !v.currency ? "₹" : v.currency) + " "}
+//                       {v.fees || (v.fee ? String(v.fee).replace(/[^\d]/g, "") : "") || "—"}
+//                     </span>
+//                   </div>
+
+//                   {/* Details row - responsive text size and wrapping */}
+//                   <div className="
+//                     flex flex-wrap gap-2 sm:gap-3 md:gap-4 lg:gap-5
+//                     mt-3 sm:mt-3 md:mt-4 lg:mt-4
+//                     text-slate-500 text-xs sm:text-sm md:text-sm lg:text-sm
+//                   ">
+//                     {v.processing_time && (
+//                       <span className="flex-shrink-0">
+//                         {t("home.results.processing")} {v.processing_time}
+//                       </span>
+//                     )}
+//                     {v.processing && !v.processing_time && (
+//                       <span className="flex-shrink-0">
+//                         {t("home.results.processing")} {v.processing}
+//                       </span>
+//                     )}
+//                     {v.validity && (
+//                       <span className="flex-shrink-0">
+//                         {t("home.results.validity")} {v.validity}
+//                       </span>
+//                     )}
+//                     {v.stay && (
+//                       <span className="flex-shrink-0">
+//                         {t("home.results.stay")} {v.stay}
+//                       </span>
+//                     )}
+//                     {v.type && !v.visaType && (
+//                       <span className="flex-shrink-0">
+//                         {t("home.results.type")} {v.type}
+//                       </span>
+//                     )}
+//                     {v.visaType && (
+//                       <span className="flex-shrink-0">
+//                         {t("home.results.type")} {v.visaType}
+//                       </span>
+//                     )}
+//                   </div>
+
+//                   {/* Requirements section - responsive padding */}
+//                   {Array.isArray(v.requirements) && v.requirements.length > 0 && (
+//                     <div className="
+//                       mt-3 sm:mt-3 md:mt-4 lg:mt-4
+//                       text-slate-400 text-xs sm:text-sm md:text-sm lg:text-sm
+//                       text-start
+//                     ">
+//                       <span className="font-medium">
+//                         {t("home.results.requirements")}
+//                       </span>
+//                       {" "}
+//                       <span className="text-slate-400">{v.requirements.join(", ")}</span>
+//                     </div>
+//                   )}
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
 
 
 /* ─────────────────────────────────────────
-   Home Page
+   Home Page - Fully Responsive
 ───────────────────────────────────────── */
 const Home = ({ user }) => {
   const { t } = useTranslation();
@@ -77,66 +152,128 @@ const Home = ({ user }) => {
     <>
       <AnnouncementBar />
 
-      <main id="home-main">
+      <main id="home-main" className="w-full overflow-x-hidden">
 
         {/* ── Video Background (fixed) ── */}
         <div
-          className="fixed inset-0 w-full h-screen -z-10 overflow-hidden pointer-events-none"
+          className="
+            fixed inset-0 w-full h-screen -z-10
+            overflow-hidden pointer-events-none
+          "
           style={{
             opacity: showBg ? 1 : 0,
-            transition: "opacity .7s cubic-bezier(.7,0,.3,1)",
+            transition: "opacity 0.7s cubic-bezier(0.7, 0, 0.3, 1)",
             willChange: "opacity",
           }}
         >
+          {/* Dark overlay */}
           <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+          
+          {/* Video element with proper sizing */}
           <video
-            autoPlay muted loop playsInline preload="auto"
-            className="absolute inset-0 w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="
+              absolute inset-0 w-full h-full
+              object-cover
+            "
           >
-            {/* <source src="/videos/helloviza.webm" type="video/webm" /> */}
-            <source src="https://hellovizavideo.s3.ap-south-1.amazonaws.com/helloviza.mp4" type="video/mp4" />
+            <source
+              src="https://hellovizavideo.s3.ap-south-1.amazonaws.com/helloviza.mp4"
+              type="video/mp4"
+            />
           </video>
         </div>
 
-        {/* ── Hero Section ── */}
+        {/* ── Hero Section - Fully Responsive ── */}
         <section
           id="hero"
-          className="relative z-10 w-full min-h-[80vh] md:min-h-screen flex items-center"
+          className="
+            relative z-10 w-full
+            min-h-screen md:min-h-[100svh]
+            flex items-center justify-center
+            overflow-hidden
+          "
         >
-          {/*
-            flex-col      → mobile: text top, tiles bottom
-            md:flex-row   → 768px+: text LEFT | tiles RIGHT  ← side by side
-          */}
-          <div className="
-            w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-10 mx-auto
-            pt-24
-            flex flex-col md:flex-row
-            items-center
-            gap-8 md:gap-10 lg:gap-14
-          ">   
-          
+          {/* Main container with responsive padding */}
+          <div
+            className="
+              w-full h-full
+              px-4 sm:px-5 md:px-6 lg:px-8 xl:px-10
+              py-12 sm:py-14 md:py-16 lg:py-20 xl:py-24
+              flex items-center justify-center
+            "
+          >
+            {/* Content wrapper with max width */}
+            <div
+              className="
+                w-full max-w-7xl
+                grid grid-cols-1 md:grid-cols-2
+                gap-8 sm:gap-10 md:gap-12 lg:gap-14 xl:gap-16
+                items-center
+                auto-rows-max md:auto-rows-max
+              "
+            >
+              {/* ── LEFT: Text Section ── */}
+              <div className="
+                w-full
+                flex flex-col items-center md:items-start
+                justify-center
+                text-center md:text-left
+                text-white
+                order-2 md:order-1
+              ">
+                {/* Hero Title - Responsive sizing */}
+                <h1 className="
+                  font-extrabold leading-tight
+                  text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+                  mb-3 sm:mb-4 md:mb-5 lg:mb-6 xl:mb-8
+                  max-w-sm xs:max-w-md sm:max-w-lg md:max-w-none
+                  mx-auto md:mx-0
+                  drop-shadow-lg
+                ">
+                  <span className="block">{t("home.hero.titleLine1")}</span>
+                  <span className="block">{t("home.hero.titleLine2")}</span>
+                </h1>
 
-            {/* ── LEFT: Text ── */}
-            <div className="w-full md:w-1/2 text-center md:text-left text-white shrink-0">
-              <h1 className="font-extrabold leading-[1.05] text-[2rem] sm:text-[2.5rem] md:text-[2.8rem] lg:text-[3.2rem] mb-3">
-                <span>{t("home.hero.titleLine1")}</span>
-                <br />
-                <span>{t("home.hero.titleLine2")}</span>
-              </h1>
-              <p className="text-white/85 leading-relaxed text-sm sm:text-base md:text-lg max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto md:mx-0">
-                {t("home.hero.subtitle")}
-              </p>
+                {/* Hero Subtitle - Responsive sizing */}
+                <p className="
+                  text-white/85 font-light
+                  text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl
+                  leading-relaxed sm:leading-relaxed md:leading-relaxed
+                  max-w-xs xs:max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl
+                  mx-auto md:mx-0
+                  drop-shadow
+                ">
+                  {t("home.hero.subtitle")}
+                </p>
+              </div>
+
+              {/* ── RIGHT: Tiles Section ── */}
+              <div className="
+                w-full
+                flex justify-center md:justify-end
+                order-1 md:order-2
+                px-2 sm:px-4 md:px-0
+              ">
+                <div className="
+                  w-full
+                  max-w-xs sm:max-w-sm md:max-w-none
+                  flex justify-center md:justify-end
+                ">
+                  <VisaTilesSection user={user} />
+                </div>
+              </div>
             </div>
-
-            {/* ── RIGHT: Visa Tiles (now normal flow, not fixed) ── */}
-            <div className="w-full md:w-1/2 shrink-0">
-              <VisaTilesSection user={user} />
-            </div>
-
           </div>
         </section>
 
+        {/* ── Results Section (if needed) ── */}
         {/* <ResultsList items={results} /> */}
+
       </main>
     </>
   );

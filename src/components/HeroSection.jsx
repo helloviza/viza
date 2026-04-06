@@ -17,7 +17,7 @@ const AVATAR_IMAGES = [
 
 
 
-const SKY_VIDEO_MP4 = "https://hellovizavideo.s3.ap-south-1.amazonaws.com/Background_Vid2.mp4";
+//const SKY_VIDEO_MP4 = "https://hellovizavideo.s3.ap-south-1.amazonaws.com/Background_Vid2.mp4";
 
 const EXPLORE_IMAGES = [
   { src: "/images/Dominic_A.jpg",              label: "Malaysia"    },
@@ -188,13 +188,13 @@ const DestCard = ({ src, label, style = {} }) => (
 /* ─────────────────────────────────────────────
    Main component
 ───────────────────────────────────────────── */
-const HeroSection = ({ user }) => {
+const HeroSection = ({ user,onContinue }) => {
   const navigate = useNavigate();
   const { t }    = useTranslation();
 
-  const continueManually = useCallback(() => {
-    window.location.href = "https://visa.helloviza.com";
-  }, []);
+  // const continueManually = useCallback(() => {
+  //   window.location.href = "https://visa.helloviza.com";
+  // }, []);
   
 
   return (
@@ -306,7 +306,7 @@ const HeroSection = ({ user }) => {
             style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}
           >
             <button
-              onClick={continueManually}
+              onClick={onContinue}
               style={{
                 background: BRAND, color: "white", border: "none",
                 borderRadius: "999px", padding: "12px 28px",

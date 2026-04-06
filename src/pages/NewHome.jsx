@@ -5,6 +5,7 @@
 //  → DiscoverDestinations → ReviewsSection → FAQSection → ContactUs → Footer
 // ─────────────────────────────────────────────────────────────────
 import React from "react";
+import { useRef } from "react";
 import AnnouncementBar        from "../components/AnnouncementBar";
 
 
@@ -20,7 +21,11 @@ import PopularVisaDestination from "../components/PopularVisaDestination";
 import ReviewSections from "../components/ReviewSections";
 import FAQSection from "../components/FAQSection";
 
+
+
+
 const NewHome=({ user, onLogout }) =>{
+  const discoverRef=useRef(null);
   return (
     <>
       {/* Fixed global announcement bar (optional — keep if you have AnnouncementBar) */}
@@ -31,7 +36,9 @@ const NewHome=({ user, onLogout }) =>{
       
 
       {/* ① Hero — video BG + service tiles + sky-meets-earth + explore strip */}
-      <HeroSection user={user} />
+      <HeroSection user={user} onContinue={() => {
+    discoverRef.current?.scrollIntoView({ behavior: "smooth" });
+  }}  />
 
       {/* ② Popular Visa Destinations — static + API-ready */}
       <PopularVisaDestination />
@@ -40,8 +47,9 @@ const NewHome=({ user, onLogout }) =>{
       <WhyChooseHelloViza/>
 
       {/* ④ Discover Your Destination — paginated API grid */}
+      <div ref={discoverRef}>
       <DiscoverDestinations />
-
+      </div>
       {/* ⑤ Customer Reviews */}
       <ReviewSections />
 
