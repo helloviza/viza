@@ -17,8 +17,7 @@ const AVATAR_IMAGES = [
 
 
 
-// const SKY_VIDEO_WEBM = "/videos/Background_Vid2.webm";
-const SKY_VIDEO_MP4  = `/videos/Background_Vid2.mp4?v=${Date.now()}`;
+const SKY_VIDEO_MP4 = `/videos/Background_Vid2.mp4?v=${Date.now()}`;
 
 const EXPLORE_IMAGES = [
   { src: "/images/Dominic_A.jpg",              label: "Malaysia"    },
@@ -349,16 +348,25 @@ const HeroSection = ({ user }) => {
         }}>
           {/* Video */}
           <video
-            autoPlay muted loop playsInline preload="metadata" crossOrigin="anonymous"
-            style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%",
-              objectFit: "cover", display: "block",
-            }}
-          >
-            {/* <source src={SKY_VIDEO_WEBM} type="video/webm"/> */}
-            <source src={SKY_VIDEO_MP4}  type="video/mp4"/>
-          </video>
+  autoPlay 
+  muted 
+  loop 
+  playsInline
+  preload="metadata"
+  crossOrigin="anonymous"
+  onError={(e) => {
+    console.error("Video failed to load:", e);
+    // Fallback background
+    e.currentTarget.parentElement.style.background = "linear-gradient(135deg, #00477f, #005fa3)";
+  }}
+  style={{
+    position: "absolute", inset: 0,
+    width: "100%", height: "100%",
+    objectFit: "cover", display: "block",
+  }}
+>
+  <source src={SKY_VIDEO_MP4} type="video/mp4"/>
+</video>
 
           {/* Dark overlay */}
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.42)" }}/>
