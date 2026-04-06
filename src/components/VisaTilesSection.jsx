@@ -161,10 +161,10 @@ export default function VisaServiceTiles({ user }) {
   }, [navigate]);
 
   const handleGoForTransfer = useCallback(() => {
-    if (effectiveUser) { navigate("/transfer-service"); return; }
-    try { sessionStorage.setItem(TRANSFER_INTENT_KEY, String(Date.now())); } catch {}
-    navigate("/login?next=/transfer-service");
-  }, [navigate, effectiveUser]);
+    // if (effectiveUser) { navigate("/transfer-service"); return; }
+    // try { sessionStorage.setItem(TRANSFER_INTENT_KEY, String(Date.now())); } catch {}
+    navigate("/transfer-service");
+  }, [navigate]);
 
   const handleGoForEvents = useCallback(() => {
     navigate("/events");
@@ -186,12 +186,12 @@ export default function VisaServiceTiles({ user }) {
 
       {/* Row 2 — Experience + Events */}
       <div style={{ display: "flex", gap: 8 }}>
-        <SmallTile
+        {/* <SmallTile
           // icon={icons.experience}
           title="Experience"
           // desc="We are coming soon..."
           onClick={handleGoForExperiences}
-        />
+        /> */}
         <SmallTile
           // icon={icons.events}
           title="Events"

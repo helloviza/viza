@@ -17,8 +17,8 @@ const AVATAR_IMAGES = [
 
 
 
-const SKY_VIDEO_WEBM = "/videos/Background_Vid2.webm";
-const SKY_VIDEO_MP4  = "/videos/Background_Vid2.mp4";
+// const SKY_VIDEO_WEBM = "/videos/Background_Vid2.webm";
+const SKY_VIDEO_MP4  = `/videos/Background_Vid2.mp4?v=${Date.now()}`;
 
 const EXPLORE_IMAGES = [
   { src: "/images/Dominic_A.jpg",              label: "Malaysia"    },
@@ -349,7 +349,7 @@ const HeroSection = ({ user }) => {
         }}>
           {/* Video */}
           <video
-            autoPlay muted loop playsInline
+            autoPlay muted loop playsInline preload="metadata" crossOrigin="anonymous"
             style={{
               position: "absolute", inset: 0,
               width: "100%", height: "100%",
