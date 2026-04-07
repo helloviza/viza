@@ -71,7 +71,7 @@ function DestCard({ dest, onClick }) {
           <span className="text-xl">{dest.flag}</span>
           <span
             className="text-white font-black text-lg leading-none"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
           >
             {dest.country}
           </span>
@@ -95,7 +95,7 @@ function DestCard({ dest, onClick }) {
         >
           <div
             className="w-full text-center py-1.5 rounded-lg text-white text-sm font-bold"
-            style={{ background: ACCENT, fontFamily: "'Inter', sans-serif" }}
+            style={{ background: ACCENT, fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
           >
             Apply Now →
           </div>
@@ -134,7 +134,7 @@ const PopularVisaDestination=() =>{
   };
 
   return (
-    <section className="bg-white pb-16 lg:py-20">
+    <section className="bg-[#f1f1f1] pb-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
         {/* Heading row */}
@@ -142,14 +142,14 @@ const PopularVisaDestination=() =>{
           <div>
             <p
               className="text-[#d06549] text-sm font-bold uppercase tracking-[0.18em] mb-2"
-              style={{ fontFamily: "'Inter', sans-serif" }}
+              style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
             >
               {t("visa.popular.eyebrow", { defaultValue: "Trending Now" })}
             </p>
             <h2
               className="font-black text-[#00477f] leading-none m-0"
               style={{
-                fontFamily: "'Inter',sans-serif",
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 fontSize: "clamp(2rem, 3.5vw, 3rem)",
                 letterSpacing: "-0.5px",
               }}

@@ -92,7 +92,7 @@ function ReviewCard({ review }) {
 
   return (
     <div
-      className="rounded-2xl p-6 flex flex-col gap-4 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="rounded-2xl p-6 flex flex-col gap-4 bg-'#f1f1f1' transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{ boxShadow: "0 4px 18px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.04)" }}
     >
       {/* Top — avatar + name */}
@@ -108,16 +108,16 @@ function ReviewCard({ review }) {
             className="w-full h-full object-cover"
             onError={(e) => { e.target.style.display = "none"; }}
           />
-          <span className="absolute font-black" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <span className="absolute font-black" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
             {review.initials}
           </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-black text-[#00477f] text-base leading-none mb-0.5 truncate"
-            style={{ fontFamily: "'Inter', sans-serif" }}>
+            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
             {review.name}
           </div>
-          <div className="text-gray-400 text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <div className="text-gray-400 text-xs" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
             {review.location}
           </div>
         </div>
@@ -125,7 +125,7 @@ function ReviewCard({ review }) {
         <span
           className="px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0"
           style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
             background: "rgba(208,101,73,0.1)",
             color: ACCENT,
             fontSize: "0.72rem",
@@ -144,13 +144,13 @@ function ReviewCard({ review }) {
       </div>
 
       {/* Review text */}
-      <p className="text-gray-600 text-sm leading-relaxed m-0" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <p className="text-gray-600 text-sm leading-relaxed m-0" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
         "{displayText}"
         {isLong && (
           <button
             onClick={() => setExpanded(!expanded)}
             className="ml-1 font-bold"
-            style={{ color: ACCENT, fontFamily: "'Inter', sans-serif", fontSize: "inherit", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            style={{ color: ACCENT, fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;", fontSize: "inherit", background: "none", border: "none", cursor: "pointer", padding: 0 }}
           >
             {expanded ? "Show less" : "Read more"}
           </button>
@@ -164,7 +164,7 @@ function ReviewCard({ review }) {
           <circle cx="8" cy="8" r="7" stroke="#22c55e" strokeWidth="1.5"/>
           <path d="M5 8l2 2 4-4" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        <span className="text-green-500 text-xs font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <span className="text-green-500 text-xs font-semibold" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
           Verified Traveler
         </span>
       </div>
@@ -174,21 +174,21 @@ function ReviewCard({ review }) {
 
 const ReviewSections=()=> {
   return (
-    <section className="bg-white py-16 lg:py-20">
+    <section className="bg-'#f1f1f1' py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
 
         {/* Heading */}
         <div className="text-center mb-12">
           <p
             className="text-[#d06549] text-sm font-bold uppercase tracking-[0.18em] mb-3"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
           >
             Traveler Stories
-          </p>
+          </p> 
           <h2
             className="font-black text-[#00477f] leading-none mb-4"
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
               fontSize: "clamp(2.2rem, 3.5vw, 3rem)",
               letterSpacing: "-1px",
             }}
@@ -207,11 +207,11 @@ const ReviewSections=()=> {
             </div>
             <span
               className="font-black text-[#00477f] text-2xl"
-              style={{ fontFamily: "'Inter', sans-serif" }}
+              style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
             >
               4.81
             </span>
-            <span className="text-gray-400 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <span className="text-gray-400 text-sm" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
               from 12,000+ reviews
             </span>
           </div>
@@ -229,7 +229,7 @@ const ReviewSections=()=> {
           <button
             className="px-8 py-3 rounded-xl font-bold text-base border-2 transition-all duration-200 hover:text-white"
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
               fontSize: "1.05rem",
               borderColor: BRAND,
               color: BRAND,

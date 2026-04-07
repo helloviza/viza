@@ -343,7 +343,7 @@ const WhyChooseHelloViza = () => {
     <section style={{
       position: "relative",
       overflow: "hidden",
-      background: "linear-gradient(160deg, #f0f6ff 0%, #fff 60%, #fff7f4 100%)",
+      background: "#f1f1f1",
       padding: `${isMobile ? "40px" : "60px"} 0`,
     }}>
 
@@ -392,26 +392,48 @@ const WhyChooseHelloViza = () => {
               color: ACCENT, fontSize: "0.78rem", fontWeight: 700,
               letterSpacing: "0.18em", textTransform: "uppercase",
               marginBottom: "10px",
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
             }}>
               {t("services.why.title", { defaultValue: "Why Choose Us" })}
             </p>
 
             <h2 style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
               fontWeight: 900, color: BRAND,
               fontSize: isMobile ? "2rem" : isTablet ? "2.6rem" : "clamp(2.6rem, 4vw, 3.8rem)",
               lineHeight: 1.05, letterSpacing: "-1px", marginBottom: "12px",
             }}>
               Why Choose{" "}
-              <span style={{ color: ACCENT, fontStyle: "italic" }}>Hello</span>Viza?
+  <span
+    style={{
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      fontWeight: 900,
+      fontSize: isMobile ? "2rem" : isTablet ? "2.6rem" : "clamp(2.6rem, 4vw, 3.8rem)",
+      color: ACCENT,
+      letterSpacing: "-0.5px",
+    }}
+  >
+    hello
+  </span>
+  <span
+    style={{
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      fontWeight: 900,
+      fontSize: isMobile ? "2rem" : isTablet ? "2.6rem" : "clamp(2.6rem, 4vw, 3.8rem)",
+      color: BRAND,
+      letterSpacing: "-0.5px",
+    }}
+  >
+    viza?
+  </span>
+
             </h2>
 
             <p style={{
               color: "#64748b",
               fontSize: isMobile ? "0.9rem" : "1rem",
               lineHeight: 1.65, marginBottom: "24px",
-              fontFamily: "'Inter', sans-serif", maxWidth: "460px",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;", maxWidth: "460px",
             }}>
               Your trusted partner for global visas. Fast, reliable, and always by your side.
             </p>
@@ -434,9 +456,9 @@ const WhyChooseHelloViza = () => {
                     </div>
                     <div>
                       <h4 style={{
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                         fontWeight: 800, color: BRAND,
-                        fontSize: isMobile ? "1rem" : "1.1rem", marginBottom: "3px",
+                        fontSize: isMobile ? "1rem" : "2rem", marginBottom: "3px",
                       }}>
                         {v.title}
                       </h4>
@@ -444,7 +466,7 @@ const WhyChooseHelloViza = () => {
                         color: "#64748b",
                         fontSize: isMobile ? "0.82rem" : "0.9rem",
                         lineHeight: 1.5, margin: 0,
-                        fontFamily: "'Inter', sans-serif",
+                        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                       }}>
                         {v.desc}
                       </p>

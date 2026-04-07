@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const BRAND  = "#00477f";
 const ACCENT = "#d06549"; 
-const baseFont = "'Barlow Condensed', Arial, sans-serif";
+const baseFont = "'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif";
 
 /* ── Icons ── */
 // const icons = {
@@ -39,7 +39,7 @@ function BigTile({ title, onClick }) {
       onClick={onClick}
       style={{
         flex: 1,
-        background: hov ? "rgba(255,255,255,0.98)" : ACCENT,
+        background: hov ? "rgba(255,255,255,0.98)" : "#f5f5f5",
         backdropFilter: "blur(12px)",
         borderRadius: 16,
         border: `1.5px solid ${hov ? ACCENT : "rgba(255,255,255,0.65)"}`,
@@ -62,7 +62,7 @@ function BigTile({ title, onClick }) {
           <span style={{
             fontWeight: 900,
             fontSize: "2.32rem",
-            color: hov ? BRAND : "#fff",
+            color: hov ? BRAND : ACCENT,
             letterSpacing: "0.01em",
             lineHeight: 1,
             transition: "color 0.24s ease",

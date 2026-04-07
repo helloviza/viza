@@ -369,7 +369,7 @@ function PassengerDetailsModal({ show, paxCount, onClose, onSubmit, countryCode 
                   border: errors.name ? "1.5px solid #d06549" : "1.5px solid #c9def3",
                   background: errors.name ? "#fff5f2" : "#e6f0ff",
                   color: "#0b315c", fontWeight: 600, fontSize: ".9rem",
-                  outline: "none", transition: "all .18s", fontFamily: "inherit",
+                  outline: "none", transition: "all .18s", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 }}
               />
               {errors.name && <span style={{ fontSize: ".78rem", fontWeight: 700, color: "#d06549" }}>{errors.name}</span>}
@@ -392,7 +392,7 @@ function PassengerDetailsModal({ show, paxCount, onClose, onSubmit, countryCode 
                   border: errors.age ? "1.5px solid #d06549" : "1.5px solid #c9def3",
                   background: errors.age ? "#fff5f2" : "#e6f0ff",
                   color: "#0b315c", fontWeight: 600, fontSize: ".9rem",
-                  outline: "none", transition: "all .18s", fontFamily: "inherit",
+                  outline: "none", transition: "all .18s", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 }}
               />
               {errors.age && <span style={{ fontSize: ".78rem", fontWeight: 700, color: "#d06549" }}>{errors.age}</span>}
@@ -411,7 +411,7 @@ function PassengerDetailsModal({ show, paxCount, onClose, onSubmit, countryCode 
                   border: errors.gender ? "1.5px solid #d06549" : "1.5px solid #c9def3",
                   background: errors.gender ? "#fff5f2" : "#e6f0ff",
                   color: "#0b315c", fontWeight: 600, fontSize: ".9rem",
-                  outline: "none", transition: "all .18s", fontFamily: "inherit",
+                  outline: "none", transition: "all .18s", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                   appearance: "none", cursor: "pointer",
                 }}
               >
@@ -445,7 +445,7 @@ function PassengerDetailsModal({ show, paxCount, onClose, onSubmit, countryCode 
                         border: errors.phone ? "1.5px solid #d06549" : "1.5px solid #c9def3",
                         background: errors.phone ? "#fff5f2" : "#e6f0ff",
                         color: "#0b315c", fontWeight: 600, fontSize: ".9rem",
-                        outline: "none", transition: "all .18s", fontFamily: "inherit",
+                        outline: "none", transition: "all .18s", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                         paddingRight: mobileVerified[currentStep] ? "3rem" : "1rem",
                       }}
                     />
@@ -482,7 +482,7 @@ function PassengerDetailsModal({ show, paxCount, onClose, onSubmit, countryCode 
                       border: errors.email ? "1.5px solid #d06549" : "1.5px solid #c9def3",
                       background: errors.email ? "#fff5f2" : "#e6f0ff",
                       color: "#0b315c", fontWeight: 600, fontSize: ".9rem",
-                      outline: "none", transition: "all .18s", fontFamily: "inherit",
+                      outline: "none", transition: "all .18s", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                     }}
                   />
                   {errors.email && <span style={{ fontSize: ".78rem", fontWeight: 700, color: "#d06549" }}>{errors.email}</span>}
@@ -719,7 +719,7 @@ export default function TransferForTaxi() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #fef9f7 100%)", fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #fef9f7 100%)", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
 
       {/* Passenger Modal */}
       <PassengerDetailsModal
@@ -1057,7 +1057,7 @@ export default function TransferForTaxi() {
         </div>
 
         {/* Right Order Summary */}
-        <div className="w-full md:w-80 lg:w-96 flex flex-col gap-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="w-full md:w-80 lg:w-96 flex flex-col gap-4" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
 
           {/* Back To Home */}
           <div className="bg-white rounded-2xl border p-4 flex items-center justify-between" style={{ borderColor: "#f0e8e3" }}>

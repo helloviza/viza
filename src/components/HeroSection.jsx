@@ -177,7 +177,7 @@ const DestCard = ({ src, label, style = {} }) => (
     <span style={{
       position: "absolute", bottom: "14px", left: "16px",
       color: "white",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
       fontWeight: 800, fontSize: "1.05rem",
     }}>
       {label}
@@ -211,7 +211,7 @@ const HeroSection = ({ user,onContinue }) => {
         id="hero"
         style={{
           position: "relative",
-          background: "white",
+          background: "#f1f1f1",
           minHeight: "520px",
           overflow: "visible",
           display: "flex",
@@ -244,7 +244,7 @@ const HeroSection = ({ user,onContinue }) => {
           <h1
             className="hs-headline"
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
               fontWeight: 900, color: BRAND,
               lineHeight: 1.05, letterSpacing: "-1.5px",
               marginBottom: "16px", maxWidth: "680px",
@@ -281,7 +281,7 @@ const HeroSection = ({ user,onContinue }) => {
               }}>
                 <span style={{
                   color: "white",
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                   fontWeight: 900, fontSize: "0.65rem",
                 }}>HV</span>
               </div>
@@ -292,7 +292,7 @@ const HeroSection = ({ user,onContinue }) => {
           <p style={{
             color: "#64748b", fontSize: "0.95rem", lineHeight: 1.65,
             maxWidth: "480px", marginBottom: "32px",
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           }}>
             {t("home.hero.subtitle", {
               defaultValue:
@@ -310,7 +310,7 @@ const HeroSection = ({ user,onContinue }) => {
               style={{
                 background: BRAND, color: "white", border: "none",
                 borderRadius: "999px", padding: "12px 28px",
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 fontWeight: 700, fontSize: "0.95rem", letterSpacing: "0.04em",
                 cursor: "pointer", transition: "background 0.2s, transform 0.2s",
               }}
@@ -324,7 +324,7 @@ const HeroSection = ({ user,onContinue }) => {
               style={{
                 background: ACCENT, color: "white", border: "none",
                 borderRadius: "999px", padding: "12px 28px",
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 fontWeight: 700, fontSize: "0.95rem", letterSpacing: "0.04em",
                 cursor: "pointer", transition: "background 0.2s, transform 0.2s",
               }}
@@ -340,7 +340,7 @@ const HeroSection = ({ user,onContinue }) => {
       {/* ══════════════════════════════════════
           SECTION 2 — SKY VIDEO CARD
       ══════════════════════════════════════ */}
-      <section className="hs-sky-section" style={{ background: "#fff" }}>
+      <section className="hs-sky-section" style={{ background: "#f1f1f1" }}>
         <div style={{
           position: "relative", overflow: "hidden",
           minHeight: "420px", display: "flex", alignItems: "center",
@@ -377,14 +377,14 @@ const HeroSection = ({ user,onContinue }) => {
               color: "#d06549", fontSize: "0.78rem", fontWeight: 700,
               letterSpacing: "0.18em", textTransform: "uppercase",
               marginBottom: "14px",
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
             }}>
               Discover
             </p>
             <h2
               className="hs-sky-h2"
               style={{
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 fontWeight: 900, color: "white",
                 lineHeight: 1.0, letterSpacing: "-1px", marginBottom: "20px",
               }}
@@ -395,7 +395,7 @@ const HeroSection = ({ user,onContinue }) => {
             <p style={{
               color: "rgba(255,255,255,0.72)", fontSize: "0.9rem",
               lineHeight: 1.6, maxWidth: "420px",
-              fontFamily: "'Inter', sans-serif", margin: 0,
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;", margin: 0,
             }}>
               From bustling cityscapes to serene mountain retreats — we open every door so your journey is as extraordinary as your destination.
             </p>
@@ -406,12 +406,12 @@ const HeroSection = ({ user,onContinue }) => {
       {/* ══════════════════════════════════════
           SECTION 3 — EXPLORE GRID
       ══════════════════════════════════════ */}
-      <section className="hs-explore-section" style={{ background: "white" }}>
+      <section className="hs-explore-section" style={{ background: "#f1f1f1" }}>
 
         {/* Heading */}
         <div style={{ textAlign: "center", marginBottom: "12px" }}>
           <h2 style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
             fontWeight: 900, color: "#1e293b",
             fontSize: "clamp(2rem, 5vw, 3.4rem)",
             lineHeight: 1.05, letterSpacing: "-0.5px", marginBottom: "16px",
@@ -422,7 +422,7 @@ const HeroSection = ({ user,onContinue }) => {
           <p style={{
             color: "#64748b", fontSize: "0.9rem", lineHeight: 1.65,
             maxWidth: "520px", margin: "0 auto 40px",
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           }}>
             Embark on a seamless journey to the world's most exclusive destinations. From hidden valleys to pristine coastlines, our bespoke visa services unlock extraordinary escapes, crafted with elegance to inspire your next adventure.
           </p>

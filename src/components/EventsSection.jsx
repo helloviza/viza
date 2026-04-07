@@ -13,7 +13,7 @@ const API_BASE =
     ? "http://localhost:8080"
     : "https://api.helloviza.com";
 
-const PROPOSAL_ENDPOINT = `${API_BASE}/api/proposals/submit`;
+const PROPOSAL_ENDPOINT = `${API_BASE}/api/event/submit`;
 
 /* ══════════════════════════════════════════════
    OTP BOX
@@ -124,7 +124,7 @@ function MobileVerificationModal({ show, mobile, onClose, onVerified }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,.6)", backdropFilter: "blur(4px)", padding: "1rem" }}>
-      <div className="ev-fadeIn" style={{ position: "relative", background: "#fff", borderRadius: "1.5rem", boxShadow: "0 32px 80px rgba(0,71,127,.25)", width: "100%", maxWidth: "22rem", padding: "2.25rem 2rem" }}>
+      <div className="ev-fadeIn" style={{ position: "relative", background: "#f1f1f1", borderRadius: "1.5rem", boxShadow: "0 32px 80px rgba(0,71,127,.25)", width: "100%", maxWidth: "22rem", padding: "2.25rem 2rem" }}>
 
         {/* Close */}
         <button onClick={onClose} style={{ position: "absolute", top: "1rem", right: "1rem", width: "2rem", height: "2rem", borderRadius: "50%", border: "none", background: "#e6f0ff", color: "#00477f", fontWeight: 900, fontSize: "1rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -202,7 +202,7 @@ function useInputStyle(hasErr) {
       : (focused ? "1.5px solid #00477f" : "1.5px solid #c9def3"),
     background: hasErr ? (focused ? "#fff" : "#fff5f2") : (focused ? "#fff" : "#e6f0ff"),
     color: "#0b315c", fontWeight: 600, fontSize: ".9rem",
-    outline: "none", transition: "all .18s", fontFamily: "inherit",
+    outline: "none", transition: "all .18s", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
     boxShadow: focused
       ? `0 0 0 3px ${hasErr ? "rgba(208,101,73,.12)" : "rgba(0,71,127,.1)"}`
       : "inset 0 1px 2px rgba(0,0,0,.04)",

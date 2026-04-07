@@ -222,7 +222,7 @@ export default function NewHeader({ user, onLogout }) {
         top: 0, left: 0, right: 0,
         zIndex: 1000,
         fontFamily: BASE_FONT,
-        background: "#fff",
+        background: "#f1f1f1",
         boxShadow: scrolled ? "0 2px 18px rgba(0,71,127,0.10)" : "none",
         transition: "box-shadow 0.3s",
         borderBottom: "1px solid #e8eef5",
@@ -397,8 +397,8 @@ export default function NewHeader({ user, onLogout }) {
                       padding: "6px 16px",
                       borderRadius: 8,
                       border: `1.5px solid ${currentLang === opt.code ? "#00477f" : "#dce8f3"}`,
-                      background: currentLang === opt.code ? "#00477f" : "#fff",
-                      color: currentLang === opt.code ? "#fff" : "#00477f",
+                      background: currentLang === opt.code ? "#00477f" : "#f1f1f1",
+                      color: currentLang === opt.code ? "#f1f1f1" : "#00477f",
                       fontFamily: BASE_FONT,
                       fontWeight: 700,
                       fontSize: 14,
@@ -465,7 +465,7 @@ export default function NewHeader({ user, onLogout }) {
                     padding: "12px 24px",
                     borderRadius: 10,
                     border: `2px solid ${draftLang === opt.code ? "#00477f" : "#dce8f3"}`,
-                    background: draftLang === opt.code ? "#f0f6ff" : "#fff",
+                    background: draftLang === opt.code ? "#f0f6ff" : "#f1f1f1",
                     color: draftLang === opt.code ? "#00477f" : "#4a6880",
                     fontFamily: BASE_FONT,
                     fontWeight: 700,
@@ -483,7 +483,7 @@ export default function NewHeader({ user, onLogout }) {
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24 }}>
               <button
                 onClick={() => setShowLangModal(false)}
-                style={{ ...styles.modalBtn, background: "#fff", color: "#00477f", border: "1.5px solid #00477f" }}
+                style={{ ...styles.modalBtn, background: "#f1f1f1", color: "#00477f", border: "1.5px solid #00477f" }}
               >
                 Cancel
               </button>
@@ -638,7 +638,7 @@ const styles = {
     position: "absolute",
     top: "calc(100% + 8px)",
     right: 0,
-    background: "#fff",
+    background: "#f1f1f1",
     borderRadius: 10,
     padding: "8px",
     boxShadow: "0 10px 28px rgba(0,71,127,0.13)",
@@ -714,7 +714,7 @@ const styles = {
   drawer: {
     width: "min(84vw, 330px)",
     height: "100%",
-    background: "#fff",
+    background: "#f1f1f1",
     boxShadow: "-4px 0 28px rgba(0,71,127,0.13)",
     display: "flex",
     flexDirection: "column",

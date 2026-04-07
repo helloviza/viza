@@ -48,7 +48,7 @@ function FAQItem({ faq, isOpen, onToggle }) {
       style={{
         border: isOpen ? `1.5px solid ${ACCENT}` : "1.5px solid rgba(0,0,0,0.07)",
         boxShadow: isOpen ? "0 8px 24px rgba(208,101,73,0.1)" : "none",
-        background: isOpen ? "rgba(208,101,73,0.02)" : "#fff",
+        background: isOpen ? "rgba(208,101,73,0.02)" : "#f1f1f1",
       }}
     >
       <button
@@ -58,7 +58,7 @@ function FAQItem({ faq, isOpen, onToggle }) {
         <span
           className="font-bold text-base leading-snug"
           style={{
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
             color: isOpen ? ACCENT : BRAND,
             fontSize: "1.08rem",
           }}
@@ -85,7 +85,7 @@ function FAQItem({ faq, isOpen, onToggle }) {
         <div className="px-6 pb-5">
           <p
             className="text-gray-500 text-sm leading-relaxed m-0"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
           >
             {faq.a}
           </p>
@@ -101,7 +101,7 @@ const FAQSection=()=> {
 
   const navigate=useNavigate();
   return (
-    <section className="py-16 lg:py-20" style={{ background: "#f8f9fc" }}>
+    <section className="py-16 lg:py-20" style={{ background: "#f1f1f1" }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-8">
 
         {/* Heading */}
@@ -115,14 +115,14 @@ const FAQSection=()=> {
           <h2
             className="font-black text-[#00477f] leading-none mb-3"
             style={{
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
               fontSize: "clamp(2.2rem, 3.5vw, 3rem)",
               letterSpacing: "-1px",
             }}
           >
             Frequently Asked Questions
           </h2>
-          <p className="text-gray-400 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <p className="text-gray-400 text-sm" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
             Everything you need to know about our visa & travel services
           </p>
         </div>
@@ -146,11 +146,11 @@ const FAQSection=()=> {
         >
           <p
             className="text-white font-black text-xl mb-2"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;", }}
           >
             Still have questions?
           </p>
-          <p className="text-white/70 text-sm mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <p className="text-white/70 text-sm mb-6" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
             Our visa experts are available 24/7 to help you
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -158,7 +158,7 @@ const FAQSection=()=> {
   onClick={() => navigate("/contact")}
   className="px-6 py-2.5 rounded-xl bg-white font-black text-[#00477f] text-sm transition-all duration-200 hover:scale-105"
   style={{
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
     fontSize: "1rem",
   }}
 >
@@ -170,7 +170,7 @@ const FAQSection=()=> {
               rel="noopener noreferrer"
               className="px-6 py-2.5 rounded-xl font-black text-white text-sm transition-all duration-200 hover:scale-105"
               style={{
-                fontFamily: "'Inter',sans-serif",
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                 fontSize: "1rem",
                 background: "#25d366",
                 textDecoration: "none",

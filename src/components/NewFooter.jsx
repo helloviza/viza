@@ -1,6 +1,7 @@
 // src/components/NewFooter.jsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import logo from "../assets/helloviza-logo.png";
 
 const BRAND  = "#00477f";
 const ACCENT = "#d06549";
@@ -110,7 +111,7 @@ const SOCIALS = [
 const LinkColumn = ({ heading, links }) => (
   <div>
     <h4 style={{
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
       fontWeight: 800,
       fontSize: "0.92rem",
       color: "#1e293b",
@@ -159,12 +160,12 @@ const NewFooter = () => {
   };
 
   return (
-    <footer style={{ fontFamily: "'Inter', sans-serif" }}>
+    <footer style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
 
       {/* ══════════════════════════════════════════════════════
           STATS CARDS + HERO IMAGE
       ══════════════════════════════════════════════════════ */}
-      <div style={{ position: "relative", background: "#f5f7fa" }}>
+      <div style={{ position: "relative", background: "#f1f1f1" }}>
 
         {/* Stats card grid */}
         <div style={{
@@ -182,7 +183,7 @@ const NewFooter = () => {
               display: "flex",
               flexDirection: "column",
               gap: "16px",
-              background: "white",
+              background: "#f1f1f1",
               borderRadius: "20px",
               boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
               overflow: "hidden",
@@ -198,7 +199,7 @@ const NewFooter = () => {
                   }}
                 >
                   <div style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                     fontWeight: 900,
                     fontSize: "2.4rem",
                     color: BRAND,
@@ -208,7 +209,7 @@ const NewFooter = () => {
                     {s.big}
                   </div>
                   <div style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                     fontWeight: 800,
                     fontSize: "0.95rem",
                     color: BRAND,
@@ -240,7 +241,7 @@ const NewFooter = () => {
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
               gap: "0",
-              background: "white",
+              background: "#f1f1f1",
               borderRadius: "20px",
               boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
               overflow: "hidden",
@@ -255,7 +256,7 @@ const NewFooter = () => {
                   }}
                 >
                   <div style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                     fontWeight: 900,
                     fontSize: "clamp(2.4rem, 4vw, 3.2rem)",
                     color: BRAND,
@@ -265,7 +266,7 @@ const NewFooter = () => {
                     {s.big}
                   </div>
                   <div style={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
                     fontWeight: 800,
                     fontSize: "1.05rem",
                     color: BRAND,
@@ -327,7 +328,7 @@ const NewFooter = () => {
       {/* ══════════════════════════════════════════════════════
           MAIN FOOTER BODY
       ══════════════════════════════════════════════════════ */}
-      <div style={{ background: "white", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+      <div style={{ background: "#f1f1f1", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
         <div style={{
           maxWidth: "1400px",
           margin: "0 auto",
@@ -502,22 +503,15 @@ const NewFooter = () => {
 const LogoBlock = () => (
   <div>
     <div style={{ marginBottom: "12px" }}>
-      <span style={{
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 900, fontSize: "2rem", color: ACCENT, letterSpacing: "-0.5px",
-      }}>hello</span>
-      <span style={{
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 900, fontSize: "2rem", color: BRAND, letterSpacing: "-0.5px",
-      }}>viza</span>
-      <div style={{
-        fontSize: "0.62rem", color: "#94a3b8",
-        letterSpacing: "0.12em", textTransform: "uppercase",
-        marginTop: "-2px", fontWeight: 600,
-      }}>
-        YOUR GATEWAY TO THE WORLD
-      </div>
-    </div>
+  <img
+    src={logo}
+    alt="HelloViza Logo"
+    style={{
+      height: "60px", // adjust size as needed
+      objectFit: "contain",
+    }}
+  />
+   </div>
     <p style={{
       color: "#64748b", fontSize: "0.875rem",
       lineHeight: 1.65, margin: 0, maxWidth: "260px",
@@ -541,7 +535,7 @@ const ServiceBox = ({ fullWidth }) => (
       boxSizing: "border-box",
     }}>
       <span style={{
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
         fontWeight: 800, fontSize: "0.88rem",
         color: "#1e293b", letterSpacing: "0.06em",
         textTransform: "uppercase",
@@ -552,7 +546,7 @@ const ServiceBox = ({ fullWidth }) => (
         style={{
           background: ACCENT, color: "white", border: "none",
           borderRadius: "8px", padding: "10px 16px",
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           fontWeight: 700, fontSize: "0.9rem",
           cursor: "pointer", letterSpacing: "0.03em",
           WebkitTapHighlightColor: "transparent",
@@ -566,7 +560,7 @@ const ServiceBox = ({ fullWidth }) => (
         style={{
           background: BRAND, color: "white", border: "none",
           borderRadius: "8px", padding: "10px 16px",
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           fontWeight: 700, fontSize: "0.9rem",
           cursor: "pointer", letterSpacing: "0.03em",
           WebkitTapHighlightColor: "transparent",
@@ -606,7 +600,7 @@ const SubscribeBox = ({ email, setEmail, handleSubscribe, fullWidth }) => (
           fontSize: "0.875rem", color: "#1e293b",
           outline: "none",
           width: "100%", boxSizing: "border-box",
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           background: "white",
         }}
         onFocus={e => e.target.style.borderColor = BRAND}
@@ -617,7 +611,7 @@ const SubscribeBox = ({ email, setEmail, handleSubscribe, fullWidth }) => (
         style={{
           background: BRAND, color: "white", border: "none",
           borderRadius: "8px", padding: "11px 24px",
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           fontWeight: 700, fontSize: "0.95rem",
           cursor: "pointer", letterSpacing: "0.04em",
           alignSelf: "flex-start",

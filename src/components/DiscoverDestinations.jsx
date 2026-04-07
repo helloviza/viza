@@ -77,8 +77,8 @@ function inferRegion(countryName = "") {
 ═══════════════════════════════════════════════════ */
 const BRAND      = "#00477f";
 const ACCENT     = "#d06549";
-const BASE_FONT  = "'Inter', sans-serif";
-const BODY_FONT  = "'Inter', sans-serif";
+const BASE_FONT  = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;";
+const BODY_FONT  = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;";
 const REGIONS    = ["All","Asia","Europe","Americas","Middle East","Africa","Oceania"];
 const PAGE_SIZE  = 12;
 
@@ -816,7 +816,7 @@ const styles = {
     border:       "none",
     background:   BRAND,
     color:        "#fff",
-    fontFamily:   BASE_FONT,
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
     fontWeight:   900,
     fontSize:     "1rem",
     cursor:       "pointer",
@@ -829,7 +829,7 @@ const styles = {
     border:       "none",
     background:   `linear-gradient(135deg, ${BRAND} 0%, #005fa3 100%)`,
     color:        "#fff",
-    fontFamily:   BASE_FONT,
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
     fontWeight:   900,
     fontSize:     "1.05rem",
     letterSpacing:"0.02em",
