@@ -20,11 +20,11 @@ const AVATAR_IMAGES = [
 //const SKY_VIDEO_MP4 = "https://hellovizavideo.s3.ap-south-1.amazonaws.com/Background_Vid2.mp4";
 
 const EXPLORE_IMAGES = [
-  { src: "/images/Dominic_A.jpg",              label: "Malaysia"    },
-  { src: "/images/Ethiopi_A.jpg",              label: "South Korea" },
+  { src: "/images/Dominic_A.jpg",              label: "Dominica"    },
+  { src: "/images/Ethiopi_A.jpg",              label: "Ethiopia" },
   { src: "/images/Colombi_A.jpg",              label: "Colombia"    },
-  { src: "/images/Nepa_L.jpg",                 label: "Hawaii"      },
-  { src: "/images/Cambodi_A.jpg",              label: "Seoul"       },
+  { src: "/images/Nepa_L.jpg",                 label: "Nepal"      },
+  { src: "/images/Cambodi_A.jpg",              label: "Cambodia"       },
   { src: "/images/explore/destination-6.jpg",  label: "Antigua"     },
 ];
 
