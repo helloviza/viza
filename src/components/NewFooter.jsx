@@ -9,7 +9,7 @@ const ACCENT = "#d06549";
 // ─────────────────────────────────────────────────────────────
 // 🖼️  HERO BACKGROUND IMAGE — replace with your own path
 // ─────────────────────────────────────────────────────────────
-const HERO_IMAGE_SRC = "/images/Benin.png";
+const HERO_IMAGE_SRC = "/images/Nepa_L.jpg";
 
 // ─────────────────────────────────────────────────────────────
 // RESPONSIVE HOOK

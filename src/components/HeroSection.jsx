@@ -413,18 +413,18 @@ const HeroSection = ({ user,onContinue }) => {
           <h2 style={{
             fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
             fontWeight: 900, color: "#1e293b",
-            fontSize: "clamp(2rem, 5vw, 3.4rem)",
+            fontSize: "clamp(1.5rem, 4vw, 3.0rem)",
             lineHeight: 1.05, letterSpacing: "-0.5px", marginBottom: "16px",
           }}>
-            Explore <em style={{ fontStyle: "italic" }}>Worlds</em><br/>
+            Explore Worlds<br/>
             Beyond Imagination
           </h2>
           <p style={{
-            color: "#64748b", fontSize: "0.9rem", lineHeight: 1.65,
+            color: "#64748b", fontSize: "1.1rem", lineHeight: 1.65,
             maxWidth: "520px", margin: "0 auto 40px",
             fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
           }}>
-            Embark on a seamless journey to the world's most exclusive destinations. From hidden valleys to pristine coastlines, our bespoke visa services unlock extraordinary escapes, crafted with elegance to inspire your next adventure.
+            Travel beyond the ordinary. Our tailored visa services open doors to extraordinary destinations.
           </p>
         </div>
 

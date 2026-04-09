@@ -32,8 +32,9 @@ const NewHome=({ user, onLogout }) =>{
       <AnnouncementBar />
 
       {/* Fixed header — sits above everything */}
-      <NewHeader user={user} onLogout={onLogout} />
-      
+      <NewHeader user={user} onLogout={onLogout} onContinue={() => {
+    discoverRef.current?.scrollIntoView({ behavior: "smooth" }); }}
+      />
 
       {/* ① Hero — video BG + service tiles + sky-meets-earth + explore strip */}
       <HeroSection user={user} onContinue={() => {

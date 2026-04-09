@@ -433,7 +433,7 @@ export default function DiscoverDestinations() {
             <p style={styles.eyebrow}>Find Your Next Adventure</p>
             <h2 style={styles.title}>
               Discover Your{" "}
-              <span style={{ color: ACCENT, fontStyle: "italic" }}>Destination</span>
+              <span style={{ color: ACCENT }}>Destination</span>
             </h2>
             <p style={styles.metaLine}>
               {loading ? (

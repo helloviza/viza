@@ -1,7 +1,7 @@
 // src/components/Header.jsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logo from "../assets/helloviza-logo.png"; // Image logo from old Header
+import logo from "../assets/helloviza-logo.png";
 
 /* ── Social Icons ── */
 const LinkedInIcon = () => (
@@ -111,40 +111,295 @@ function sanitiseRedirect(raw) {
 
 const BASE_FONT = "'Inter', sans-serif";
 
+/* ─────────────────────────────────────────────────────────────────────────
+   LEFT SECTION OPTION COMPONENTS
+   ─────────────────────────────────────────────────────────────────────────
+   Five brand-visibility options for the header left section.
+   Only Option 5 (CountryFlagTicker) is used below — the rest are here
+   for easy swap-in: just replace <CountryFlagTicker /> in the JSX.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── OPTION 1: Tagline Badge with shimmer animation ── */
+// const TaglineBadge = () => (
+//   <>
+//     <style>{`
+//       @keyframes hvShimmer {
+//         0%   { background-position: -200% center; }
+//         100% { background-position:  200% center; }
+//       }
+//       .hv-tagline-badge {
+//         display: inline-flex;
+//         align-items: center;
+//         gap: 7px;
+//         padding: 5px 14px 5px 10px;
+//         borderRadius: 20px;
+//         background: linear-gradient(
+//           90deg,
+//           #e8f2fb 0%, #d0e6f7 30%, #f0f7ff 50%, #d0e6f7 70%, #e8f2fb 100%
+//         );
+//         background-size: 200% auto;
+//         animation: hvShimmer 3s linear infinite;
+//         border: 1.5px solid #bdd6ef;
+//       }
+//     `}</style>
+//     <div className="hv-tagline-badge hv-desktop-only">
+//       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00477f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+//         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+//         <polyline points="9 22 9 12 15 12 15 22"/>
+//       </svg>
+//       <span style={{ fontSize: 13, fontWeight: 700, color: "#00477f", letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
+//         Your Visa Journey Starts Here
+//       </span>
+//     </div>
+//   </>
+// );
+
+/* ── OPTION 2: Trust Signal Strip ── */
+// const TrustSignalStrip = () => (
+//   <div
+//     className="hv-desktop-only"
+//     style={{
+//       display: "flex",
+//       alignItems: "center",
+//       gap: 6,
+//       padding: "5px 14px",
+//       borderRadius: 20,
+//       background: "#e8f5ee",
+//       border: "1.5px solid #b2dfc9",
+//     }}
+//   >
+//     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0e7a45" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+//       <polyline points="20 6 9 17 4 12"/>
+//     </svg>
+//     <span style={{ fontSize: 13, fontWeight: 700, color: "#0e7a45", whiteSpace: "nowrap" }}>
+//       10,000+ Visas Approved
+//     </span>
+//     <span style={{ width: 1, height: 14, background: "#b2dfc9" }} />
+//     <span style={{ fontSize: 12, fontWeight: 600, color: "#1a9a5c", whiteSpace: "nowrap" }}>
+//       50+ Countries
+//     </span>
+//   </div>
+// );
+
+/* ── OPTION 3: Passport Icon + Brand Micro-Copy ── */
+// const PassportBrand = () => (
+//   <div
+//     className="hv-desktop-only"
+//     style={{
+//       display: "flex",
+//       alignItems: "center",
+//       gap: 8,
+//       padding: "5px 14px 5px 10px",
+//       borderRadius: 10,
+//       background: "#f0f6ff",
+//       border: "1.5px solid #bdd6ef",
+//     }}
+//   >
+//     {/* Stylised passport book icon */}
+//     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+//       <rect x="4" y="2" width="13" height="20" rx="2" fill="#00477f" opacity="0.15" stroke="#00477f" strokeWidth="1.5"/>
+//       <rect x="2" y="4" width="3" height="16" rx="1.5" fill="#00477f" opacity="0.35"/>
+//       <circle cx="11" cy="10" r="3" stroke="#00477f" strokeWidth="1.3" fill="none"/>
+//       <line x1="7" y1="16" x2="15" y2="16" stroke="#00477f" strokeWidth="1.2" strokeLinecap="round"/>
+//       <line x1="8" y1="18" x2="14" y2="18" stroke="#00477f" strokeWidth="1.2" strokeLinecap="round"/>
+//     </svg>
+//     <div style={{ lineHeight: 1.2 }}>
+//       <div style={{ fontSize: 13, fontWeight: 800, color: "#00477f", letterSpacing: "0.02em" }}>helloviza</div>
+//       <div style={{ fontSize: 10, fontWeight: 500, color: "#4a6880", letterSpacing: "0.04em" }}>Trusted Visa Experts</div>
+//     </div>
+//   </div>
+// );
+
+/* ── OPTION 4: Live Support Indicator ── */
+// const LiveSupportIndicator = () => (
+//   <>
+//     <style>{`
+//       @keyframes hvPulse {
+//         0%, 100% { opacity: 1; transform: scale(1); }
+//         50%       { opacity: 0.5; transform: scale(1.5); }
+//       }
+//       .hv-pulse-dot::after {
+//         content: '';
+//         position: absolute;
+//         inset: -3px;
+//         border-radius: 50%;
+//         background: #22c55e;
+//         animation: hvPulse 1.6s ease-in-out infinite;
+//         z-index: -1;
+//       }
+//     `}</style>
+//     <div
+//       className="hv-desktop-only"
+//       style={{
+//         display: "flex",
+//         alignItems: "center",
+//         gap: 8,
+//         padding: "6px 16px 6px 12px",
+//         borderRadius: 20,
+//         background: "#f0fdf4",
+//         border: "1.5px solid #bbf7d0",
+//         cursor: "pointer",
+//       }}
+//       onClick={() => window.open("mailto:hello@helloviza.com")}
+//     >
+//       <span
+//         className="hv-pulse-dot"
+//         style={{
+//           position: "relative",
+//           width: 8,
+//           height: 8,
+//           borderRadius: "50%",
+//           background: "#22c55e",
+//           flexShrink: 0,
+//         }}
+//       />
+//       <span style={{ fontSize: 13, fontWeight: 700, color: "#15803d", whiteSpace: "nowrap" }}>
+//         Live Support Available
+//       </span>
+//     </div>
+//   </>
+// );
+
+/* ── OPTION 5: Country Flag Ticker (ACTIVE) ── */
+// Flags of the top countries helloviza serves, cycling in a smooth marquee.
+const FLAG_COUNTRIES = [
+  { flag: "🇦🇪", src: "/images/uae.png", name: "UAE" },
+  { flag: "🇺🇸", src: "/images/usa.png", name: "USA" },
+  { flag: "🇬🇧", src: "/images/u_k.png", name: "UK" },
+  { flag: "🇨🇦", src: "/images/canada.png", name: "Canada" },
+  { flag: "🇦🇺", src: "/images/australi_a.png", name: "Australia" },
+  { flag: "🇩🇪", src: "/images/germany.png", name: "Germany" },
+  { flag: "🇫🇷", src: "/images/france.png", name: "France" },
+  { flag: "🇸🇬", src: "/images/singapore.png", name: "Singapore" },
+  { flag: "🇯🇵", src: "/images/japan.png", name: "Japan" },
+  { flag: "🇳🇿", src: "/images/nz.png", name: "New Zealand" },
+];
+
+const CountryFlagTicker = () => { 
+  // Duplicate items so the ticker loops seamlessly
+  const items = [...FLAG_COUNTRIES, ...FLAG_COUNTRIES];
+
+  return (
+    <>
+      <style>{`
+        @keyframes hvTicker {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .hv-ticker-wrap {
+          overflow: hidden;
+          width: 210px;
+          mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+        }
+        .hv-ticker-track {
+          display: flex;
+          align-items: center;
+          gap: 0;
+          width: max-content;
+          animation: hvTicker 18s linear infinite;
+        }
+        .hv-ticker-track:hover {
+          animation-play-state: paused;
+        }
+        .hv-ticker-item {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 0 14px;
+          white-space: nowrap;
+          font-family: 'Inter', sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          color: #00477f;
+          border-right: 1px solid #dce8f3;
+          cursor: default;
+        }
+        .hv-ticker-item:last-child {
+          border-right: none;
+        }
+        .hv-ticker-flag {
+          font-size: 16px;
+          line-height: 1;
+        }
+        .hv-ticker-label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+          padding: 4px 10px 4px 8px;
+          border-radius: 6px;
+          background: #f0f6ff;
+          border: 1px solid #bdd6ef;
+        }
+      `}</style>
+      <div className="hv-desktop-only" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Small label before the ticker */}
+        <div className="hv-ticker-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00477f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#00477f", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+            WE SERVE
+          </span>
+        </div>
+
+        {/* Scrolling flag strip */}
+        <div className="hv-ticker-wrap">
+          <div className="hv-ticker-track">
+            {items.map(({ flag, name,src }, i) => (
+              <div key={i} className="hv-ticker-item">
+                <img
+                  src={src} alt={flag}
+                  style={{
+                    width: "34px", height: "34px", borderRadius: "50%",
+                    border: "2px solid white", objectFit: "cover",
+                    marginLeft: i === 0 ? "0" : "-10px",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                  }}
+                  onError={e => { e.target.style.background = "#e2e8f0"; }}
+                />
+                <span>{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 /* ═══════════════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════ */
 export default function NewHeader({ user, onLogout }) {
-  const [scrolled, setScrolled]         = useState(false);
-  const [mobileOpen, setMobileOpen]     = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled]           = useState(false);
+  const [mobileOpen, setMobileOpen]       = useState(false);
+  const [dropdownOpen, setDropdownOpen]   = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
 
-  /* 1. LANGUAGE: draft state for modal */
-  const [currentLang, setCurrentLang]   = useState(() => localStorage.getItem("hv_lang") || "en");
-  const [draftLang, setDraftLang]       = useState(currentLang);
+  const [currentLang, setCurrentLang] = useState(() => localStorage.getItem("hv_lang") || "en");
+  const [draftLang, setDraftLang]     = useState(currentLang);
 
-  /* 2. AUTH: merge prop user with localStorage cache; sync on storage events */
   const [effectiveUser, setEffectiveUser] = useState(() => user || getCachedUser());
 
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate    = useNavigate();
+  const location    = useLocation();
   const dropdownRef = useRef(null);
 
-  /* ── Scroll shadow ── */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* ── Lock body scroll when mobile drawer open ── */
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  /* 2. AUTH: Keep effectiveUser in sync with prop changes and storage events */
   useEffect(() => {
     const sync = () => setEffectiveUser(user || getCachedUser());
     sync();
@@ -152,7 +407,6 @@ export default function NewHeader({ user, onLogout }) {
     return () => window.removeEventListener("storage", sync);
   }, [user]);
 
-  /* ── Close dropdown on outside click ── */
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -163,13 +417,11 @@ export default function NewHeader({ user, onLogout }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* ── Close dropdown on route change ── */
   useEffect(() => {
     setDropdownOpen(false);
     setMobileOpen(false);
   }, [location.pathname]);
 
-  /* 1. LANGUAGE: Apply lang to <html> for RTL/LTR support */
   useEffect(() => {
     const opt = LANG_OPTIONS.find((o) => o.code === currentLang) || LANG_OPTIONS[0];
     document.documentElement.lang = opt.apiLocale;
@@ -177,25 +429,18 @@ export default function NewHeader({ user, onLogout }) {
     try { localStorage.setItem("hv_lang", currentLang); } catch {}
   }, [currentLang]);
 
-  /* 1. LANGUAGE: Save language choice — calls i18n API if available */
   const applyLanguage = useCallback(async () => {
-    const opt = LANG_OPTIONS.find((o) => o.code === draftLang) || LANG_OPTIONS[0];
-
-    /* If app uses i18next (optional — safe no-op if not present) */
     if (window.__i18n && typeof window.__i18n.changeLanguage === "function") {
       await window.__i18n.changeLanguage(draftLang);
     }
-
     setCurrentLang(draftLang);
     setShowLangModal(false);
   }, [draftLang]);
 
-  /* 2. AUTH: Logout — clears all auth tokens and redirects */
   const handleLogout = useCallback(() => {
     setDropdownOpen(false);
     setMobileOpen(false);
     try {
-      /* Clear all auth-related storage keys */
       [
         "hv_user", "hv_token", "helloviza_user",
         LOGIN_REDIRECT_KEY, VISA_INTENT_KEY,
@@ -208,8 +453,8 @@ export default function NewHeader({ user, onLogout }) {
     navigate("/");
   }, [navigate, onLogout]);
 
-  const displayName = pickDisplayName(effectiveUser);
-  const initial     = (displayName?.[0] || "U").toUpperCase();
+  const displayName      = pickDisplayName(effectiveUser);
+  const initial          = (displayName?.[0] || "U").toUpperCase();
   const currentLangLabel = LANG_OPTIONS.find((o) => o.code === currentLang)?.label || "English";
 
   return (
@@ -229,34 +474,18 @@ export default function NewHeader({ user, onLogout }) {
       }}>
         <div style={styles.barInner}>
 
-          {/* LEFT: Socials + Email */}
-          <div style={styles.leftSection} className="hv-desktop-only">
-            <div style={styles.socials}>
-              {SOCIAL_LINKS.map(({ name, href, Icon }) => (
-                <a
-                  key={name}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={name}
-                  style={styles.socialLink}
-                  onMouseEnter={e => e.currentTarget.style.color = "#d06549"}
-                  onMouseLeave={e => e.currentTarget.style.color = "#00477f"}
-                >
-                  <Icon />
-                </a>
-              ))}
-            </div>
-            <span style={styles.email}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 4, verticalAlign: "middle" }}>
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              hello@helloviza.com
-            </span>
-          </div>
+          {/* ── LEFT SECTION ──
+              Active: Option 5 — Country Flag Ticker
+              To swap, replace <CountryFlagTicker /> with any of:
+                <TaglineBadge />         (Option 1 — uncomment above)
+                <TrustSignalStrip />     (Option 2 — uncomment above)
+                <PassportBrand />        (Option 3 — uncomment above)
+                <LiveSupportIndicator /> (Option 4 — uncomment above)
+                <CountryFlagTicker />
+          ── */}
+          <CountryFlagTicker />
 
-          {/* CENTER: Image logo (from old Header) */}
+          {/* CENTER: Logo */}
           <Link to="/" style={styles.logoWrap} aria-label="helloviza home">
             <img src={logo} alt="helloviza" style={styles.logoImg} />
           </Link>
@@ -285,16 +514,13 @@ export default function NewHeader({ user, onLogout }) {
                   aria-label="User menu"
                   aria-expanded={dropdownOpen}
                 >
-                  {/* Avatar circle with initial */}
                   <div style={styles.avatar}>{initial}</div>
-                  {/* 3. USERNAME: Display name */}
                   <span style={{ fontSize: 14, fontWeight: 700, color: "#00477f", marginLeft: 6 }}>
                     {displayName || "Account"}
                   </span>
                   <ChevronDown />
                 </button>
 
-                {/* Dropdown menu */}
                 {dropdownOpen && (
                   <div style={styles.dropdown}>
                     <Link to="/account/profile"      style={styles.dropItem} onClick={() => setDropdownOpen(false)}>My Profile</Link>
@@ -313,7 +539,6 @@ export default function NewHeader({ user, onLogout }) {
                 style={styles.loginBtn}
                 className="hv-desktop-only"
                 onClick={() => {
-                  /* 2. AUTH: Save intended destination before redirecting to login */
                   const dest = sanitiseRedirect(location.pathname + location.search);
                   if (dest !== "/" && dest !== "/login") {
                     try { sessionStorage.setItem(LOGIN_REDIRECT_KEY, dest); } catch {}
@@ -344,7 +569,6 @@ export default function NewHeader({ user, onLogout }) {
         <div style={styles.drawerOverlay} onClick={() => setMobileOpen(false)}>
           <div style={styles.drawer} onClick={e => e.stopPropagation()}>
 
-            {/* Drawer header with logo */}
             <div style={styles.drawerHead}>
               <Link to="/" onClick={() => setMobileOpen(false)}>
                 <img src={logo} alt="helloviza" style={{ height: 36, objectFit: "contain" }} />
@@ -358,7 +582,6 @@ export default function NewHeader({ user, onLogout }) {
 
             <div style={styles.drawerDivider} />
 
-            {/* 2. AUTH: Mobile user info or login */}
             {effectiveUser ? (
               <div style={{ padding: "14px 20px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
@@ -386,7 +609,34 @@ export default function NewHeader({ user, onLogout }) {
 
             <div style={styles.drawerDivider} />
 
-            {/* 1. LANGUAGE: Mobile language selector */}
+            {/* Mobile: show flag strip as a static horizontal scroll */}
+            <div style={{ padding: "14px 20px" }}>
+              <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#00477f", fontSize: 13 }}>Countries We Serve</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {FLAG_COUNTRIES.map(({ flag, name }) => (
+                  <span
+                    key={name}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "3px 10px",
+                      borderRadius: 20,
+                      background: "#f0f6ff",
+                      border: "1px solid #bdd6ef",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "#00477f",
+                    }}
+                  >
+                    <span style={{ fontSize: 14 }}>{flag}</span> {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div style={styles.drawerDivider} />
+
             <div style={{ padding: "14px 20px" }}>
               <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#00477f", fontSize: 14 }}>Language</p>
               <div style={{ display: "flex", gap: 8 }}>
@@ -414,7 +664,6 @@ export default function NewHeader({ user, onLogout }) {
 
             <div style={styles.drawerDivider} />
 
-            {/* Socials */}
             <div style={{ display: "flex", gap: 16, padding: "14px 20px" }}>
               {SOCIAL_LINKS.map(({ name, href, Icon }) => (
                 <a key={name} href={href} target="_blank" rel="noopener noreferrer"
@@ -525,7 +774,6 @@ export default function NewHeader({ user, onLogout }) {
 const BASE = "'Inter', sans-serif";
 
 const styles = {
-  /* Single unified bar */
   barInner: {
     maxWidth: 1280,
     margin: "0 auto",
@@ -565,7 +813,6 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
-  /* 3. LOGO: Center image logo */
   logoWrap: {
     display: "flex",
     alignItems: "center",
@@ -574,7 +821,7 @@ const styles = {
     flex: "1 1 auto",
   },
   logoImg: {
-    height: 42,
+    height: 49,
     objectFit: "contain",
   },
 
@@ -585,7 +832,6 @@ const styles = {
     flex: "0 0 auto",
   },
 
-  /* 1. LANGUAGE */
   langBtn: {
     display: "flex",
     alignItems: "center",
@@ -603,7 +849,6 @@ const styles = {
     transition: "border-color 0.2s",
   },
 
-  /* 2. AUTH: Avatar circle */
   avatar: {
     backgroundColor: "#d06549",
     color: "#fff",
@@ -619,7 +864,6 @@ const styles = {
     flexShrink: 0,
   },
 
-  /* 2. AUTH: User button */
   userBtn: {
     display: "flex",
     alignItems: "center",
@@ -633,7 +877,6 @@ const styles = {
     transition: "border-color 0.2s",
   },
 
-  /* 2. AUTH: Dropdown */
   dropdown: {
     position: "absolute",
     top: "calc(100% + 8px)",
@@ -702,7 +945,6 @@ const styles = {
     borderRadius: 6,
   },
 
-  /* Mobile Drawer */
   drawerOverlay: {
     position: "fixed",
     inset: 0,
@@ -751,7 +993,6 @@ const styles = {
     borderBottom: "1px solid #f0f6fc",
   },
 
-  /* Language Modal */
   modalOverlay: {
     position: "fixed",
     inset: 0,

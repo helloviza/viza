@@ -408,7 +408,7 @@ const WhyChooseHelloViza = () => {
     style={{
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       fontWeight: 900,
-      fontSize: isMobile ? "2rem" : isTablet ? "2.6rem" : "clamp(2.6rem, 4vw, 3.8rem)",
+      fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
       color: ACCENT,
       letterSpacing: "-0.5px",
     }}
@@ -419,7 +419,7 @@ const WhyChooseHelloViza = () => {
     style={{
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       fontWeight: 900,
-      fontSize: isMobile ? "2rem" : isTablet ? "2.6rem" : "clamp(2.6rem, 4vw, 3.8rem)",
+      fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
       color: BRAND,
       letterSpacing: "-0.5px",
     }}
