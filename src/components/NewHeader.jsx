@@ -288,7 +288,7 @@ const CountryFlagTicker = () => {
         }
         .hv-ticker-wrap {
           overflow: hidden;
-          width: 210px;
+          width: 100px;
           mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
           -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
         }
@@ -333,7 +333,7 @@ const CountryFlagTicker = () => {
           border: 1px solid #bdd6ef;
         }
       `}</style>
-      <div className="hv-desktop-only" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="hv-desktop-only" style={{ display: "flex", alignItems: "center"}}>
         {/* Small label before the ticker */}
         <div className="hv-ticker-label">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00477f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -341,7 +341,7 @@ const CountryFlagTicker = () => {
             <line x1="2" y1="12" x2="22" y2="12"/>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
           </svg>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#00477f", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#00477f", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
             WE SERVE
           </span>
         </div>

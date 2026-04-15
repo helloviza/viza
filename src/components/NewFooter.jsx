@@ -9,7 +9,7 @@ const ACCENT = "#d06549";
 // ─────────────────────────────────────────────────────────────
 // 🖼️  HERO BACKGROUND IMAGE — replace with your own path
 // ─────────────────────────────────────────────────────────────
-const HERO_IMAGE_SRC = "/images/Nepa_L.jpg";
+const HERO_IMAGE_SRC = "/images/Nepa_L.jpg";  
 
 // ─────────────────────────────────────────────────────────────
 // RESPONSIVE HOOK
@@ -29,11 +29,11 @@ const useWindowWidth = () => {
 // ─────────────────────────────────────────────────────────────
 // DATA
 // ─────────────────────────────────────────────────────────────
-const STATS = [
-  { big: "99.2%", title: "Visas On Time",  desc: "Visa delivered before travel date" },
-  { big: "500k+", title: "Processed",      desc: "Processed for travelers worldwide" },
-  { big: "4.81",  title: "Rating",         desc: "Industry's highest rating for customer service & reliability" },
-];
+// const STATS = [
+//   { big: "99.2%", title: "Visas On Time",  desc: "Visa delivered before travel date" },
+//   { big: "500k+", title: "Processed",      desc: "Processed for travelers worldwide" },
+//   { big: "4.81",  title: "Rating",         desc: "Industry's highest rating for customer service & reliability" },
+// ];
 
 const DISCOVER_LINKS   = [
   { label: "Home",    to: "/" },
@@ -165,9 +165,9 @@ const NewFooter = () => {
       {/* ══════════════════════════════════════════════════════
           STATS CARDS + HERO IMAGE
       ══════════════════════════════════════════════════════ */}
-      <div style={{ position: "relative", background: "#f1f1f1" }}>
+      {/* <div style={{ position: "relative", background: "#f1f1f1" }}>
 
-        {/* Stats card grid */}
+        //Stats card grid
         <div style={{
           maxWidth: "1400px",
           margin: "0 auto",
@@ -295,7 +295,7 @@ const NewFooter = () => {
           )}
         </div>
 
-        {/* Hero image — behind / below cards */}
+         
         <div style={{
           width: "100%",
           height: isMobile ? "180px" : "260px",
@@ -323,7 +323,7 @@ const NewFooter = () => {
             pointerEvents: "none",
           }}/>
         </div>
-      </div>
+      </div> */}
 
       {/* ══════════════════════════════════════════════════════
           MAIN FOOTER BODY

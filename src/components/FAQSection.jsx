@@ -95,11 +95,11 @@ function FAQItem({ faq, isOpen, onToggle }) {
   );
 }
 
-const FAQSection=()=> {
+const FAQSection = () => {
   const [openIdx, setOpenIdx] = useState(0);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const navigate=useNavigate();
   return (
     <section className="py-16 lg:py-20" style={{ background: "#f1f1f1" }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-8">
@@ -146,44 +146,53 @@ const FAQSection=()=> {
         >
           <p
             className="text-white font-black text-xl mb-2"
-            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;", }}
+            style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}
           >
             Still have questions?
           </p>
           <p className="text-white/70 text-sm mb-6" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" }}>
             Our visa experts are available 24/7 to help you
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+
+          <div className="flex gap-4 justify-center">
+
+            {/* Contact Us — icon only */}
             <button
-  onClick={() => navigate("/contact")}
-  className="px-6 py-2.5 rounded-xl bg-white font-black text-[#00477f] text-sm transition-all duration-200 hover:scale-105"
-  style={{
-    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-    fontSize: "1rem",
-  }}
->
-  Contact Us
-</button>
+              onClick={() => navigate("/contact")}
+              title="Contact Us"
+              className="w-12 h-12 rounded-full bg-white flex items-center justify-center transition-all duration-200 hover:scale-110"
+              style={{ flexShrink: 0, border: "none", cursor: "pointer" }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="4" width="20" height="16" rx="2" stroke="#00477f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 8l10 7 10-7" stroke="#00477f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* WhatsApp — icon only */}
             <a
-              href="https://wa.me/919999999999"
+              href="https://wa.me/8527528363"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-2.5 rounded-xl font-black text-white text-sm transition-all duration-200 hover:scale-105"
-              style={{
-                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-                fontSize: "1rem",
-                background: "#25d366",
-                textDecoration: "none",
-              }}
+              title="WhatsApp Chat"
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+              style={{ background: "#25d366", flexShrink: 0 }}
             >
-              WhatsApp Chat
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M12 2C6.477 2 2 6.477 2 12c0 1.89.526 3.66 1.438 5.168L2 22l4.979-1.405A9.953 9.953 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2Zm-1.4 5.5c-.2-.45-.41-.46-.6-.47H9.4c-.18 0-.47.07-.71.33-.25.27-.94.92-.94 2.24 0 1.32.96 2.6 1.09 2.78.14.18 1.86 2.96 4.58 4.03 2.27.9 2.73.72 3.22.67.49-.04 1.58-.64 1.81-1.27.22-.62.22-1.15.15-1.26-.07-.1-.25-.16-.52-.28-.27-.13-1.58-.78-1.83-.87-.24-.09-.42-.13-.6.13-.18.27-.68.87-.83 1.05-.15.18-.3.2-.56.07-.27-.14-1.13-.42-2.16-1.33-.8-.71-1.34-1.58-1.5-1.85-.15-.27-.02-.41.12-.55.12-.12.27-.31.4-.47.14-.15.18-.27.27-.45.09-.18.05-.34-.02-.47-.07-.13-.59-1.43-.81-1.96Z"
+                  fill="white"
+                />
+              </svg>
             </a>
+
           </div>
         </div>
       </div>
     </section>
   );
-}
-
+};
 
 export default FAQSection;

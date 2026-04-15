@@ -526,7 +526,7 @@ export default function DiscoverDestinations() {
         </div>
 
         {/* ════════ GRID ════════ */}
-        <div style={styles.grid}>
+        <div className="dest-grid">
           {loading && pagedCards.length === 0
             ? Array.from({ length: PAGE_SIZE }).map((_, i) => <SkeletonCard key={i}/>)
             : pagedCards.map((card, i) => (
@@ -599,6 +599,25 @@ export default function DiscoverDestinations() {
           from { transform: rotate(0deg);   }
           to   { transform: rotate(360deg); }
         }
+        .dest-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(1, 1fr); /* Mobile default */
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .dest-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .dest-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
       `}</style>
     </section>
   );
@@ -837,4 +856,5 @@ const styles = {
     boxShadow:    "0 8px 24px rgba(0,71,127,0.28)",
     transition:   "transform 0.22s ease, box-shadow 0.22s ease",
   },
+  
 };

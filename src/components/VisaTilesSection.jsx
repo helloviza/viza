@@ -39,7 +39,8 @@ function BigTile({ title, onClick }) {
       onClick={onClick}
       style={{
         flex: 1,
-        background: hov ? "rgba(255,255,255,0.98)" : "#f5f5f5",
+        //background: hov ? "rgba(255,255,255,0.98)" : "#f5f5f5",
+        background: hov ? "rgba(255,255,255,0.97)" : ACCENT,
         backdropFilter: "blur(12px)",
         borderRadius: 16,
         border: `1.5px solid ${hov ? ACCENT : "rgba(255,255,255,0.65)"}`,
@@ -50,7 +51,7 @@ function BigTile({ title, onClick }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 14,
+        gap: 14, 
         cursor: "pointer",
         transition: "all 0.24s cubic-bezier(.22,.9,.22,1)",
         transform: hov ? "translateY(-3px)" : "none",
@@ -62,7 +63,7 @@ function BigTile({ title, onClick }) {
           <span style={{
             fontWeight: 900,
             fontSize: "2.32rem",
-            color: hov ? BRAND : ACCENT,
+            color: hov ? BRAND : "#fff",
             letterSpacing: "0.01em",
             lineHeight: 1,
             transition: "color 0.24s ease",

@@ -2,26 +2,17 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
-
-
 const BRAND  = "#00477f";
 const ACCENT = "#d06549";
 
-// ─────────────────────────────────────────────
-// 🖼️  ADD YOUR OWN CAROUSEL IMAGES HERE
-//     e.g. { src: "/images/vietnam.jpg", alt: "Vietnam" }
-// ─────────────────────────────────────────────
 const CAROUSEL_IMAGES = [
-  { src: "/images/singapore.jpg", alt: "Singapore" },
-  { src: "/images/taiwan.jpg", alt: "Taiwan" },
-  { src: "/images/new_zealand.jpg", alt: "New Zealand" },
-  { src: "/images/georgia.jpg", alt: "Georgia" },
-  { src: "/images/russia.jpg", alt: "Russia" }
+  { src: "/images/singapore.jpg",  alt: "Singapore"  },
+  { src: "/images/taiwan.jpg",     alt: "Taiwan"     },
+  { src: "/images/new_zealand.jpg",alt: "New Zealand" },
+  { src: "/images/georgia.jpg",    alt: "Georgia"    },
+  { src: "/images/russia.jpg",     alt: "Russia"     },
 ];
 
-// ─────────────────────────────────────────────
-// RESPONSIVE HOOK
-// ─────────────────────────────────────────────
 const useWindowWidth = () => {
   const [width, setWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200
@@ -34,57 +25,54 @@ const useWindowWidth = () => {
   return width;
 };
 
-// ─────────────────────────────────────────────
-// VISA SERVICE LIST
-// ─────────────────────────────────────────────
-const VISA_TYPES = [
+const STATS = [
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+          stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    title: "Tourist Visa",
-    desc: "Experience seamless travel for holidays and tourism across the globe.",
+    big: "99.2%", title: "Visas On Time",
+    desc: "Visas delivered on or before the travel date, every time.",
+    accent: BRAND, bg: "rgba(0,71,127,0.06)",
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <rect x="2" y="7" width="20" height="14" rx="2" stroke="white" strokeWidth="1.8"/>
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="white" strokeWidth="1.8"/>
-        <path d="M12 12v4M10 14h4" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/>
+        <path d="M12 6v6l4 2" stroke="white" strokeWidth="2" strokeLinecap="round"/>
       </svg>
     ),
-    title: "Business Visa",
-    desc: "Accelerate your international business journeys with dedicated support.",
+    big: "500k+", title: "Visas Processed",
+    desc: "Half a million travelers successfully served worldwide.",
+    accent: ACCENT, bg: "rgba(208,101,73,0.06)",
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M22 10v6M2 10l10-7 10 7" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M6 10v10h12V10" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-        <rect x="9" y="14" width="6" height="6" stroke="white" strokeWidth="1.6"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+          stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    title: "Student Visa",
-    desc: "Unlock global education opportunities with our expert visa guidance.",
+    big: "4.81★", title: "Customer Rating",
+    desc: "Industry's highest rating for service & reliability.",
+    accent: ACCENT, bg: "rgba(208,101,73,0.06)",
   },
   {
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-        <circle cx="9" cy="7" r="4" stroke="white" strokeWidth="1.8"/>
-        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z" stroke="white" strokeWidth="2"/>
+        <path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"
+          stroke="white" strokeWidth="2" strokeLinecap="round"/>
       </svg>
     ),
-    title: "Family Visa",
-    desc: "Bring your loved ones closer—smooth family visa processing for all destinations.",
+    big: "150+", title: "Countries Covered",
+    desc: "Visa assistance for destinations across every continent.",
+    accent: BRAND, bg: "rgba(0,71,127,0.06)",
   },
 ];
 
-// ─────────────────────────────────────────────
-// FEATURE CARD ICONS
-// ─────────────────────────────────────────────
 const ICONS = {
   speed: (
     <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
@@ -134,12 +122,10 @@ const ICONS = {
   ),
 };
 
-// ─────────────────────────────────────────────
-// TOUCH-AWARE IMAGE CAROUSEL
-// ─────────────────────────────────────────────
+// ─── CAROUSEL ────────────────────────────────────────────────────────────────
 const ImageCarousel = ({ images }) => {
-  const [active, setActive]       = useState(0);
-  const [animating, setAnimating] = useState(false);
+  const [active, setActive]         = useState(0);
+  const [animating, setAnimating]   = useState(false);
   const [touchStart, setTouchStart] = useState(null);
 
   const goTo = useCallback((idx) => {
@@ -151,13 +137,11 @@ const ImageCarousel = ({ images }) => {
   const prev = () => goTo((active - 1 + images.length) % images.length);
   const next = () => goTo((active + 1) % images.length);
 
-  // Auto-advance
   useEffect(() => {
     const id = setInterval(() => setActive(a => (a + 1) % images.length), 4500);
     return () => clearInterval(id);
   }, [images.length]);
 
-  // Touch / swipe support
   const onTouchStart = (e) => setTouchStart(e.touches[0].clientX);
   const onTouchEnd   = (e) => {
     if (touchStart === null) return;
@@ -173,16 +157,16 @@ const ImageCarousel = ({ images }) => {
       style={{
         position: "relative",
         width: "100%",
+        height: "100%",           /* ← fills parent height instead of aspect-ratio */
+        minHeight: "320px",        /* ← fallback for mobile stacked layout */
         borderRadius: "20px",
         overflow: "hidden",
-        aspectRatio: "4/3",
         boxShadow: "0 20px 56px rgba(0,71,127,0.18)",
         background: "#e8f0fb",
         userSelect: "none",
         WebkitUserSelect: "none",
       }}
     >
-      {/* Slides */}
       {images.map((img, i) => (
         <div
           key={i}
@@ -213,7 +197,6 @@ const ImageCarousel = ({ images }) => {
         </div>
       ))}
 
-      {/* Prev / Next arrows */}
       {images.length > 1 && (
         <>
           {[
@@ -238,7 +221,6 @@ const ImageCarousel = ({ images }) => {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
                 zIndex: 10,
-                // tap highlight off on mobile
                 WebkitTapHighlightColor: "transparent",
               }}
             >
@@ -250,7 +232,6 @@ const ImageCarousel = ({ images }) => {
         </>
       )}
 
-      {/* Dot indicators */}
       <div style={{
         position: "absolute", bottom: "14px", left: "50%",
         transform: "translateX(-50%)",
@@ -279,9 +260,7 @@ const ImageCarousel = ({ images }) => {
   );
 };
 
-// ─────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────
+// ─── MAIN ─────────────────────────────────────────────────────────────────────
 const WhyChooseHelloViza = () => {
   const { t }     = useTranslation();
   const width     = useWindowWidth();
@@ -290,7 +269,6 @@ const WhyChooseHelloViza = () => {
   const isTablet  = width >= 640 && width < 1024;
   const isDesktop = width >= 1024;
 
-  // Padding: 20px mobile → 40px tablet → 103px desktop
   const sidePad = isMobile ? "20px" : isTablet ? "40px" : "103px";
 
   const reasons = useMemo(() => [
@@ -332,13 +310,6 @@ const WhyChooseHelloViza = () => {
     },
   ], [t]);
 
-  const stats = [
-    { big: "99.2%", label: "Visas On Time"     },
-    { big: "500k+", label: "Visas Processed"   },
-    { big: "4.81★", label: "Customer Rating"   },
-    { big: "150+",  label: "Countries Covered" },
-  ];
-
   return (
     <section style={{
       position: "relative",
@@ -369,126 +340,150 @@ const WhyChooseHelloViza = () => {
         paddingRight: sidePad,
       }}>
 
-        {/* ══ HERO ROW ══════════════════════════════════════════════ */}
+        {/* ══ HERO ROW ══════════════════════════════════════════════════════════ */}
         <div style={{
           display: "grid",
           gridTemplateColumns: isDesktop ? "1fr 1fr" : "1fr",
-          gap: isDesktop ? "10px" : "28px",
-          alignItems: "center",
+          gap: isDesktop ? "48px" : "28px",
+          alignItems: "stretch",          /* ← both columns same height */
           marginBottom: isMobile ? "32px" : "52px",
         }}>
 
-          {/* Carousel renders ABOVE text on mobile/tablet */}
+          {/* Carousel above text on mobile/tablet */}
           {!isDesktop && (
-            <div>
+            <div style={{ width: "100%", aspectRatio: "4/3" }}>
               <ImageCarousel images={CAROUSEL_IMAGES} />
             </div>
           )}
 
-          {/* ── LEFT: text + visa list ── */}
-          <div style={{ paddingRight: isDesktop ? "40px" : "0" }}>
-
-            <p style={{
-              color: ACCENT, fontSize: "0.78rem", fontWeight: 700,
-              letterSpacing: "0.18em", textTransform: "uppercase",
-              marginBottom: "10px",
-              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-            }}>
-              {t("services.why.title", { defaultValue: "Why Choose Us" })}
-            </p>
-
+          {/* ── LEFT: text + stats ── */}
+          <div style={{
+            paddingRight: isDesktop ? "20px" : "0",
+            display: "flex",
+            flexDirection: "column",
+          }}>
             <h2 style={{
-              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
               fontWeight: 900, color: BRAND,
-              fontSize: isMobile ? "2rem" : isTablet ? "2.6rem" : "clamp(2.6rem, 4vw, 3.8rem)",
+              fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
               lineHeight: 1.05, letterSpacing: "-1px", marginBottom: "12px",
             }}>
               Why Choose{" "}
-  <span
-    style={{
-      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-      fontWeight: 900,
-      fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
-      color: ACCENT,
-      letterSpacing: "-0.5px",
-    }}
-  >
-    hello
-  </span>
-  <span
-    style={{
-      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-      fontWeight: 900,
-      fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
-      color: BRAND,
-      letterSpacing: "-0.5px",
-    }}
-  >
-    viza?
-  </span>
-
+              <span style={{
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+                fontWeight: 900,
+                fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
+                color: ACCENT, letterSpacing: "-0.5px",
+              }}>hello</span>
+              <span style={{
+                fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+                fontWeight: 900,
+                fontSize: isMobile ? "1.8rem" : isTablet ? "2.4rem" : "clamp(2.4rem, 3.8vw, 3.0rem)",
+                color: BRAND, letterSpacing: "-0.5px",
+              }}>viza?</span>
             </h2>
 
             <p style={{
               color: "#64748b",
               fontSize: isMobile ? "0.9rem" : "1rem",
-              lineHeight: 1.65, marginBottom: "24px",
-              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;", maxWidth: "460px",
+              lineHeight: 1.65, marginBottom: "28px",
+              fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+              maxWidth: "460px",
             }}>
               Your trusted partner for global visas. Fast, reliable, and always by your side.
             </p>
 
-            {/* Visa type list */}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {VISA_TYPES.map((v, i) => (
-                <div key={i}>
+            {/* Stats 2×2 grid — flex:1 so it fills remaining left-column height */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "14px",
+              flex: 1,                    /* ← grows to fill leftover space */
+            }}>
+              {STATS.map((s, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: "#fff",
+                    borderRadius: "16px",
+                    padding: isMobile ? "16px 14px" : "20px 18px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    border: `1.5px solid ${s.accent}18`,
+                    transition: "transform 0.18s, box-shadow 0.18s",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform  = "translateY(-3px)";
+                    e.currentTarget.style.boxShadow  = "0 12px 32px rgba(0,71,127,0.10)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform  = "translateY(0)";
+                    e.currentTarget.style.boxShadow  = "none";
+                  }}
+                >
+                  {/* Icon pill — stroke swapped to accent color */}
                   <div style={{
-                    display: "flex", alignItems: "flex-start", gap: "14px",
-                    padding: isMobile ? "13px 0" : "17px 0",
+                    width: "40px", height: "40px",
+                    borderRadius: "11px",
+                    background: s.bg,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
                   }}>
-                    <div style={{
-                      width: "44px", height: "44px", borderRadius: "12px",
-                      background: BRAND, flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 4px 14px rgba(0,71,127,0.25)",
-                    }}>
-                      {v.icon}
-                    </div>
-                    <div>
-                      <h4 style={{
-                        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-                        fontWeight: 800, color: BRAND,
-                        fontSize: isMobile ? "1rem" : "2rem", marginBottom: "3px",
-                      }}>
-                        {v.title}
-                      </h4>
-                      <p style={{
-                        color: "#64748b",
-                        fontSize: isMobile ? "0.82rem" : "0.9rem",
-                        lineHeight: 1.5, margin: 0,
-                        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-                      }}>
-                        {v.desc}
-                      </p>
-                    </div>
+                    {React.cloneElement(s.icon, {
+                      ...s.icon.props,
+                      children: React.Children.map(s.icon.props.children, child =>
+                        child ? React.cloneElement(child, { stroke: s.accent }) : child
+                      ),
+                    })}
                   </div>
-                  {i < VISA_TYPES.length - 1 && (
-                    <div style={{ height: "1px", background: "rgba(0,0,0,0.06)" }}/>
-                  )}
+
+                  {/* Big number */}
+                  <div style={{
+                    fontSize: isMobile ? "1.6rem" : "1.9rem",
+                    fontWeight: 900, lineHeight: 1,
+                    letterSpacing: "-1px", color: s.accent,
+                    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+                  }}>
+                    {s.big}
+                  </div>
+
+                  <div>
+                    <p style={{
+                      fontSize: "0.72rem", fontWeight: 700,
+                      textTransform: "uppercase", letterSpacing: "0.1em",
+                      color: s.accent, margin: "0 0 5px",
+                      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+                    }}>
+                      {s.title}
+                    </p>
+                    <div style={{
+                      height: "1.5px", background: s.accent,
+                      opacity: 0.18, borderRadius: "2px", marginBottom: "6px",
+                    }}/>
+                    <p style={{
+                      fontSize: "0.78rem", color: "#64748b",
+                      lineHeight: 1.5, margin: 0,
+                      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+                    }}>
+                      {s.desc}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── RIGHT: carousel (desktop only) ── */}
+          {/* ── RIGHT: carousel (desktop) — fills full row height ── */}
           {isDesktop && (
-            <div>
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+            }}>
               <ImageCarousel images={CAROUSEL_IMAGES} />
             </div>
           )}
         </div>
-
-
 
       </div>
     </section>

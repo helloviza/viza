@@ -39,8 +39,8 @@ const NewHome=({ user, onLogout }) =>{
       {/* ① Hero — video BG + service tiles + sky-meets-earth + explore strip */}
       <HeroSection user={user} onContinue={() => {
     discoverRef.current?.scrollIntoView({ behavior: "smooth" });
-  }}  />
-
+  }}  /> 
+    
       {/* ② Popular Visa Destinations — static + API-ready */}
       <PopularVisaDestination />
 

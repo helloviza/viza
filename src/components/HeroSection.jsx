@@ -37,7 +37,7 @@ const RESPONSIVE_CSS = `
 
   /* ── Section 1 — Hero ── */
   .hs-hero-inner {
-    padding: 180px 144px 60px;
+    padding: 190px 164px 40px 180px;
   }
   .hs-headline { font-size: clamp(2.8rem, 6vw, 4.8rem); }
 
@@ -246,11 +246,11 @@ const HeroSection = ({ user,onContinue }) => {
             style={{
               fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
               fontWeight: 900, color: BRAND,
-              lineHeight: 1.05, letterSpacing: "-1.5px",
+              lineHeight: 1.05, letterSpacing: "-1.8px",
               marginBottom: "16px", maxWidth: "680px",
             }}
           >
-            Your gateway to the{" "}
+            Your Gateway to the{" "}
             <span style={{ color: ACCENT }}>WORLD</span>
 
             {/* Avatars */}
