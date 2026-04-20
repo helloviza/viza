@@ -895,6 +895,29 @@ const LuxWorldIcon = ({ size = 22 }) => (
   </svg>
 );
 
+const HomeIcon = ({ size = 22 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={ACCENT}
+    strokeWidth={1.8}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    {/* Roof */}
+    <path d="M3 10.5L12 3l9 7.5" />
+    
+    {/* House body */}
+    <path d="M5 10.5V20h14v-9.5" />
+    
+    {/* Door */}
+    <path d="M10 20v-6h4v6" />
+  </svg>
+);
+
 const HeadsetIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
     stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1080,6 +1103,12 @@ export default function Header({ onFlightClick, user, onLogout }) {
           {/* ── Desktop Nav (3 icon buttons only) ── */}
           <nav className="hv-desktop-nav" style={{ display: "flex", gap: "6px", alignItems: "center" }}>
 
+                        {/* Home */}
+            <Link to="/" className="hv-icon-btn"
+              aria-label={t("nav.home")} title={t("nav.home")}>
+              <HomeIcon size={22} />
+            </Link>
+
             {/* Language */}
             <button type="button" className="hv-icon-btn" onClick={openLangModal}
               aria-label={t("nav.languageRegion")} title={t("nav.languageRegion")}>
@@ -1161,6 +1190,11 @@ export default function Header({ onFlightClick, user, onLogout }) {
             </div>
 
             <div style={styles.drawerDivider} />
+
+            <Link to="/" onClick={() => setShowMobileNav(false)} className="mobile-link-btn">
+              <HomeIcon size={19} />
+              <span>{t("nav.home")}</span>
+            </Link>
 
             <button className="mobile-link-btn" onClick={openLangModal}>
               <LuxWorldIcon size={19} />

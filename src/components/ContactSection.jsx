@@ -210,9 +210,9 @@ export default function ContactSection() {
             }}
           >
             {t("contact.title", { defaultValue: "Contact" })}{" "}
-            <em style={{ color: ACCENT, fontStyle: "italic" }}>
-              {t("contact.titleAccent", { defaultValue: "Us" })}
-            </em>
+            
+            {t("contact.titleAccent", { defaultValue: "Us" })}
+            
           </h1>
 
           <p
@@ -252,9 +252,28 @@ export default function ContactSection() {
                   </svg>
                 ),
                 label: t("contact.officeLabel", { defaultValue: "OFFICE" }),
-                value: "New Delhi, India",
+                value: "Vatika Business Park,Tower 2, Gurgaon, Haryana, India",
                 href: null,
               },
+              {
+  icon: (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={ACCENT}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.32 1.78.6 2.63a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.45-1.12a2 2 0 0 1 2.11-.45c.85.28 1.73.48 2.63.6A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  ),
+  label: t("contact.callLabel", { defaultValue: "CALL" }),
+  value: "+91 98765 43210", // replace with your number
+  href: "tel:+919876543210",
+}
             ].map((item, i) => (
               <div
                 key={i}

@@ -542,34 +542,50 @@ const ServiceBox = ({ fullWidth }) => (
       }}>
         Our Service
       </span>
-      <button
-        style={{
-          background: ACCENT, color: "white", border: "none",
-          borderRadius: "8px", padding: "10px 16px",
-          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-          fontWeight: 700, fontSize: "0.9rem",
-          cursor: "pointer", letterSpacing: "0.03em",
-          WebkitTapHighlightColor: "transparent",
-        }}
-        onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-        onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-      >
-        Book my Flight
-      </button>
-      <button
-        style={{
-          background: BRAND, color: "white", border: "none",
-          borderRadius: "8px", padding: "10px 16px",
-          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif;",
-          fontWeight: 700, fontSize: "0.9rem",
-          cursor: "pointer", letterSpacing: "0.03em",
-          WebkitTapHighlightColor: "transparent",
-        }}
-        onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
-        onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-      >
-        Book my Hotel
-      </button>
+      <a
+  href="https://plumtrips.in/flights"
+  target="_blank"
+  rel="noopener noreferrer"
+  style={{
+    display: "inline-block",
+    textDecoration: "none",
+    background: ACCENT,
+    color: "white",
+    borderRadius: "8px",
+    padding: "10px 16px",
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontWeight: 700,
+    fontSize: "0.9rem",
+    letterSpacing: "0.03em",
+    textAlign: "center",
+  }}
+  onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+>
+  Book my Flight
+</a>
+      <a
+  href="https://plumtrips.in/hotels"
+  target="_blank"
+  rel="noopener noreferrer"
+  style={{
+    display: "inline-block",
+    textDecoration: "none",
+    background: BRAND,
+    color: "white",
+    borderRadius: "8px",
+    padding: "10px 16px",
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontWeight: 700,
+    fontSize: "0.9rem",
+    letterSpacing: "0.03em",
+    textAlign: "center",
+  }}
+  onMouseEnter={e => e.currentTarget.style.opacity = "0.88"}
+  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+>
+  Book my Hotel
+</a>
     </div>
   </div>
 );

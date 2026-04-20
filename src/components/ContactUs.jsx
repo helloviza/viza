@@ -70,7 +70,7 @@ const ContactUs=()=>{
                 letterSpacing: "-1px",
               }}
             >
-              Contact <span className="italic text-[#d06549]">Us</span>
+              Contact Us
             </h2>
             <p className="text-gray-500 text-base leading-relaxed mb-8"
               style={{ fontFamily: "'Inter', sans-serif" }}>

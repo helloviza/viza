@@ -320,7 +320,7 @@ export default function Careers() {
             alt={t("careers.images.team1Alt", "Helloviza team collaborating")}
             style={{
               borderRadius: mobile ? 14 : 20,
-              width: "100%",
+              width: mobile ? "100%" : "48%",
               maxWidth: mobile ? "100%" : 520,
               minHeight: mobile ? 120 : 220,
               objectFit: "cover",
@@ -333,7 +333,7 @@ export default function Careers() {
             alt={t("careers.images.team2Alt", "Helloviza team during an offsite")}
             style={{
               borderRadius: mobile ? 14 : 20,
-              width: "100%",
+              width: mobile ? "100%" : "48%",
               maxWidth: mobile ? "100%" : 520,
               minHeight: mobile ? 120 : 220,
               objectFit: "cover",
